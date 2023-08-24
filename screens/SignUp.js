@@ -1,69 +1,49 @@
 import { StyleSheet, Text, View, Image, TextInput, TouchableOpacity, Pressable} from 'react-native'
-import React from 'react'
+import React, { useState } from 'react'
 import COLORS from '../data/colors'
 import * as Animatable from 'react-native-animatable';
 import { useNavigation } from '@react-navigation/native';
+import {firebase} from '../config'
 
 const SignUp = () => {
     const navigation = useNavigation();
 
-    const [data, setData] = React.useState({
-        email: '',
-        password: '',
-        username: '',
-        check_textInputChange: false,
-        check_textInputChange1: false,
-        secureTextEntry: true
-        });
 
-        const textInputChange = (val) => {
-            if(val.length != 0) {
-                setData({
-                    ...data,
-                    email: val,
-                    check_textInputChange: true
-                })
-            } 
-            else {
-                setData({
-                    ...data,
-                    email: val,
-                    check_textInputChange: false
-                })
-            }
-        }
-    
-        const textInputChange1 = (val1) => {
-            if(val1.length != 0) {
-                setData({
-                    ...data,
-                    username: val1,
-                    check_textInputChange1: true
-                })
-            } 
-            else {
-                setData({
-                    ...data,
-                    username: val1,
-                    check_textInputChange1: false
-                })
-            }
-        }
-    
-    
-        const handlePasswordChange = (val) => {
-            setData({
-                ...data,
-                password: val,
+    const [username, setUsername] =useState('')
+    const [email, setEmail] = useState('')
+    const [password, setPassword] = useState('')
+
+
+    signUpUser = async (username, email, password,) => {
+        await firebase.auth().createUserWithEmailAndPassword(email,password)
+        .then(()=> {
+            firebase.auth().currentUser.sendEmailVerification({
+                handleCodeInApp: true,
+                url:'https://climatesense-4328a.firebaseapp.com',
             })
-        }
-    
-        const updateSecureText = () => {
-            setData({
-                ...data,
-                secureTextEntry: !data.secureTextEntry
+            .then(() => {
+                alert('Verification email sent')
+            }) .catch((error) => {
+                alert(error.message)
             })
-        }
+            .then(() => {
+                firebase.firestore().collection('users')
+                .doc(firebase.auth().currentUser.uid)
+                .set({
+                    username,
+                    email,
+                    password,
+                })
+            })
+            .catch((error) => {
+                alert(error.message)
+            })
+        })
+        .catch((error) => {
+            alert(error.message)
+        })
+    }
+
 
         return (
             <View style={styles.container}>
@@ -83,15 +63,8 @@ const SignUp = () => {
                             placeholder='Your Username'
                             style={styles.textInput}
                             autoCapitalize='none'
-                            onChangeText={(val1) => textInputChange1(val1)}
+                            onChangeText={(username) => setUsername(username)}
                         />
-                        {data.check_textInputChange1 ?
-                        <Animatable.Image
-                        animation={"bounceIn"}
-                        style={{height: 20, width: 20}} 
-                        source={require('../assets/correct.png')}
-                        />
-                        : null}
                     </View>
         
         
@@ -105,15 +78,9 @@ const SignUp = () => {
                             placeholder='Your Email'
                             style={styles.textInput}
                             autoCapitalize='none'
-                            onChangeText={(val) => textInputChange(val)}
+                            onChangeText={(email) => setEmail(email)}
                         />
-                        {data.check_textInputChange ?
-                        <Animatable.Image
-                        animation={"bounceIn"}
-                        style={{height: 20, width: 20}} 
-                        source={require('../assets/correct.png')}
-                        />
-                        : null}
+
                     </View>
         
         
@@ -129,29 +96,14 @@ const SignUp = () => {
                             placeholder='Your Password'
                             style={styles.textInput}
                             autoCapitalize='none'
-                            secureTextEntry={data.secureTextEntry ? true : false}
-                            onChangeText={(val) => handlePasswordChange(val)}
+                            secureTextEntry={true}
+                            onChangeText={(password) => setPassword(password)}
                         />
         
-                        <TouchableOpacity
-                            onPress={updateSecureText}
-                        >
-                        {data.secureTextEntry ?
-                        <Image
-                        style={{height: 20, width: 20}} 
-                        source={require('../assets/crossed-eye.png')}
-                        /> 
-                        :
-                        <Image
-                        style={{height: 20, width: 20}} 
-                        source={require('../assets/eye.png')}
-                        /> 
-                        }
-                        </TouchableOpacity>
                     </View>
         
                     <Pressable 
-                    onPress={() => navigation.navigate("Home")}
+                    onPress={() => signUpUser(username, email, password)}
                     style={[styles.box1,{marginTop:60,justifyContent:'center',alignItems:'center', backgroundColor:COLORS.third}] }
                     >
                         <Text style={[styles.text1,{color:COLORS.white}]}>SignUp</Text>

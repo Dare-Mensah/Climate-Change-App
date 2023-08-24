@@ -1,14 +1,30 @@
 import { Pressable, ScrollView, StyleSheet, Text, View, Image, Dimensions, SafeAreaView, StatusBar, FlatList, ImageBackground, TouchableOpacity } from 'react-native'
-import React from 'react'
+import React, {useState, useEffect} from 'react'
 import COLORS from '../data/colors'
 import DATA from '../data/data1'
 import * as Animatable from 'react-native-animatable';
+import {firebase} from '../config'
 
 import { useNavigation } from '@react-navigation/native';
 const {width} = Dimensions.get('screen')
 
-const Home = () => {
+const Home = ({username}) => {
     const navigation = useNavigation();
+
+    const [name, setName] = useState('')
+
+    useEffect(() => {
+      firebase.firestore().collection('users')
+      .doc(firebase.auth().currentUser.uid).get()
+      .then((snapshot) => {
+        if (snapshot.exists){
+          setName(snapshot.data())
+        }
+        else {
+          console.log('User does not exists')
+        }
+      })
+    }, [])
 
     const Card =({Tips}) => {
       return (
@@ -44,7 +60,7 @@ const Home = () => {
           </Pressable>
         </View>
     
-        <Text style={[styles.Title1, style={paddingHorizontal:20, paddingTop:10}]}>Welcome Back</Text>
+        <Text style={[styles.Title1, style={paddingHorizontal:20, paddingTop:10}]}>Hi, {name.username}</Text>
   
         <ScrollView showsVerticalScrollIndicator={false}>
   

@@ -1,69 +1,27 @@
 import {  SafeAreaView, StyleSheet, Text, View, Image, TextInput, TouchableOpacity, Pressable } from 'react-native'
-import React from 'react'
+import React, {useState} from 'react'
 import COLORS from '../data/colors'
 import * as Animatable from 'react-native-animatable';
 import { useNavigation } from '@react-navigation/native';
+import {firebase} from '../config'
 
 const SignIn = () => {
     const navigation = useNavigation();
 
-    const [data, setData] = React.useState({
-        email: '',
-        password: '',
-        username: '',
-        check_textInputChange: false,
-        check_textInputChange1: false,
-        secureTextEntry: true
-    });
+    const [email, setEmail] = useState('')
 
-    const textInputChange = (val) => {
-        if(val.length != 0) {
-            setData({
-                ...data,
-                email: val,
-                check_textInputChange: true
-            })
-        } 
-        else {
-            setData({
-                ...data,
-                email: val,
-                check_textInputChange: false
-            })
-        }
-    }
+    const [password, setPassword] = useState('')
 
-    const textInputChange1 = (val1) => {
-        if(val1.length != 0) {
-            setData({
-                ...data,
-                username: val1,
-                check_textInputChange1: true
-            })
-        } 
-        else {
-            setData({
-                ...data,
-                username: val1,
-                check_textInputChange1: false
-            })
+
+    loginUser = async(email, password) => {
+        try{
+            await firebase.auth().signInWithEmailAndPassword(email, password)
+        } catch (error){
+            alert(error.message)
         }
     }
 
 
-    const handlePasswordChange = (val) => {
-        setData({
-            ...data,
-            password: val,
-        })
-    }
-
-    const updateSecureText = () => {
-        setData({
-            ...data,
-            secureTextEntry: !data.secureTextEntry
-        })
-    }
 
   return (
     <View style={styles.container}>
@@ -84,15 +42,9 @@ const SignIn = () => {
                     placeholder='Your Email'
                     style={styles.textInput}
                     autoCapitalize='none'
-                    onChangeText={(val) => textInputChange(val)}
+                    onChangeText={(email) => setEmail(email)}
+                    autoCorrect={false}
                 />
-                {data.check_textInputChange ?
-                <Animatable.Image
-                animation={"bounceIn"}
-                style={{height: 20, width: 20}} 
-                source={require('../assets/correct.png')}
-                />
-                : null}
             </View>
 
 
@@ -108,29 +60,15 @@ const SignIn = () => {
                     placeholder='Your Password'
                     style={styles.textInput}
                     autoCapitalize='none'
-                    secureTextEntry={data.secureTextEntry ? true : false}
-                    onChangeText={(val) => handlePasswordChange(val)}
+                    onChangeText={(password) => setPassword(password)}
+                    autoCorrect={false}
+                    secureTextEntry={true}
                 />
 
-                <TouchableOpacity
-                    onPress={updateSecureText}
-                >
-                {data.secureTextEntry ?
-                <Image
-                style={{height: 20, width: 20}} 
-                source={require('../assets/crossed-eye.png')}
-                /> 
-                :
-                <Image
-                style={{height: 20, width: 20}} 
-                source={require('../assets/eye.png')}
-                /> 
-                }
-                </TouchableOpacity>
             </View>
 
             <Pressable 
-            onPress={() => navigation.navigate("Home")}
+            onPress={() => loginUser(email, password)}
             style={[styles.box1,{marginTop:60,justifyContent:'center',alignItems:'center', backgroundColor:COLORS.third}] }
             >
                 <Text style={[styles.text1,{color:COLORS.white}]}>Login</Text>
