@@ -10,6 +10,7 @@ import Home from './screens/Home';
 import StartUp from './screens/StartUp';
 import News from './screens/News';
 import Tips from './screens/Tips';
+import ForgotPassword from './screens/ForgotPassword';
 
 
 const Stack = createStackNavigator();
@@ -40,6 +41,7 @@ function App(){
         <Stack.Screen name="StartUp" component={StartUp}/>
         <Stack.Screen name="SignIn" component={SignIn}/>
         <Stack.Screen name="SignUp" component={SignUp}/>
+        <Stack.Screen name="ForgotPassword" component={ForgotPassword}/>
       </Stack.Navigator>
     );
   }

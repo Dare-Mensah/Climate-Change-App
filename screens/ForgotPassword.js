@@ -1,41 +1,30 @@
-import {  SafeAreaView, StyleSheet, Text, View, Image, TextInput, TouchableOpacity, Pressable } from 'react-native'
+import { SafeAreaView, StyleSheet, Text, View, Image, TextInput, TouchableOpacity, Pressable } from 'react-native'
 import React, {useState} from 'react'
 import COLORS from '../data/colors'
 import * as Animatable from 'react-native-animatable';
 import { useNavigation } from '@react-navigation/native';
 import {firebase} from '../config'
 
-const SignIn = () => {
+const ForgotPassword = () => {
+
     const navigation = useNavigation();
 
     const [email, setEmail] = useState('')
-
-    const [password, setPassword] = useState('')
-
-
-    loginUser = async(email, password) => {
-        try{
-            await firebase.auth().signInWithEmailAndPassword(email, password)
-        } catch (error){
-            alert(error.message)
-        }
-    }
 
     const forgotpassword = () => {
         firebase.auth().sendPasswordResetEmail(email)
         .then(() => {
             alert("Password Reset Email Sent")
+            navigation.navigate("SignIn")
         }) .catch((error) => {
             alert(error)
         })
     }
 
-
-
   return (
     <View style={styles.container}>
         <View style={styles.header2}>
-            <Text style={styles.text_header}>Login</Text>
+            <Text style={styles.text_header}>Reset Password</Text>
         </View>
         <Animatable.View 
         animation={"fadeInUpBig"}
@@ -56,49 +45,19 @@ const SignIn = () => {
                 />
             </View>
 
-
-
-            
-            <Text style={[styles.text_footer, {marginTop:35}]}>Password</Text>
-            <View style={styles.action}>
-                <Image
-                style={{height: 20, width: 20}} 
-                source={require('../assets/lock.png')}/>
-
-                <TextInput
-                    placeholder='Your Password'
-                    style={styles.textInput}
-                    autoCapitalize='none'
-                    onChangeText={(password) => setPassword(password)}
-                    autoCorrect={false}
-                    secureTextEntry={true}
-                />
-
-            </View>
-
             <TouchableOpacity 
-            onPress={() => loginUser(email, password)}
+            onPress={() => {forgotpassword()}}
             style={[styles.box1,{marginTop:60,justifyContent:'center',alignItems:'center', backgroundColor:COLORS.third}] }
             >
-                <Text style={[styles.text1,{color:COLORS.white}]}>Login</Text>
+                <Text style={[styles.text1,{color:COLORS.white, textAlign: 'center'}]}>Send Password Reset Email</Text>
             </TouchableOpacity>
-
-
-
-
-            <TouchableOpacity 
-            onPress={() => navigation.navigate("ForgotPassword")}
-            >
-                <Text style={{fontWeight:'400', textAlign:'center', fontSize: 17, marginTop: 40}}>Forgot Password?</Text>
-            </TouchableOpacity>
-
 
         </Animatable.View>
     </View>
   )
 }
 
-export default SignIn
+export default ForgotPassword
 
 const styles = StyleSheet.create({
     container: {

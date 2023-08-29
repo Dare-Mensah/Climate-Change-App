@@ -59,8 +59,12 @@ const Home = ({username}) => {
             <Image style={{height: 30, width:30, paddingTop: 5}} source={require('../assets/user1.png')}/>
           </Pressable>
         </View>
-    
-        <Text style={[styles.Title1, style={paddingHorizontal:20, paddingTop:10}]}>Hi, {name.username}</Text>
+
+        <View>
+          <Animatable.Text 
+          animation={"fadeInUpBig"}
+          style={[styles.Title1, style={paddingHorizontal:20, paddingTop:10}]}>Hi, {name.username}</Animatable.Text>
+        </View>
   
         <ScrollView showsVerticalScrollIndicator={false}>
   
