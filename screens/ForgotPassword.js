@@ -17,7 +17,7 @@ const ForgotPassword = () => {
             alert("Password Reset Email Sent")
             navigation.navigate("SignIn")
         }) .catch((error) => {
-            alert(error)
+            alert("Invalid Email Address")
         })
     }
 

@@ -4,14 +4,16 @@ import COLORS from '../data/colors'
 import DATA from '../data/data1'
 import * as Animatable from 'react-native-animatable';
 import {firebase} from '../config'
+import Profile from './Profile';
 
 import { useNavigation } from '@react-navigation/native';
 const {width} = Dimensions.get('screen')
 
-const Home = ({username}) => {
+const Home = () => {
     const navigation = useNavigation();
 
     const [name, setName] = useState('')
+
 
     useEffect(() => {
       firebase.firestore().collection('users')
@@ -42,11 +44,11 @@ const Home = ({username}) => {
   
 
       <SafeAreaView style={{flex:1, backgroundColor:COLORS.white}}>
-        <StatusBar translucent={false} backgroundColor={COLORS.third}/>
+        <StatusBar translucent={false} />
         <View style={styles.header}>
-          <Pressable>
-            <Image style={{height: 30, width:30}} source={require('../assets/home2.png')}/>
-          </Pressable>
+          <TouchableOpacity onPress={() => firebase.auth().signOut()}>
+            <Image style={{height: 30, width:30}} source={require('../assets/logout2.png')}/>
+          </TouchableOpacity>
   
           <Text style={{
           fontSize: 20,
@@ -55,63 +57,167 @@ const Home = ({username}) => {
           color: COLORS.white,
         }}>Climate Sense</Text>
   
-          <Pressable>
+          <TouchableOpacity onPress={() => navigation.navigate("Profile")}>
             <Image style={{height: 30, width:30, paddingTop: 5}} source={require('../assets/user1.png')}/>
-          </Pressable>
+          </TouchableOpacity>
         </View>
+
+
+        <ScrollView showsVerticalScrollIndicator={false}>
 
         <View>
           <Animatable.Text 
           animation={"fadeInUpBig"}
           style={[styles.Title1, style={paddingHorizontal:20, paddingTop:10}]}>Hi, {name.username}</Animatable.Text>
         </View>
+
+        <Text style={styles.sectionTitle}>Wordle</Text>
   
-        <ScrollView showsVerticalScrollIndicator={false}>
-  
-        <Animatable.View 
-        animation={"fadeInUpBig"}
+        <View 
+        style={{flexDirection: 'row'}}>
+
+        <View
         style={{        
           backgroundColor: '#FFFFFF',
-          elevation: 2,
+          elevation: 4,
           borderRadius: 20,
-          width: 370,
+          width:'40%',
           height: 130,
-          shadowColor: '#000000',
-          shadowOffset: {
-              width: 0,
-              height: 2,
-          },
-          shadowOpacity: 0.09,
-          shadowRadius: 10,
           marginTop: 20,
-          marginLeft:20,}}>
-  
-          <View style={{flexDirection:'row'}}>
-            <Text 
-            style={{fontSize:70, 
-            fontWeight:'bold',
-            paddingTop:8, 
-            paddingHorizontal:30}}
-            >5°</Text>
-  
-          <View style={{flexDirection:'column'}}>
-          <Text style={{        
-          alignItems: 'center',
-          fontSize: 33,
-          marginLeft:50,
-          paddingTop: 15,
-          fontWeight:'200',}} >Chilly</Text>
-  
-  
-          <Text style={{        
-          alignItems: 'center',
-          fontSize: 33,
-          marginLeft:40,
-          //paddingTop: 15,
-          fontWeight:'200',}} >London</Text>
-          </View>
-          </View>
-        </Animatable.View>
+          marginLeft:25,}}>
+
+          <Text 
+          style={{
+          paddingHorizontal: 10,
+          marginTop: 10, 
+          fontWeight: 400}}>
+          Current Streak:</Text>
+
+          <Text 
+          style={{
+          textAlign: 'center',
+          fontSize: 40,
+          marginTop: 17,
+          fontWeight: '600'
+          }}>0</Text>
+
+
+        </View>
+
+        <View
+        style={{        
+          backgroundColor: '#FFFFFF',
+          elevation: 4,
+          borderRadius: 20,
+          width:'40%',
+          height: 130,
+          marginTop: 20,
+          marginLeft:25,}}>
+
+        <Text 
+          style={{
+          paddingHorizontal: 10,
+          marginTop: 10, 
+          fontWeight: 400}}>
+          Current Streak:</Text>
+
+          <Text 
+          style={{
+          textAlign: 'center',
+          fontSize: 40,
+          marginTop: 17,
+          fontWeight: '600'
+          }}>0</Text>
+
+
+        </View>
+        </View>
+
+
+
+        <View 
+        style={{flexDirection: 'row'}}>
+
+        <View
+        style={{        
+          backgroundColor: '#FFFFFF',
+          elevation: 4,
+          borderRadius: 20,
+          width:'40%',
+          height: 130,
+          marginTop: 20,
+          marginLeft:25,}}>
+
+          <Text 
+          style={{
+          paddingHorizontal: 10,
+          marginTop: 10, 
+          fontWeight: 400}}>
+          Current Streak:</Text>
+
+          <Text 
+          style={{
+          textAlign: 'center',
+          fontSize: 40,
+          marginTop: 17,
+          fontWeight: '600'
+          }}>0</Text>
+
+        </View>
+
+
+        <View
+        style={{        
+          backgroundColor: '#FFFFFF',
+          elevation: 4,
+          borderRadius: 20,
+          width:'40%',
+          height: 130,
+          marginTop: 20,
+          marginLeft:25,}}>
+
+        <Text 
+          style={{
+          paddingHorizontal: 10,
+          marginTop: 10, 
+          fontWeight: 400}}>
+          Current Streak:</Text>
+
+          <Text 
+          style={{
+          textAlign: 'center',
+          fontSize: 40,
+          marginTop: 17,
+          fontWeight: '600'
+          }}>0</Text>
+        </View>
+        </View>
+
+        <View>
+        <TouchableOpacity
+        style={{        
+          backgroundColor: '#FFFFFF',
+          elevation: 4,
+          borderRadius: 20,
+          width:'86%',
+          height: 70,
+          marginTop: 40,
+          marginLeft:25,
+          backgroundColor: COLORS.third}}>
+
+          <Text
+          style={{
+            fontSize: 25,
+            fontWeight: 'bold',
+            textAlign: 'center',
+            marginTop: 15,
+            
+          }}>Play</Text>
+
+        </TouchableOpacity>
+
+        </View>
+
   
         <Text style={styles.sectionTitle}>Tips</Text>
   
@@ -126,7 +232,7 @@ const Home = ({username}) => {
           />
         </View>
   
-        <Text style={styles.sectionTitle}>Wordle</Text>
+       
   
   
         </ScrollView>

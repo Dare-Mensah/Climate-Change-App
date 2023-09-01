@@ -7,7 +7,8 @@ const COLORS ={
     grey: '#dddedd',
     red: 'red',
     orange: '#f5a623',
-    third: '#49CB5C'
+    third: '#49CB5C',
+    fourth: '#02BA78'
 
 };
 
