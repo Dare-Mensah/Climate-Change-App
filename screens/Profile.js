@@ -36,7 +36,7 @@ const Profile = () => {
         style={styles.footer}>
         <View style={styles.menuWrapper}>
 
-            <TouchableRipple onPress={() => {}}>
+            <TouchableRipple onPress={() => navigation.navigate("EditProfile")}>
                 <View style={styles.menuItem}>
                     <Image source={require('../assets/edit.png')} style={{height: 30, width: 30}}/>
                     <Text style={styles.menuItemText}>Edit Profile</Text>
