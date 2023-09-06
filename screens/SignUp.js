@@ -22,6 +22,7 @@ const SignUp = () => {
                 url:'https://climatesense-4328a.firebaseapp.com',
             })
             .then(() => {
+                navigation.navigate("SignUpComplete")
                 alert('Verification email sent')
             }) .catch((error) => {
                 alert(error.message)
