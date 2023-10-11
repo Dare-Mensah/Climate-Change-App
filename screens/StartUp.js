@@ -3,11 +3,12 @@ import React from 'react'
 import { useNavigation } from '@react-navigation/native';
 import COLORS from '../data/colors';
 import * as Animatable from 'react-native-animatable';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const StartUp = () => {
     const navigation = useNavigation();
     return (
-      <View style={styles.container}>
+      <LinearGradient style={{flex: 1}} colors={['#EAEAEA', '#8DED97']}>
         <Text style={styles.Title1}>Climate Sense</Text>
   
   
@@ -33,7 +34,7 @@ const StartUp = () => {
   
         <Pressable 
         onPress={() => navigation.navigate("SignIn")}
-        style={[styles.box1,{marginTop:60,justifyContent:'center',alignItems:'center', backgroundColor:COLORS.third}] }
+        style={[styles.box1,{marginTop:100,justifyContent:'center',alignItems:'center', backgroundColor:COLORS.third}] }
         >
         <Text style={[styles.text1,{color:COLORS.white}]}>Login</Text>
         </Pressable>
@@ -47,8 +48,8 @@ const StartUp = () => {
         <Text style={[styles.text1,{color:COLORS.white}]}>SignUp</Text>
         </Pressable>
   
-  
-      </View>
+
+      </LinearGradient>
     )
 }
 
@@ -65,7 +66,7 @@ const styles = StyleSheet.create({
     Images:{
       height: 230,
       width: 230,
-      marginTop:60,
+      marginTop:80,
       //borderRadius: 270 / 2,
       //backgroundColor: '#CDFADB',
       justifyContent: 'center',
@@ -93,7 +94,7 @@ const styles = StyleSheet.create({
       backgroundColor: '#EAEAEA',
       elevation: 2,
       borderRadius: 20,
-      width: 210,
+      width: "54%",
       height: 60,
       shadowColor: '#000000',
       shadowOffset: {

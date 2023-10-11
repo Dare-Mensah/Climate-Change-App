@@ -16,6 +16,7 @@ const SignIn = () => {
     loginUser = async(email, password) => {
         try{
             await firebase.auth().signInWithEmailAndPassword(email, password)
+            navigation.navigate("Home", { email })
         } catch (error){
             alert("Invalid Email or Password")
         }
