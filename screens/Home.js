@@ -5,14 +5,20 @@ import DATA from '../data/data1'
 import * as Animatable from 'react-native-animatable';
 import {firebase} from '../config'
 import Profile from './Profile';
+import { Divider } from 'react-native-paper';
+import { LinearGradient } from 'expo-linear-gradient';
+
 
 import { useNavigation } from '@react-navigation/native';
 const {width} = Dimensions.get('screen')
 
-const Home = () => {
+const Home = ({route}) => {
     const navigation = useNavigation();
 
-    const [name, setName] = useState('')
+    const [name, setName] = useState('');
+
+    const [email] = useState('');
+
 
 
     useEffect(() => {
@@ -32,9 +38,8 @@ const Home = () => {
       return (
       <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate("Tips", Tips)}>
       <ImageBackground style={styles.cardImage} source={Tips.image}>
-        <Text style={{color: COLORS.white, fontSize: 20, fontWeight:'800'}}>{Tips.name}</Text>
-        <Text style={{color: COLORS.white, fontSize: 15, fontWeight:'300', marginVertical:20}}>{Tips.author}</Text>
-        <Image style={{height: 70, width:70, marginLeft:50, }} source={Tips.icon}/>
+        <Image style={{height: 30, width:30, }} source={Tips.icon}/>
+        <Text style={{color: COLORS.white, fontSize: 15, fontWeight:'800', marginTop: 40}}>{Tips.name}</Text>
       </ImageBackground>
       </TouchableOpacity>
       )
@@ -42,24 +47,21 @@ const Home = () => {
   
     return (
   
+      <LinearGradient style={{flex: 1}} colors={['#EAEAEA', '#B7F1B5']}>
+        <StatusBar translucent={false} style={"light"} color = "white"/>
 
-      <SafeAreaView style={{flex:1, backgroundColor:COLORS.white}}>
-        <StatusBar translucent={false} />
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => firebase.auth().signOut()}>
-            <Image style={{height: 30, width:30}} source={require('../assets/logout2.png')}/>
+
+        <View style={{marginTop: 20, flexDirection:'row'}}>
+          <TouchableOpacity onPress={() => navigation.navigate("Profile", {username: name.username, email})}>
+            <Image style={{height: 40, width:40, paddingTop: 5, marginLeft: 18}} source={require('../assets/circle-user.png')}/>
           </TouchableOpacity>
-  
-          <Text style={{
-          fontSize: 20,
-          fontWeight:'800',
-          //paddingTop:5,
-          color: COLORS.white,
-        }}>Climate Sense</Text>
-  
-          <TouchableOpacity onPress={() => navigation.navigate("Profile")}>
-            <Image style={{height: 30, width:30, paddingTop: 5}} source={require('../assets/user1.png')}/>
+        </View>
+
+        <TouchableOpacity onPress={() => firebase.auth().signOut()}>
+            <Image style={{height: 40, width:40, marginTop: 20, marginRight: 20}} source={require('../assets/SignOut.png')}/>
           </TouchableOpacity>
+
         </View>
 
 
@@ -68,30 +70,34 @@ const Home = () => {
         <View>
           <Animatable.Text 
           animation={"fadeInUpBig"}
-          style={[styles.Title1, style={paddingHorizontal:20, paddingTop:10}]}>Hi, {name.username}</Animatable.Text>
+          style={[styles.Title1, style={paddingHorizontal:20, paddingTop:10}]}>Dashboard </Animatable.Text>
         </View>
 
         <Text style={styles.sectionTitle}>Wordle</Text>
-  
+
+        
         <View 
         style={{flexDirection: 'row'}}>
 
-        <View
+        <View style={{flexDirection: 'column'}}>
+        <Pressable onPress={() => navigation.navigate("Wordle")}>
+        <Animatable.View
+        animation={"fadeInUpBig"}
         style={{        
           backgroundColor: '#FFFFFF',
           elevation: 4,
-          borderRadius: 20,
-          width:'40%',
-          height: 130,
-          marginTop: 20,
-          marginLeft:25,}}>
+          borderRadius: 25,
+          width:'95%',
+          height: 150,
+          marginTop: 5,
+          marginLeft:30,}}>
 
           <Text 
           style={{
           paddingHorizontal: 10,
           marginTop: 10, 
           fontWeight: 400}}>
-          Current Streak:</Text>
+         Current Streak:</Text>
 
           <Text 
           style={{
@@ -102,24 +108,28 @@ const Home = () => {
           }}>0</Text>
 
 
-        </View>
+        </Animatable.View>
+        </Pressable>
 
-        <View
+        <Pressable onPress={() => navigation.navigate("Wordle")}>
+        <Animatable.View
+        animation={"fadeInUpBig"}
+        delay={5}
         style={{        
           backgroundColor: '#FFFFFF',
           elevation: 4,
-          borderRadius: 20,
-          width:'40%',
-          height: 130,
+          borderRadius: 25,
+          width:'95%',
+          height: 150,
           marginTop: 20,
-          marginLeft:25,}}>
+          marginLeft:30,}}>
 
-        <Text 
+          <Text 
           style={{
           paddingHorizontal: 10,
           marginTop: 10, 
           fontWeight: 400}}>
-          Current Streak:</Text>
+          Correct:</Text>
 
           <Text 
           style={{
@@ -130,97 +140,54 @@ const Home = () => {
           }}>0</Text>
 
 
+        </Animatable.View>
+        </Pressable>
         </View>
-        </View>
-
-
-
-        <View 
-        style={{flexDirection: 'row'}}>
-
-        <View
+        
+        <Pressable onPress={() => navigation.navigate("Wordle")}>
+        <Animatable.View
+        animation={"fadeInUpBig"}
+        delay={9}
         style={{        
           backgroundColor: '#FFFFFF',
           elevation: 4,
-          borderRadius: 20,
-          width:'40%',
-          height: 130,
-          marginTop: 20,
-          marginLeft:25,}}>
+          borderRadius: 25,
+          width:'72%',
+          height: 319,
+          marginTop: 5,
+          marginLeft:55,}}>
 
           <Text 
           style={{
           paddingHorizontal: 10,
           marginTop: 10, 
           fontWeight: 400}}>
-          Current Streak:</Text>
+          Wins:</Text>
 
           <Text 
           style={{
           textAlign: 'center',
-          fontSize: 40,
-          marginTop: 17,
+          fontSize: 50,
+          marginTop: 67,
           fontWeight: '600'
-          }}>0</Text>
-
-        </View>
-
-
-        <View
-        style={{        
-          backgroundColor: '#FFFFFF',
-          elevation: 4,
-          borderRadius: 20,
-          width:'40%',
-          height: 130,
-          marginTop: 20,
-          marginLeft:25,}}>
-
-        <Text 
-          style={{
-          paddingHorizontal: 10,
-          marginTop: 10, 
-          fontWeight: 400}}>
-          Current Streak:</Text>
+          }}>0%</Text>
 
           <Text 
           style={{
           textAlign: 'center',
-          fontSize: 40,
-          marginTop: 17,
-          fontWeight: '600'
-          }}>0</Text>
+          fontSize: 18,
+          marginTop: 37,
+          fontWeight: '200'
+          }}>Your win percentage</Text>
+
+
+        </Animatable.View>
+        </Pressable>
         </View>
-        </View>
-
-        <View>
-        <TouchableOpacity
-        style={{        
-          backgroundColor: '#FFFFFF',
-          elevation: 4,
-          borderRadius: 20,
-          width:'86%',
-          height: 70,
-          marginTop: 40,
-          marginLeft:25,
-          backgroundColor: COLORS.third}}>
-
-          <Text
-          style={{
-            fontSize: 25,
-            fontWeight: 'bold',
-            textAlign: 'center',
-            marginTop: 15,
-            
-          }}>Play</Text>
-
-        </TouchableOpacity>
-
-        </View>
-
-  
+        
+    
         <Text style={styles.sectionTitle}>Tips</Text>
-  
+        
   
         <View>
           <FlatList 
@@ -236,7 +203,7 @@ const Home = () => {
   
   
         </ScrollView>
-      </SafeAreaView>
+      </LinearGradient>
     )
 }
 
@@ -252,14 +219,10 @@ const styles = StyleSheet.create({
     },
 
     header:{
-      paddingVertical: 21,
-      paddingHorizontal: 20,
+      //paddingVertical: 21,
+      //paddingHorizontal: 20,
       flexDirection: 'row',
       justifyContent: 'space-between',
-      backgroundColor: COLORS.third,
-      borderBottomLeftRadius:20,
-      borderBottomRightRadius:20,
-      elevation:10
     },
   
     headerTitle:{
@@ -290,12 +253,12 @@ const styles = StyleSheet.create({
     },
   
     cardImage:{
-      height: 220,
-      width: width /2,
+      height: 160,
+      width: width /2.9,
       marginRight: 20,
       padding: 20,
       overflow:"hidden",
-      borderRadius: 10,
+      borderRadius: 40,
       
     },
     othercards:{

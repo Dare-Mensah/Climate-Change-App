@@ -19,6 +19,13 @@ const EditProfile = () => {
                         source={require('../assets/profileUser.png')}
                         style={{height:150, width:150, marginTop:50}}
                         >
+                            <View style={{
+                                flex:1,
+                                justifyContent:'center',
+                                alignItems:'center'
+                            }}>
+
+                            </View>
                             
                         </ImageBackground>
 

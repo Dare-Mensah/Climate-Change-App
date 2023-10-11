@@ -16,13 +16,13 @@ const SignUp = () => {
 
     signUpUser = async (username, email, password,) => {
         await firebase.auth().createUserWithEmailAndPassword(email,password)
+        navigation.navigate("Onboarding",{email})
         .then(()=> {
             firebase.auth().currentUser.sendEmailVerification({
                 handleCodeInApp: true,
                 url:'https://climatesense-4328a.firebaseapp.com',
             })
             .then(() => {
-                navigation.navigate("SignUpComplete")
                 alert('Verification email sent')
             }) .catch((error) => {
                 alert(error.message)

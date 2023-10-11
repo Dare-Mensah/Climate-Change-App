@@ -5,7 +5,11 @@ import { useNavigation } from '@react-navigation/native';
 import COLORS from '../data/colors';
 import * as Animatable from 'react-native-animatable';
 import {firebase} from '../config'
-const Profile = () => {
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRoute } from '@react-navigation/native';
+const Profile = ({route}) => {
+
+    const {username} = route.params;
 
     const navigation = useNavigation();
 
@@ -25,8 +29,9 @@ const Profile = () => {
                         size={80}
                     />
                     <View style={{marginLeft:20, marginTop:20}}>
-                        <Title style={styles.title}>Dare</Title>
-                        <Caption style={styles.caption}>darepaul.mensah@gmail.com</Caption>
+                        <Title style={styles.title}>{username}</Title>
+                        <Caption>Hello</Caption>
+                        
                     </View>
                 </View>
             </View>
@@ -70,6 +75,7 @@ const Profile = () => {
                     <Text style={styles.menuItemText}>About</Text>
                 </View>
             </TouchableRipple>
+
         </View>
 
 
@@ -102,9 +108,10 @@ const styles = StyleSheet.create({
     },
 
     title:{
-        fontSize: 17,
-        lineHeight: 17,
+        fontSize: 20,
+        lineHeight: 20,
         fontWeight: 500,
+        marginTop:10,
         color: COLORS.white
     },
 

@@ -29,11 +29,7 @@ const Onboarding = () => {
             data2Ref.current.scrollToIndex({index: currentIndex + 1});
         } else {
             console.log ('last item')
-            //navigation.navigate("SignUp")
-
-            AsyncStorage.setItem('onboardingCompleted', 'true').then(() => {
-                navigation.navigate("StartUp")
-            })
+            navigation.navigate("SignUpComplete")
         }
     }
   return (
