@@ -1,36 +1,96 @@
-import { StyleSheet, Text, View, SafeAreaView } from 'react-native'
-import React from 'react'
+import { StyleSheet, Text, View, SafeAreaView,ScrollView } from 'react-native'
+import React, { useState } from 'react'
 import { LinearGradient } from 'expo-linear-gradient';
 import Keyboard from '../src/components/Keyboard'
 import colors from '../src/constants'
+import COLORS from '../data/colors';
 import * as Animatable from 'react-native-animatable';
+import { CLEAR } from '../src/constants';
+import { ENTER } from '../src/constants';
+
 
 const Number_Of_Tries = 6;
+
+
+const copyArray = (arr) => { // making a copy of this aaray 
+  return [...arr.map((rows) => [...rows])];
+};
 
 const Wordle = () => {
 
   const word= "hello";
-  const letters = word.split('')//returns an array of characters.
+  const letters = word.split("");//returns an array of characters.
 
-  const rows = new Array(Number_Of_Tries).fill(new Array(letters.length).fill('a'))
+  const [rows, setRows] = useState(
+    new Array(Number_Of_Tries).fill(new Array(letters.length).fill("")));
+
+  //const rows = new Array(Number_Of_Tries).fill(new Array(letters.length).fill(''))
+
+  const [curRow, setCurRow] = useState(0);
+  const [curCol, setCurCol] = useState(0);
+
+
+  const onKeyPressed = (key) => {
+    const updatedRows = copyArray(rows);
+
+    if(key == CLEAR){
+      const prevCol = curCol -1; //check if the current col is not less than 0
+      if (prevCol >= 0)
+      {
+        updatedRows[curRow][prevCol] = ""; //remove the word in the currnet row
+        setRows(updatedRows);
+        setCurCol(prevCol);
+
+      }
+      return;
+    }
+
+    if (key == ENTER)
+    {
+      if(curCol == rows[0].length)
+      {
+        setCurRow(curRow+1);
+        setCurCol(0);
+      }
+      return
+    } 
+
+    if(curCol < rows[0].length) { //Checking if the current collumn doesnt extend past the lenght of the word
+      updatedRows[curRow][curCol] = key;
+      setRows(updatedRows) // set it back in state 
+      setCurCol(curCol + 1); //incrementing the collumn after placing a letter in a box
+    }
+
+  };
+
+  const isCellActive =(row, col) => {
+    return row == curRow && col == curCol;
+  }
+
+
+
+
+
+
+
   return (
     <LinearGradient style={{flex: 1}} colors={['#EAEAEA', '#B7F1B5']}>
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>WORDLE</Text>
 
       <View style={styles.map}>
-        {rows.map((row) =>(
-          <View style={styles.row}>
-            {row.map((cell) => (
-              <View style={styles.cell}>
-                <Text style={styles.cellText}>{cell}</Text>
+        {rows.map((row, i) =>(
+          <View key={'row-${i}'} style={styles.row}>
+            {row.map((cell, j) => (
+              <View key ={'cell-${i}-${j}'} style={[styles.cell, {borderColor: isCellActive(i,j) ? COLORS.white : COLORS.darkgrey }]}>
+                <Text style={styles.cellText}>{cell.toUpperCase()}</Text>
               </View>
             ))}
 
           </View>
         ))}
       </View>
-      <Keyboard/>
+      <Keyboard onKeyPressed={onKeyPressed}/>
     </SafeAreaView>
     </LinearGradient>
   )
