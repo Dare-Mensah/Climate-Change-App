@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, SafeAreaView,ScrollView } from 'react-native'
+import { StyleSheet, Text, View, SafeAreaView,ScrollView, LogBox} from 'react-native'
 import React, { useState } from 'react'
 import { LinearGradient } from 'expo-linear-gradient';
 import Keyboard from '../src/components/Keyboard'
@@ -7,7 +7,7 @@ import COLORS from '../data/colors';
 import * as Animatable from 'react-native-animatable';
 import { CLEAR } from '../src/constants';
 import { ENTER } from '../src/constants';
-
+LogBox.ignoreAllLogs();
 
 const Number_Of_Tries = 6;
 
@@ -69,6 +69,34 @@ const Wordle = () => {
 
 
 
+  const getCellBGColor= (row, col) =>
+  {
+    const letter = rows[row][col];
+    if (row >= curRow) {
+      return COLORS.grey
+    }
+    if(letter  == letters[col])
+    {
+      return COLORS.primary; // checking if the letter is in the correct collumn change it to green
+    }
+    if (letters.includes(letter))
+    {
+      return COLORS.secondary; //if the letter is included in the word change it to yellow
+    }
+    return COLORS.darkgrey;
+  }
+
+  const getAllLettersWithColor = (color) => {
+    return rows.flatMap((row, i) =>
+      row.filter((cell, j) => getCellBGColor(i,j) == color) 
+    );
+  }
+
+  const greenCaps = getAllLettersWithColor(COLORS.primary)
+  const yellowCaps = getAllLettersWithColor(COLORS.secondary)
+  const greyCaps = getAllLettersWithColor(COLORS.darkgrey)
+
+  
 
 
 
@@ -81,16 +109,24 @@ const Wordle = () => {
       <View style={styles.map}>
         {rows.map((row, i) =>(
           <View key={'row-${i}'} style={styles.row}>
-            {row.map((cell, j) => (
-              <View key ={'cell-${i}-${j}'} style={[styles.cell, {borderColor: isCellActive(i,j) ? COLORS.white : COLORS.darkgrey }]}>
-                <Text style={styles.cellText}>{cell.toUpperCase()}</Text>
+            {row.map((letter, j) => (
+              <View key ={'cell-${i}-${j}'} style={[styles.cell, 
+              {borderColor: isCellActive(i,j) ? COLORS.white : COLORS.darkgrey,
+              backgroundColor: getCellBGColor(i, j),
+               }]}>
+                <Text style={styles.cellText}>{letter.toUpperCase()}</Text>
               </View>
             ))}
 
           </View>
         ))}
       </View>
-      <Keyboard onKeyPressed={onKeyPressed}/>
+      <Keyboard 
+      onKeyPressed={onKeyPressed}
+      greenCaps={greenCaps}
+      yellowCaps={yellowCaps}
+      greyCaps={greyCaps}
+      />
     </SafeAreaView>
     </LinearGradient>
   )
