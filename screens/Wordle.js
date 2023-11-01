@@ -1,5 +1,5 @@
-import { StyleSheet, Text, View, SafeAreaView,ScrollView, LogBox} from 'react-native'
-import React, { useState } from 'react'
+import { StyleSheet, Text, View, SafeAreaView,ScrollView, LogBox, Alert} from 'react-native'
+import React, { useEffect, useState } from 'react'
 import { LinearGradient } from 'expo-linear-gradient';
 import Keyboard from '../src/components/Keyboard'
 import colors from '../src/constants'
@@ -29,8 +29,44 @@ const Wordle = () => {
   const [curRow, setCurRow] = useState(0);
   const [curCol, setCurCol] = useState(0);
 
+  const [gameSate, setGameState] = useState('playing')
+
+  useEffect(() => {
+    if(curRow > 0)
+    {
+      checkGameState();
+    }
+  }, [curRow])
+
+  const checkGameState = () => {
+    if(checkIfWon())
+    {
+      Alert.alert('You Have Won')
+      setGameState('won');
+    }
+    else if(checkIfLose())
+    {
+      Alert.alert('You have lost')
+      setGameState('lost');
+    }
+  }
+
+  const checkIfWon = () => { // winning state
+    const row = rows[curRow-1];
+
+    return row.every((letter, i) => letter == letters[i]) //if every letter from a row is equalt to the letter we want to guess then we won
+  }
+
+  const checkIfLose = () => { //lose state
+    return curRow == rows.length;
+  }
 
   const onKeyPressed = (key) => {
+    if(gameSate != 'playing')
+    {
+      return;
+    }
+
     const updatedRows = copyArray(rows);
 
     if(key == CLEAR){
