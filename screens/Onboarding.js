@@ -7,9 +7,13 @@ import Pageinator from './Pageinator'
 import NextButton from './NextButton'
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import { useRoute } from '@react-navigation/native';
 
 
 const Onboarding = () => {
+
+    const route = useRoute();
+    const { email } = route.params;
 
     const navigation = useNavigation();
 
