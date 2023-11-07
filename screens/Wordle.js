@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, SafeAreaView,ScrollView, LogBox, Alert} from 'react-native'
+import { StyleSheet, Text, View, SafeAreaView,ScrollView, LogBox, Alert, } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { LinearGradient } from 'expo-linear-gradient';
 import Keyboard from '../src/components/Keyboard'
@@ -7,6 +7,8 @@ import COLORS from '../data/colors';
 import * as Animatable from 'react-native-animatable';
 import { CLEAR } from '../src/constants';
 import { ENTER } from '../src/constants';
+import { colorsToEmoji } from '../src/constants';
+import * as Clipboard from 'expo-clipboard';
 LogBox.ignoreAllLogs();
 
 const Number_Of_Tries = 6;
@@ -28,7 +30,6 @@ const Wordle = () => {
 
   const [curRow, setCurRow] = useState(0);
   const [curCol, setCurCol] = useState(0);
-
   const [gameSate, setGameState] = useState('playing')
 
   useEffect(() => {
@@ -39,17 +40,32 @@ const Wordle = () => {
   }, [curRow])
 
   const checkGameState = () => {
-    if(checkIfWon())
+    if(checkIfWon() && gameSate != 'won')
     {
-      Alert.alert('You Have Won')
+      Alert.alert('Nice work!', 'Share our result with the community', [
+        {
+          text: 'Share', //Shows share button to share their game result
+          onPress: shareScore, //press to share result
+        },
+    ]);
       setGameState('won');
     }
-    else if(checkIfLose())
+    else if(checkIfLose() && gameSate != 'lost')
     {
-      Alert.alert('You have lost')
+      Alert.alert('You have lost', 'Try again tomorrow') //shows and alert message if the user has lost
       setGameState('lost');
     }
+  };
+
+  const shareScore = () => {
+    const textMap = rows.map((row, i) => row.map((cell,j) => colorsToEmoji[getCellBGColor(i,j)]).join('')). filter((row) => row).join('\n');
+    //console.log(textShare); //debugging
+    const textToShare = `Your Wordle Result:\n${textMap}`;;
+    Clipboard.setString(textToShare);
+    Alert.alert("Copied Sucessfully", "Spread the word on social media")
   }
+
+
 
   const checkIfWon = () => { // winning state
     const row = rows[curRow-1];
@@ -58,7 +74,7 @@ const Wordle = () => {
   }
 
   const checkIfLose = () => { //lose state
-    return curRow == rows.length;
+    return !checkIfWon() && curRow == rows.length;
   }
 
   const onKeyPressed = (key) => {
@@ -131,7 +147,7 @@ const Wordle = () => {
   const greenCaps = getAllLettersWithColor(COLORS.primary)
   const yellowCaps = getAllLettersWithColor(COLORS.secondary)
   const greyCaps = getAllLettersWithColor(COLORS.darkgrey)
-
+ //for each of the keyboards caps on the virtual keyboard
   
 
 

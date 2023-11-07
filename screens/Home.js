@@ -90,7 +90,7 @@ const Home = ({route}) => {
           width:'95%',
           height: 150,
           marginTop: 5,
-          marginLeft:30,}}>
+          marginLeft:20,}}>
 
           <Text 
           style={{
@@ -122,7 +122,7 @@ const Home = ({route}) => {
           width:'95%',
           height: 150,
           marginTop: 20,
-          marginLeft:30,}}>
+          marginLeft:20,}}>
 
           <Text 
           style={{

@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
       shadowRadius: 10,
       alignItems: 'center',
       justifyContent: 'center',
-      marginLeft: 95,
+      marginLeft: 85,
       textAlign: 'center'
     },
     
