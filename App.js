@@ -20,6 +20,7 @@ import SignUpComplete from './screens/SignUpComplete';
 import { ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Wordle from './screens/Wordle';
+import EndScreen from './screens/EndScreen';
 
 
 
@@ -78,6 +79,7 @@ function App(){
       <Stack.Screen name="Profile" component={Profile}/>
       <Stack.Screen name="EditProfile" component={EditProfile}/>
       <Stack.Screen name="Wordle" component={Wordle}/>
+      <Stack.Screen name="EndScreen" component={EndScreen}/>
     </Stack.Navigator>
   )
 }

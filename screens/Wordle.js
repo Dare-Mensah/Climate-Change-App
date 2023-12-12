@@ -10,6 +10,7 @@ import { ENTER } from '../src/constants';
 import { colorsToEmoji } from '../src/constants';
 import * as Clipboard from 'expo-clipboard';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import EndScreen from './EndScreen';
 LogBox.ignoreAllLogs();
 
 const Number_Of_Tries = 6;
@@ -30,8 +31,16 @@ const getDayOfTheYear = () => {
   return day;
 }
 
-const dayOfTheYear = getDayOfTheYear() + 1; //add +2 to test for next day
-const dayKey = `day-${dayOfTheYear}`;
+
+const getDayKey = () => {
+  const d = new Date();
+  let year = d.getFullYear();
+  return `day-${getDayOfTheYear()}-${year}`;
+}
+
+
+const dayOfTheYear = getDayOfTheYear(); //add +2 to test for next day
+const dayKey = getDayKey();
 
 const  getWordForDay =(day)=>  {
   return words[day % words.length];
@@ -235,6 +244,12 @@ const Wordle = () => {
   if(!loaded) {
     return (<ActivityIndicator/>)
   }
+
+
+  if (gameSate != 'playing') {
+    return (<EndScreen won={gameSate == 'won'}/>)
+  }
+
 
 
   return (
