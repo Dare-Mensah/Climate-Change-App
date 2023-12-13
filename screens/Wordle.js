@@ -130,28 +130,13 @@ const Wordle = () => {
   const checkGameState = () => {
     if(checkIfWon() && gameSate != 'won')
     {
-      Alert.alert('Nice work!', 'Share your result with the community', [
-        {
-          text: 'Share', //Shows share button to share their game result
-          onPress: shareScore, //press to share result
-        },
-    ]);
       setGameState('won');
     }
     else if(checkIfLose() && gameSate != 'lost')
     {
-      Alert.alert('You have lost', 'Try again tomorrow') //shows and alert message if the user has lost
       setGameState('lost');
     }
   };
-
-  const shareScore = () => {
-    const textMap = rows.map((row, i) => row.map((cell,j) => colorsToEmoji[getCellBGColor(i,j)]).join('')). filter((row) => row).join('\n');
-    //console.log(textShare); //debugging
-    const textToShare = `Your Wordle Result:\n${textMap}`;;
-    Clipboard.setString(textToShare);
-    Alert.alert("Copied Sucessfully", "Spread the word on social media")
-  }
 
 
 
@@ -247,7 +232,7 @@ const Wordle = () => {
 
 
   if (gameSate != 'playing') {
-    return (<EndScreen won={gameSate == 'won'}/>)
+    return (<EndScreen won={gameSate == 'won'} rows={rows} getCellBGColor={getCellBGColor}/>)
   }
 
 
