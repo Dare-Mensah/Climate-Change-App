@@ -10,6 +10,7 @@ import { ENTER } from '../src/constants';
 import { colorsToEmoji } from '../src/constants';
 import * as Clipboard from 'expo-clipboard';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
 import EndScreen from './EndScreen';
 LogBox.ignoreAllLogs();
 
@@ -47,6 +48,7 @@ const  getWordForDay =(day)=>  {
 }
 
 const Wordle = () => {
+  const navigation = useNavigation();
   //AsyncStorage.removeItem("@game") //resetting async storage for game
   const word = getWordForDay(dayOfTheYear);
 
@@ -232,7 +234,7 @@ const Wordle = () => {
 
 
   if (gameSate != 'playing') {
-    return (<EndScreen won={gameSate == 'won'} rows={rows} getCellBGColor={getCellBGColor}/>)
+    return (<EndScreen won={gameSate == 'won'} rows={rows} getCellBGColor={getCellBGColor} navigation={navigation}/>)
   }
 
 

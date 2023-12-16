@@ -13,7 +13,6 @@ import { useRoute } from '@react-navigation/native';
 const Onboarding = () => {
 
     const route = useRoute();
-    const { email } = route.params;
 
     const navigation = useNavigation();
 

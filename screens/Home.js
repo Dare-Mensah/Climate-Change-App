@@ -7,32 +7,60 @@ import {firebase} from '../config'
 import Profile from './Profile';
 import { Divider } from 'react-native-paper';
 import { LinearGradient } from 'expo-linear-gradient';
-
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 const {width} = Dimensions.get('screen')
 
 const Home = ({route}) => {
     const navigation = useNavigation();
 
+    const {currentStreak, winPercentage, playedState }= route.params || {}
+    const [statsSaved, setStatsSaved] = useState(false);
+
     const [name, setName] = useState('');
 
     const [email] = useState('');
 
 
-
     useEffect(() => {
-      firebase.firestore().collection('users')
-      .doc(firebase.auth().currentUser.uid).get()
-      .then((snapshot) => {
-        if (snapshot.exists){
-          setName(snapshot.data())
+      if (!statsSaved) {
+        saveStatsToAsyncStorage();
+        setStatsSaved(true);
+      }
+    }, [statsSaved]);
+  
+    const saveStatsToAsyncStorage = async () => {
+      try {
+        const statsData = {
+          currentStreak,
+          winPercentage,
+          playedState,
+        };
+        const statsString = JSON.stringify(statsData);
+        await AsyncStorage.setItem('@user_stats', statsString);
+      } catch (error) {
+        console.error('Error saving stats to AsyncStorage:', error);
+      }
+    };
+  
+    const readStatsFromAsyncStorage = async () => {
+      try {
+        const statsString = await AsyncStorage.getItem('@user_stats');
+        if (statsString) {
+          const statsData = JSON.parse(statsString);
+          // Update the state with the retrieved statistics
+          // This will re-render the component with the saved stats
+          setStatsSaved(statsData);
         }
-        else {
-          console.log('User does not exists')
-        }
-      })
-    }, [])
+      } catch (error) {
+        console.error('Error reading stats from AsyncStorage:', error);
+      }
+    };
+  
+    useEffect(() => {
+      readStatsFromAsyncStorage();
+    }, []);
+  
 
     const Card =({Tips}) => {
       return (
@@ -105,7 +133,7 @@ const Home = ({route}) => {
           fontSize: 40,
           marginTop: 17,
           fontWeight: '600'
-          }}>0</Text>
+          }}>{currentStreak } </Text>
 
 
         </Animatable.View>
@@ -129,7 +157,7 @@ const Home = ({route}) => {
           paddingHorizontal: 10,
           marginTop: 10, 
           fontWeight: 400}}>
-          Correct:</Text>
+          Games Played:</Text>
 
           <Text 
           style={{
@@ -137,7 +165,7 @@ const Home = ({route}) => {
           fontSize: 40,
           marginTop: 17,
           fontWeight: '600'
-          }}>0</Text>
+          }}>{playedState}</Text>
 
 
         </Animatable.View>
@@ -170,7 +198,7 @@ const Home = ({route}) => {
           fontSize: 50,
           marginTop: 67,
           fontWeight: '600'
-          }}>0%</Text>
+          }}>{winPercentage}%</Text>
 
           <Text 
           style={{

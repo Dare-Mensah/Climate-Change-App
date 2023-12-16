@@ -10,6 +10,7 @@ import * as Animatable from 'react-native-animatable';
 import { CLEAR } from '../src/constants';
 import { ENTER } from '../src/constants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
 
 const Number = ({number, label}) => (
     <View style ={{alignItems: 'center', margin: 10}}>
@@ -47,10 +48,8 @@ const GuessDistributionLine =({position, amount, percentage}) => {
 }
 
 
+const EndScreen = ({ won = false, rows, getCellBGColor, navigation }) => {
 
-
-
-const EndScreen = ({ won = false, rows, getCellBGColor }) => {
     const [secondsTillTmr, setSecondsTillTmr] = useState(0);
     const [played, setPlayed] = useState(0);
     const [winRate, setWinRate] = useState(0);
@@ -152,13 +151,21 @@ const EndScreen = ({ won = false, rows, getCellBGColor }) => {
         //return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
       //};
 
+
+    const calculateTimeTillNextGame = () => {
+      const hours = Math.floor(secondsTillTmr / 3600);
+      const minutes = Math.floor((secondsTillTmr % 3600) / 60);
+      const seconds = secondsTillTmr % 60;
+      return `${hours}h ${minutes}m ${seconds}s`;
+    };
+
   return (
     <LinearGradient style={{flex: 1}} colors={['#EAEAEA', '#B7F1B5']}>
         <ScrollView showsVerticalScrollIndicator={false}>
         <SafeAreaView style={{width:'100%', alignContent:'center'}}>
         <View>
             <Text style={styles.title}>WORDLE</Text>
-            <Text style ={{fontSize: 30, color:"black", fontWeight: 400, textAlign: 'center',}}>{won ? 'Congrats!' : 'Try again tomorrow'}</Text>
+            <Text style ={{fontSize: 30, color:"black", fontWeight: 400, textAlign: 'center',}}>{won ? 'You Won!' : 'Try again tomorrow'}</Text>
         </View>
 
         <Text style ={{fontSize: 30, color:"black", fontWeight: 200, marginVertical: 20, textAlign: 'center',}}>Your Statisitics</Text>
@@ -177,13 +184,27 @@ const EndScreen = ({ won = false, rows, getCellBGColor }) => {
             
             <View>
                 <Text style ={{fontSize: 30, color:"black", fontWeight: 200, marginTop:20, textAlign: 'center',}}>Next Game</Text>
-                <Text style ={{fontSize: 30, color:"black", fontWeight: 'bold',marginTop:10, textAlign: 'center',}}></Text>
+                <Text style ={{fontSize: 30, color:"black", fontWeight: 'bold',marginTop:10, textAlign: 'center',}}>{calculateTimeTillNextGame()}</Text>
             </View>
             
             <TouchableOpacity onPress={share}
-                style={[styles.box1, {marginTop:50, backgroundColor:COLORS.third}]}
+                style={[styles.box1, {marginTop:40, backgroundColor:COLORS.third}]}
             >
                 <Text style={[styles.text1,{color:COLORS.white}]}>Share</Text>
+            </TouchableOpacity>
+
+
+
+            <TouchableOpacity onPress={() => {
+              navigation.navigate("Home", {
+                currentStreak: curStreak,
+                winPercentage: winRate,
+                playedState: played,
+              })
+            }}
+                style={[styles.box1, {marginTop:40, backgroundColor:COLORS.third}]}
+            >
+                <Text style={[styles.text1,{color:COLORS.white}]}>Return Home</Text>
             </TouchableOpacity>
 
         </View>

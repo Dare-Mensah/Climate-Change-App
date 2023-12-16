@@ -8,9 +8,9 @@ import {firebase} from '../config'
 const SignIn = () => {
     const navigation = useNavigation();
 
-    const [email, setEmail] = useState('')
+    const [email, setEmail] = useState('') //email variables
 
-    const [password, setPassword] = useState('')
+    const [password, setPassword] = useState('') //password variable
 
 
     loginUser = async(email, password) => {
