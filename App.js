@@ -24,6 +24,8 @@ import Wordle from './screens/Wordle';
 import EndScreen from './screens/EndScreen';
 import GuestProfile from './screens/GuestProfile';
 import BlogScreen from './screens/BlogScreen';
+import BlogDetails from './screens/BlogDetails';
+import EditBlog from './screens/EditBlog';
 
 
 
@@ -88,6 +90,8 @@ function App(){
       <Stack.Screen name="Wordle" component={Wordle}/>
       <Stack.Screen name="EndScreen" component={EndScreen}/>
       <Stack.Screen name="BlogScreen" component={BlogScreen}/>
+      <Stack.Screen name="BlogDetails" component={BlogDetails}/>
+      <Stack.Screen name="EditBlog" component={EditBlog}/>
     </Stack.Navigator>
   )
 }

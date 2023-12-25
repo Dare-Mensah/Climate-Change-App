@@ -27,6 +27,38 @@ const BlogPostCard = ({ post, onPress }) => {
 
 const Home = ({route}) => {
 
+  const [userStats, setUserStats] = useState({
+    currentStreak: 0,
+    winPercentage: 0,
+    playedState: 0,
+  });
+
+  useEffect(() => {
+    // Fetch user stats from Firebase
+    const fetchUserStats = async () => {
+      try {
+        const userStatsSnapshot = await firebase.firestore()
+          .collection('users')
+          .doc(firebase.auth().currentUser.uid)
+          .get();
+
+        if (userStatsSnapshot.exists) {
+          setUserStats(userStatsSnapshot.data());
+        } else {
+          console.log('User stats do not exist');
+        }
+      } catch (error) {
+        console.error('Error fetching user stats:', error);
+      }
+    };
+
+    // Call the fetchUserStats function
+    fetchUserStats();
+  }, []);
+
+
+
+
   const [blogPosts, setBlogPosts] = useState([]);
 
   useEffect(() => {
@@ -41,6 +73,9 @@ const Home = ({route}) => {
           ...doc.data(),
         }));
 
+        // Sort posts by date in descending order
+        postsData.sort((a, b) => b.date - a.date);
+
         // Set the blogPosts state with the fetched data
         setBlogPosts(postsData);
       } catch (error) {
@@ -51,6 +86,11 @@ const Home = ({route}) => {
     // Call the fetchBlogPosts function
     fetchBlogPosts();
   }, []);
+
+  // Only take the latest 4 blog posts
+  const latestBlogPosts = blogPosts.slice(0, 4);
+
+
     const navigation = useNavigation();
 
     const {currentStreak, winPercentage, playedState }= route.params || {}
@@ -311,13 +351,13 @@ const Home = ({route}) => {
 
         </View>
 
-      {/* Display fetched blog posts */}
-      <Text style={styles.sectionTitle}>Community Blogs</Text>
+      {/* Display latest 4 blog posts */}
+      <Text style={styles.sectionTitle}>Latest Blogs</Text>
       <FlatList
         contentContainerStyle={{ paddingLeft: 20 }}
         horizontal
         showsHorizontalScrollIndicator={false}
-        data={blogPosts}
+        data={latestBlogPosts}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <BlogPostCard

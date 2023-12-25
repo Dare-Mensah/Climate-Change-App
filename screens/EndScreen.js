@@ -48,6 +48,7 @@ const GuessDistributionLine =({position, amount, percentage}) => {
 }
 
 
+
 const EndScreen = ({ won = false, rows, getCellBGColor, navigation }) => {
 
     const [secondsTillTmr, setSecondsTillTmr] = useState(0);
@@ -56,6 +57,29 @@ const EndScreen = ({ won = false, rows, getCellBGColor, navigation }) => {
     const [curStreak, setCurStreak] = useState(0);
     const [maxStreak, setMaxStreak] = useState(0);
     const [distribution, setDistribution] = useState(null)
+
+
+    const saveStatsToFirebase = async () => {
+      try {
+        const userStatsRef = firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid);
+    
+        await userStatsRef.set({
+          currentStreak,
+          winPercentage,
+          playedState,
+        });
+      } catch (error) {
+        console.error('Error saving stats to Firebase:', error);
+      }
+    };
+
+    const saveStats = async () => {
+      // Save stats to Firebase
+      await saveStatsToFirebase();
+  
+      // Save stats to AsyncStorage (optional)
+      saveStatsToAsyncStorage();
+    };
   
     useEffect(() => {
       readState();
