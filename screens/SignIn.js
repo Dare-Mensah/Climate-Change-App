@@ -1,4 +1,4 @@
-import {  SafeAreaView, StyleSheet, Text, View, Image, TextInput, TouchableOpacity, Pressable } from 'react-native'
+import {  SafeAreaView, StyleSheet, Text, View, Image, TextInput, TouchableOpacity, Pressable, ScrollView } from 'react-native'
 import React, {useState} from 'react'
 import COLORS from '../data/colors'
 import * as Animatable from 'react-native-animatable';
@@ -42,7 +42,7 @@ const SignIn = () => {
         animation={"fadeInUpBig"}
         style={styles.footer}>
 
-            <Text style={[styles.text_footer, {marginTop: 35}]}>Email</Text>
+            <Text style={[styles.text_footer, {marginTop: 11}]}>Email</Text>
             <View style={styles.action}>
                 <Image
                 style={{height: 20, width: 20}} 
@@ -79,7 +79,7 @@ const SignIn = () => {
 
             <TouchableOpacity 
             onPress={() => loginUser(email, password)}
-            style={[styles.box1,{marginTop:60, backgroundColor:COLORS.third}] }
+            style={[styles.box1,{marginTop:50, backgroundColor:COLORS.third}] }
             >
                 <Text style={[styles.text1,{color:COLORS.white}]}>Login</Text>
             </TouchableOpacity>
@@ -90,8 +90,31 @@ const SignIn = () => {
             <TouchableOpacity 
             onPress={() => navigation.navigate("ForgotPassword")}
             >
-                <Text style={{fontWeight:'400', textAlign:'center', fontSize: 17, marginTop: 40}}>Forgot Password?</Text>
+                <Text style={{fontWeight:'500', textAlign:'center', fontSize: 17, marginTop: 30}}>Forgot Password?</Text>
             </TouchableOpacity>
+
+
+
+            <View style={{flexDirection:'row', justifyContent:'center', padding:30}}>
+                <Text style={{fontWeight:'300', textAlign:'center', fontSize: 17}}>Don't have an account?   </Text>
+                <TouchableOpacity 
+                    onPress={() => navigation.navigate("SignUp")}
+                >
+                    <Text style={{fontWeight:'500', textAlign:'center', fontSize: 17}}>SignUp</Text>
+                </TouchableOpacity>
+            </View>
+
+            <Text style={{fontWeight:'300', textAlign:'center', fontSize: 17}}>Or</Text>
+
+
+            <View style={{flexDirection:'row', justifyContent:'center', padding:30}}>
+                <Text style={{fontWeight:'300', textAlign:'center', fontSize: 17}}>Login as a Guest?   </Text>
+                <TouchableOpacity 
+                    onPress={() => navigation.navigate("GuestHome")}
+                >
+                    <Text style={{fontWeight:'500', textAlign:'center', fontSize: 17}}>Guest Login</Text>
+                </TouchableOpacity>
+            </View>
 
 
         </Animatable.View>
@@ -107,7 +130,7 @@ const styles = StyleSheet.create({
         backgroundColor:COLORS.third,
     },
     header2:{
-        flex: 1,
+        flex: 0.9,
         justifyContent:'flex-end',
         paddingHorizontal: 20,
         paddingBottom: 50,
@@ -118,7 +141,7 @@ const styles = StyleSheet.create({
         fontSize: 30
     },
     footer:{
-        flex: 3,
+        flex: 3.1,
         backgroundColor: '#fff',
         borderTopLeftRadius: 30,
         borderTopRightRadius: 30,

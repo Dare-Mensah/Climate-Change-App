@@ -1,0 +1,195 @@
+import React, { useState } from 'react';
+import { StyleSheet, Text, View, TextInput, Button, ScrollView, Image, Pressable } from 'react-native';
+import * as Animatable from 'react-native-animatable';
+import { LinearGradient } from 'expo-linear-gradient';
+import COLORS from '../data/colors';
+import * as ImagePicker from 'expo-image-picker'
+import { firebase } from '../config';
+
+const BlogScreen = () => {
+  const [title, setTitle] = useState('');
+  const [author, setAuthor] = useState('');
+  const [content, setContent] = useState('');
+
+  const handleSavePost = async () => {
+    try {
+      // Create a new post object
+      const post = {
+        title,
+        author,
+        content,
+        timestamp: new Date(),
+      };
+
+      // Get the current user's ID from Firebase Auth
+      const userId = firebase.auth().currentUser.uid;
+
+      // Add the post to the 'posts' collection in Firestore
+      await firebase.firestore().collection('posts').add({
+        userId,
+        ...post,
+      });
+
+      // Reset the form fields after successful submission
+      setTitle('');
+      setAuthor('');
+      setContent('');
+
+      console.log('Post saved successfully!');
+    } catch (error) {
+      console.error('Error saving post:', error);
+    }
+  };
+
+  return (
+    <LinearGradient style={{ flex: 1, padding: 16 }} colors={['#EAEAEA', '#B7F1B5']}>
+      <Animatable.Text
+        animation={"fadeInUpBig"}
+        style={[styles.Title1, { paddingHorizontal: 10, paddingTop: 10, marginBottom: 40 }]}>
+        Create A New Blog
+      </Animatable.Text>
+
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <View style={styles.formContainer}>
+          <Text style={[styles.text_footer, { marginTop: 35 }]}>Title</Text>
+          <View style={styles.action}>
+            <Image
+              style={{ height: 20, width: 20 }}
+              source={require('../assets/title.png')} />
+
+            <TextInput
+              placeholder='Enter Title'
+              style={styles.textInput}
+              autoCapitalize='none'
+              onChangeText={(text) => setTitle(text)}
+              autoCorrect={false}
+            />
+          </View>
+
+          <Text style={[styles.text_footer, { marginTop: 35 }]}>Author</Text>
+          <View style={styles.action}>
+            <Image
+              style={{ height: 20, width: 20 }}
+              source={require('../assets/circle-user.png')} />
+
+            <TextInput
+              placeholder='Enter Author'
+              style={styles.textInput}
+              autoCapitalize='none'
+              onChangeText={(text) => setAuthor(text)}
+              autoCorrect={false}
+            />
+          </View>
+
+          <Text style={[styles.text_footer, { marginTop: 35, marginBottom: 20 }]}>Content</Text>
+          <TextInput
+            style={[styles.input, styles.largeInput]}  // Adjust the height here
+            placeholder="Enter content"
+            multiline={true}
+            value={content}
+            onChangeText={(text) => setContent(text)}
+            textAlignVertical="top"  // Move placeholder to the top
+          />
+
+            <Pressable
+            onPress={handleSavePost}
+            style={[styles.box1, { marginTop: 50, backgroundColor: COLORS.third }]}
+          >
+            <Text style={[styles.text1, { color: COLORS.white }]}>Share Post</Text>
+          </Pressable>
+        </View>
+      </ScrollView>
+    </LinearGradient>
+  );
+};
+
+
+
+export default BlogScreen
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 16,
+  },
+  Title1:{
+    fontSize: 34,
+    marginTop: 20,
+    //fontFamily: 'Montserrat',
+    fontWeight: 'bold',
+},
+
+largeInput: {
+  height: 100,  // Adjust the height as needed
+},
+  heading: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 16,
+  },
+  formContainer: {
+    marginBottom: 20,
+  },
+  label: {
+    fontSize: 16,
+    marginBottom: 4,
+  },
+  sectionTitle:{
+    paddingHorizontal: 5,
+    marginVertical:25,
+    fontSize: 20,
+    fontWeight:'300'
+  },
+  input: {
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    marginBottom: 12,
+    paddingHorizontal: 8,
+    borderRadius: 10
+  },
+  text_footer:{
+    color: COLORS.black,
+    fontSize: 18,
+},
+action: {
+  flexDirection: 'row',
+  marginTop: 10,
+  borderBottomWidth: 1,
+  borderBottomColor: COLORS.black,
+  paddingBottom: 5
+},
+
+textInput: {
+  flex: 1,
+  marginTop: Platform.OS === 'andriod' ? 0 : -6,
+  paddingLeft: 10,
+  color: COLORS.darkgrey,
+},
+
+box1:{
+  backgroundColor: '#EAEAEA',
+  elevation: 2,
+  borderRadius: 20,
+  width: "59%",
+  height: 60,
+  shadowColor: '#000000',
+  shadowOffset: {
+      width: 0,
+      height: 2,
+  },
+  shadowOpacity: 0.09,
+  shadowRadius: 10,
+  alignItems: 'center',
+  justifyContent: 'center',
+  marginLeft: 65,
+  textAlign: 'center'
+},
+
+text1:{
+  alignItems: 'center',
+  fontWeight:'bold',
+  fontSize: 20,
+
+},
+});

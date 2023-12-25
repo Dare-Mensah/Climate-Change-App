@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, FlatList, useWindowDimensions, Animated } from 'react-native'
+import { StyleSheet, Text, View, FlatList, useWindowDimensions, Animated, TouchableOpacity } from 'react-native'
 import React, {useState, useRef} from 'react'
 import data2 from '../data/data2'
 import OnboardingItem from './OnboardingItem'
@@ -32,12 +32,19 @@ const Onboarding = () => {
             data2Ref.current.scrollToIndex({index: currentIndex + 1});
         } else {
             console.log ('last item')
-            navigation.navigate("SignUpComplete")
+            navigation.navigate("SignIn")
         }
     }
   return (
     <View style={styles.container}>
+
+
         <View style={{flex:3}}>
+        <TouchableOpacity 
+            onPress={() => navigation.navigate("SignIn")}
+        >
+            <Text style={{fontWeight:'500', fontSize: 17, marginTop: 40, paddingHorizontal: 20}}>Skip</Text>
+        </TouchableOpacity>
             <FlatList 
             data={data2}
             renderItem={({item}) => <OnboardingItem item={item}/>}

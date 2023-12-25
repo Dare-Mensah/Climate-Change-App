@@ -1,17 +1,94 @@
-import { SafeAreaView, StyleSheet, Text, View, Image, Pressable, TextInput, TouchableOpacity } from 'react-native'
-import React, {useState, useEffect} from 'react'
+import { SafeAreaView, StyleSheet, Text, View, Image, Pressable, TextInput, TouchableOpacity, Alert } from 'react-native'
+import React, {useState, useEffect, useRef} from 'react'
 import { Avatar, Title, Caption, TouchableRipple } from 'react-native-paper'
 import { useNavigation } from '@react-navigation/native';
 import COLORS from '../data/colors';
 import * as Animatable from 'react-native-animatable';
 import {firebase} from '../config'
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import storage from "@react-native-async-storage/async-storage";
 import { useRoute } from '@react-navigation/native';
+import * as Notifications from 'expo-notifications';
+import Constants from 'expo-constants';
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: true
+  })
+});
+
+
 const Profile = ({route}) => {
 
     const {username} = route.params;
 
     const navigation = useNavigation();
+
+    const [notification, setNotification] = useState(false);
+    const notificationListener = useRef();
+    const responseListener = useRef();
+  
+    useEffect(() => {
+      const getPermission = async () => {
+        if (Constants.isDevice) {
+            const { status: existingStatus } = await Notifications.getPermissionsAsync();
+            let finalStatus = existingStatus;
+            if (existingStatus !== 'granted') {
+              const { status } = await Notifications.requestPermissionsAsync();
+              finalStatus = status;
+            }
+            if (finalStatus !== 'granted') {
+              alert('Enable push notifications to use the app!');
+              await storage.setItem('expopushtoken', "");
+              return;
+            }
+            const token = (await Notifications.getExpoPushTokenAsync()).data;
+            await storage.setItem('expopushtoken', token);
+        } else {
+          alert('Must use physical device for Push Notifications');
+        }
+  
+          if (Platform.OS === 'android') {
+            Notifications.setNotificationChannelAsync('default', {
+              name: 'default',
+              importance: Notifications.AndroidImportance.MAX,
+              vibrationPattern: [0, 250, 250, 250],
+              lightColor: '#FF231F7C',
+            });
+          }
+      }
+  
+      getPermission();
+  
+      notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
+        setNotification(notification);
+      });
+  
+      responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {});
+  
+      return () => {
+        Notifications.removeNotificationSubscription(notificationListener.current);
+        Notifications.removeNotificationSubscription(responseListener.current);
+      };
+    }, []);
+  
+    const onClick = async () => {
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: "Title",
+          body: "body",
+          data: { data: "data goes here" }
+        },
+        trigger: {
+          hour: 14,
+          minute: 30,
+          repeats: true
+        }
+      });
+    }
+  
 
   return (
     <View style={styles.container}>
@@ -23,15 +100,12 @@ const Profile = ({route}) => {
 
         <View style={styles.header2}>
             <View style={styles.userInfoSection}>
-                <View style={{flexDirection: 'row', marginTop: 15}}>
+                <View style={{flexDirection: 'row', marginTop: 15, justifyContent:'center'}}>
                     <Avatar.Image
                         source={require('../assets/profileUser.png')}
-                        size={80}
+                        size={120}
                     />
-                    <View style={{marginLeft:20, marginTop:20}}>
-                        <Title style={styles.title}>{username}</Title>
-                        <Caption>Hello</Caption>
-                        
+                    <View style={{marginLeft:20, marginTop:20}}>          
                     </View>
                 </View>
             </View>
@@ -48,19 +122,19 @@ const Profile = ({route}) => {
                 </View>
             </TouchableRipple>
 
-            <TouchableRipple onPress={() => {}}>
+            <TouchableRipple onPress={onClick}>
                 <View style={styles.menuItem}>
                     <Image source={require('../assets/headset.png')} style={{height: 30, width: 30}}/>
                     <Text style={styles.menuItemText}>Help and Support</Text>
                 </View>
             </TouchableRipple>
 
-            <TouchableRipple onPress={() => {}}>
+            <TouchableOpacity onPress={() => {onClick}}>
                 <View style={styles.menuItem}>
                     <Image source={require('../assets/bell.png')} style={{height: 30, width: 30}}/>
                     <Text style={styles.menuItemText}>Notifications</Text>
                 </View>
-            </TouchableRipple>
+            </TouchableOpacity>
 
             <TouchableRipple onPress={() => {}}>
                 <View style={styles.menuItem}>
