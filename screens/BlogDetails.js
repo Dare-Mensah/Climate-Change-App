@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, Button,TouchableOpacity,Image } from 'react-native';
+import { StyleSheet, Text, View, Button,TouchableOpacity,Image, Alert } from 'react-native';
 import { firebase } from '../config';
 import COLORS from '../data/colors';
 

@@ -11,6 +11,7 @@ import { CLEAR } from '../src/constants';
 import { ENTER } from '../src/constants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
+import {firebase} from '../config'
 
 const Number = ({number, label}) => (
     <View style ={{alignItems: 'center', margin: 10}}>
@@ -58,31 +59,55 @@ const EndScreen = ({ won = false, rows, getCellBGColor, navigation }) => {
     const [maxStreak, setMaxStreak] = useState(0);
     const [distribution, setDistribution] = useState(null)
 
+    const saveStatsToAsyncStorage = async () => {
+      try {
+        const statsData = {
+          curStreak,
+          winRate,
+          played,
+          distribution,
+        };
+    
+        // Save to AsyncStorage
+        const statsString = JSON.stringify(statsData);
+        await AsyncStorage.setItem('@game_stats', statsString);
+    
+        // Save to Firebase
+        const userId = firebase.auth().currentUser.uid;
+        const userStatsRef = firebase.firestore().collection('user_stats').doc(userId);
+        await userStatsRef.set(statsData);
+      } catch (error) {
+        console.error('Error saving stats:', error);
+      }
+    };
+
+
 
     const saveStatsToFirebase = async () => {
       try {
-        const userStatsRef = firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid);
-    
-        await userStatsRef.set({
-          currentStreak,
-          winPercentage,
-          playedState,
-        });
+        const userId = firebase.auth().currentUser.uid;
+        const userStatsRef = firebase.firestore().collection('user_stats').doc(userId);
+  
+        const statsData = {
+          curStreak,
+          winRate,
+          played,
+          distribution,
+        };
+  
+        // Save to Firebase
+        await userStatsRef.set(statsData);
       } catch (error) {
         console.error('Error saving stats to Firebase:', error);
       }
     };
 
-    const saveStats = async () => {
-      // Save stats to Firebase
-      await saveStatsToFirebase();
-  
-      // Save stats to AsyncStorage (optional)
-      saveStatsToAsyncStorage();
-    };
-  
+
+
     useEffect(() => {
       readState();
+      saveStatsToAsyncStorage(); // Save stats to AsyncStorage
+      saveStatsToFirebase(); // Save stats to Firebase
     }, []);
   
     const share = () => {

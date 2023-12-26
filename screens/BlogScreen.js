@@ -1,15 +1,18 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, Button, ScrollView, Image, Pressable } from 'react-native';
+import { StyleSheet, Text, View, TextInput, Button, ScrollView, Image, Pressable} from 'react-native';
 import * as Animatable from 'react-native-animatable';
 import { LinearGradient } from 'expo-linear-gradient';
 import COLORS from '../data/colors';
 import * as ImagePicker from 'expo-image-picker'
 import { firebase } from '../config';
+import { FlatList } from 'react-native-gesture-handler';
+
 
 const BlogScreen = () => {
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
   const [content, setContent] = useState('');
+  const [selectedTopic, setSelectedTopic] = useState(null); // New state for selected topic
 
   const handleSavePost = async () => {
     try {
@@ -19,6 +22,7 @@ const BlogScreen = () => {
         author,
         content,
         timestamp: new Date(),
+        topic: selectedTopic, // Add the selected topic to the post object
       };
 
       // Get the current user's ID from Firebase Auth
@@ -30,10 +34,12 @@ const BlogScreen = () => {
         ...post,
       });
 
+
       // Reset the form fields after successful submission
       setTitle('');
       setAuthor('');
       setContent('');
+      setSelectedTopic(null); // Reset the selected topic
 
       console.log('Post saved successfully!');
     } catch (error) {
@@ -50,6 +56,8 @@ const BlogScreen = () => {
       </Animatable.Text>
 
       <ScrollView showsVerticalScrollIndicator={false}>
+
+
         <View style={styles.formContainer}>
           <Text style={[styles.text_footer, { marginTop: 35 }]}>Title</Text>
           <View style={styles.action}>
@@ -91,10 +99,27 @@ const BlogScreen = () => {
             textAlignVertical="top"  // Move placeholder to the top
           />
 
-            <Pressable
+          {/* Add the topic selection FlatList */}
+          <Text style={[styles.text_footer, { marginTop: 35, marginBottom: 20 }]}>Select Topic</Text>
+          <FlatList
+            data={['Technology', 'Food', 'Transport', 'Finanace' ]} // Add more topics as needed
+            keyExtractor={(item) => item}
+            horizontal
+            renderItem={({ item }) => (
+              <Pressable
+                style={[styles.topicButton, { backgroundColor: selectedTopic === item ? COLORS.third : COLORS.gray }]}
+                onPress={() => setSelectedTopic(item)}
+              >
+                <Text style={{ color: COLORS.black}}>{item}</Text>
+              </Pressable>
+            )}
+          />
+
+          <Pressable
             onPress={handleSavePost}
             style={[styles.box1, { marginTop: 50, backgroundColor: COLORS.third }]}
           >
+          
             <Text style={[styles.text1, { color: COLORS.white }]}>Share Post</Text>
           </Pressable>
         </View>
@@ -110,13 +135,23 @@ export default BlogScreen
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
+    paddingHorizontal: 16,
   },
   Title1:{
     fontSize: 34,
     marginTop: 20,
     //fontFamily: 'Montserrat',
     fontWeight: 'bold',
+},
+topicButton: {
+  marginRight: 10,
+  paddingVertical: 8,
+  paddingHorizontal: 16,
+  borderRadius: 20,
+  borderWidth: 1,
+  borderColor: COLORS.darkgrey,
+  justifyContent: 'center',
+  alignItems: 'center',
 },
 
 largeInput: {
@@ -128,7 +163,7 @@ largeInput: {
     marginBottom: 16,
   },
   formContainer: {
-    marginBottom: 20,
+
   },
   label: {
     fontSize: 16,
@@ -162,7 +197,7 @@ action: {
 
 textInput: {
   flex: 1,
-  marginTop: Platform.OS === 'andriod' ? 0 : -6,
+  marginTop: Platform.OS === 'android' ? 0 : -6, // Corrected typo here
   paddingLeft: 10,
   color: COLORS.darkgrey,
 },

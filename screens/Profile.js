@@ -9,6 +9,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import storage from "@react-native-async-storage/async-storage";
 import { useRoute } from '@react-navigation/native';
 import * as Notifications from 'expo-notifications';
+import { LinearGradient } from 'expo-linear-gradient';
 import Constants from 'expo-constants';
 
 Notifications.setNotificationHandler({
@@ -91,6 +92,7 @@ const Profile = ({route}) => {
   
 
   return (
+    <LinearGradient style={{flex: 1}} colors={['#B7F1B5','#EAEAEA']}>
     <View style={styles.container}>
         <View style={styles.header1}>
             <Pressable onPress={() => navigation.navigate("Home")}>
@@ -151,11 +153,9 @@ const Profile = ({route}) => {
             </TouchableRipple>
 
         </View>
-
-
-
         </Animatable.View>
     </View>
+    </LinearGradient>
   )
 }
 
@@ -236,7 +236,6 @@ const styles = StyleSheet.create({
 
     container: {
         flex: 1,
-        backgroundColor:COLORS.third,
     },
     header2:{
         flex: 1,

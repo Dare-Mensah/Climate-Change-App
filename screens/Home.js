@@ -27,68 +27,45 @@ const BlogPostCard = ({ post, onPress }) => {
 
 const Home = ({route}) => {
 
-  const [userStats, setUserStats] = useState({
-    currentStreak: 0,
-    winPercentage: 0,
-    playedState: 0,
-  });
-
-  useEffect(() => {
-    // Fetch user stats from Firebase
-    const fetchUserStats = async () => {
-      try {
-        const userStatsSnapshot = await firebase.firestore()
-          .collection('users')
-          .doc(firebase.auth().currentUser.uid)
-          .get();
-
-        if (userStatsSnapshot.exists) {
-          setUserStats(userStatsSnapshot.data());
-        } else {
-          console.log('User stats do not exist');
-        }
-      } catch (error) {
-        console.error('Error fetching user stats:', error);
-      }
-    };
-
-    // Call the fetchUserStats function
-    fetchUserStats();
-  }, []);
-
-
-
-
   const [blogPosts, setBlogPosts] = useState([]);
+  const [selectedTopic, setSelectedTopic] = useState(null);
 
   useEffect(() => {
-    // Fetch blog posts from Firebase
     const fetchBlogPosts = async () => {
       try {
         const postsSnapshot = await firebase.firestore().collection('posts').get();
-
-        // Extract data from the snapshot
         const postsData = postsSnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
-
-        // Sort posts by date in descending order
         postsData.sort((a, b) => b.date - a.date);
-
-        // Set the blogPosts state with the fetched data
         setBlogPosts(postsData);
       } catch (error) {
         console.error('Error fetching blog posts:', error);
       }
     };
 
-    // Call the fetchBlogPosts function
     fetchBlogPosts();
   }, []);
 
   // Only take the latest 4 blog posts
   const latestBlogPosts = blogPosts.slice(0, 4);
+
+  const filterPostsByTopic = () => {
+    if (!selectedTopic) {
+      return blogPosts;
+    }
+    return blogPosts.filter((post) => post.topic === selectedTopic);
+  };
+
+  const handleTopicChange = (topic) => {
+    setSelectedTopic(topic);
+  };
+
+  const createBlogButtonPressed = () => {
+    // Navigate to the BlogScreen for creating a new blog
+    navigation.navigate('BlogScreen');
+  };
 
 
     const navigation = useNavigation();
@@ -101,44 +78,7 @@ const Home = ({route}) => {
     const [email] = useState('');
 
 
-    useEffect(() => {
-      if (!statsSaved) {
-        saveStatsToAsyncStorage();
-        setStatsSaved(true);
-      }
-    }, [statsSaved]);
-  
-    const saveStatsToAsyncStorage = async () => {
-      try {
-        const statsData = {
-          currentStreak,
-          winPercentage,
-          playedState,
-        };
-        const statsString = JSON.stringify(statsData);
-        await AsyncStorage.setItem('@user_stats', statsString);
-      } catch (error) {
-        console.error('Error saving stats to AsyncStorage:', error);
-      }
-    };
-  
-    const readStatsFromAsyncStorage = async () => {
-      try {
-        const statsString = await AsyncStorage.getItem('@user_stats');
-        if (statsString) {
-          const statsData = JSON.parse(statsString);
-          // Update the state with the retrieved statistics
-          // This will re-render the component with the saved stats
-          setStatsSaved(statsData);
-        }
-      } catch (error) {
-        console.error('Error reading stats from AsyncStorage:', error);
-      }
-    };
-  
-    useEffect(() => {
-      readStatsFromAsyncStorage();
-    }, []);
+
 
     useEffect(() => {
       firebase.firestore().collection('users')
@@ -224,7 +164,7 @@ const Home = ({route}) => {
           fontSize: 40,
           marginTop: 17,
           fontWeight: '600'
-          }}>{currentStreak } </Text>
+          }}></Text>
 
 
         </Animatable.View>
@@ -256,7 +196,7 @@ const Home = ({route}) => {
           fontSize: 40,
           marginTop: 17,
           fontWeight: '600'
-          }}>{playedState}</Text>
+          }}></Text>
 
 
         </Animatable.View>
@@ -289,7 +229,7 @@ const Home = ({route}) => {
           fontSize: 50,
           marginTop: 67,
           fontWeight: '600'
-          }}>{winPercentage}%</Text>
+          }}>%</Text>
 
           <Text 
           style={{
@@ -339,14 +279,6 @@ const Home = ({route}) => {
           fontWeight: 400}}>
           Blogs:</Text>
 
-          <Text 
-          style={{
-          textAlign: 'center',
-          fontSize: 40,
-          marginTop: 17,
-          fontWeight: '600'
-          }}>{playedState}</Text>
-
         </Pressable>
 
         </View>
@@ -366,6 +298,42 @@ const Home = ({route}) => {
           />
         )}
       />
+
+
+
+        <Text style={styles.sectionTitle}>Filter by Topic</Text>
+        <FlatList
+          contentContainerStyle={{ paddingLeft: 20 }}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          data={['Technology', 'Food', 'Transport', 'Finance']} // Add more topics as needed
+          keyExtractor={(item) => item}
+          renderItem={({ item }) => (
+            <Pressable
+              style={[
+                styles.topicButton,
+                { backgroundColor: selectedTopic === item ? COLORS.third : COLORS.gray },
+              ]}
+              onPress={() => handleTopicChange(item)}
+            >
+              <Text style={{ color: COLORS.black }}>{item}</Text>
+            </Pressable>
+          )}
+        />
+
+<FlatList
+  contentContainerStyle={{ paddingLeft: 20 }}
+  horizontal
+  showsHorizontalScrollIndicator={false}
+  data={filterPostsByTopic()}
+  keyExtractor={(item) => item.id}
+  renderItem={({ item }) => (
+    <BlogPostCard
+      post={item}
+      onPress={() => navigation.navigate('BlogDetails', { postId: item.id })}
+    />
+  )}
+/>
   
         </ScrollView>
       </LinearGradient>
@@ -460,6 +428,37 @@ const styles = StyleSheet.create({
     blogPostAuthor: {
       fontSize: 14,
       color: COLORS.darkgrey,
+    },
+
+    topicButton: {
+      marginRight: 10,
+      paddingVertical: 8,
+      paddingHorizontal: 16,
+      borderRadius: 20,
+      borderWidth: 1,
+      borderColor: COLORS.darkgrey,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: 20
+    },
+  
+    noBlogsContainer: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginTop: 20,
+    },
+  
+    noBlogsText: {
+      fontSize: 18,
+      color: COLORS.black,
+      textAlign: 'center',
+    },
+  
+    createBlogLink: {
+      fontSize: 18,
+      color: COLORS.third,
+      textDecorationLine: 'underline',
     },
 
 
