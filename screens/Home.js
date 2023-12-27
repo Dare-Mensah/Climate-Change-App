@@ -25,10 +25,13 @@ const BlogPostCard = ({ post, onPress }) => {
   );
 }
 
+
+
+
 const Home = ({route}) => {
 
   const [blogPosts, setBlogPosts] = useState([]);
-  const [selectedTopic, setSelectedTopic] = useState(null);
+  const [selectedTopic, setSelectedTopic] = useState('Latest'); // Set the default topic to 'Latest'
 
   useEffect(() => {
     const fetchBlogPosts = async () => {
@@ -48,15 +51,25 @@ const Home = ({route}) => {
     fetchBlogPosts();
   }, []);
 
-  // Only take the latest 4 blog posts
-  const latestBlogPosts = blogPosts.slice(0, 4);
 
   const filterPostsByTopic = () => {
-    if (!selectedTopic) {
-      return blogPosts;
+    if (!selectedTopic || selectedTopic === 'All') {
+      // Show all posts or latest posts if 'All' is selected
+      return blogPosts.slice().sort((a, b) => b.date - a.date);
+    } else if (selectedTopic === 'Latest') {
+      // Show only the top 4 latest posts
+      return blogPosts.slice().sort((a, b) => b.date - a.date).slice(0, 4);
+    } else {
+      // Show posts filtered by selected topic
+      return blogPosts.filter((post) => post.topic === selectedTopic);
     }
-    return blogPosts.filter((post) => post.topic === selectedTopic);
   };
+
+
+
+
+
+  
 
   const handleTopicChange = (topic) => {
     setSelectedTopic(topic);
@@ -283,45 +296,32 @@ const Home = ({route}) => {
 
         </View>
 
-      {/* Display latest 4 blog posts */}
-      <Text style={styles.sectionTitle}>Latest Blogs</Text>
-      <FlatList
-        contentContainerStyle={{ paddingLeft: 20 }}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        data={latestBlogPosts}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <BlogPostCard
-            post={item}
-            onPress={() => navigation.navigate('BlogDetails', { postId: item.id })}
-          />
-        )}
-      />
-
-
 
         <Text style={styles.sectionTitle}>Filter by Topic</Text>
         <FlatList
           contentContainerStyle={{ paddingLeft: 20 }}
           horizontal
           showsHorizontalScrollIndicator={false}
-          data={['Technology', 'Food', 'Transport', 'Finance']} // Add more topics as needed
+          data={['Latest', 'Technology', 'Food', 'Transport', 'Finance']}
           keyExtractor={(item) => item}
           renderItem={({ item }) => (
-            <Pressable
-              style={[
-                styles.topicButton,
-                { backgroundColor: selectedTopic === item ? COLORS.third : COLORS.gray },
-              ]}
-              onPress={() => handleTopicChange(item)}
-            >
-              <Text style={{ color: COLORS.black }}>{item}</Text>
-            </Pressable>
-          )}
-        />
+        <Pressable
+          style={[
+            styles.topicButton,
+            {
+              backgroundColor:
+              selectedTopic === item ? COLORS.third : item === 'Latest' ? COLORS.third : COLORS.gray,
+            },
+          ]}
+        onPress={() => handleTopicChange(item)}
+        >
+          <Text style={{ color: COLORS.black }}>{item}</Text>
+      </Pressable>
+      )}
+      />
+      
 
-<FlatList
+      <FlatList
   contentContainerStyle={{ paddingLeft: 20 }}
   horizontal
   showsHorizontalScrollIndicator={false}
@@ -330,10 +330,22 @@ const Home = ({route}) => {
   renderItem={({ item }) => (
     <BlogPostCard
       post={item}
-      onPress={() => navigation.navigate('BlogDetails', { postId: item.id })}
+      onPress={() => navigation.navigate('BlogDetails', { postId: item.id, selectedTopic })}
     />
   )}
 />
+
+{/* Conditional rendering for no blogs in the selected category */}
+{filterPostsByTopic().length === 0 && (
+  <View style={styles.noBlogsContainer}>
+    <Text style={styles.noBlogsText}>
+      There are no blogs in this category.
+    </Text>
+    <TouchableOpacity onPress={createBlogButtonPressed}>
+      <Text style={styles.createBlogLink}>Create one!</Text>
+    </TouchableOpacity>
+  </View>
+)}
   
         </ScrollView>
       </LinearGradient>
@@ -447,16 +459,19 @@ const styles = StyleSheet.create({
       alignItems: 'center',
       justifyContent: 'center',
       marginTop: 20,
+      marginBottom: 40,
+      flexDirection:'row',
     },
   
     noBlogsText: {
-      fontSize: 18,
+      fontSize: 14,
       color: COLORS.black,
       textAlign: 'center',
     },
   
     createBlogLink: {
-      fontSize: 18,
+      fontSize: 14,
+      paddingHorizontal:7,
       color: COLORS.third,
       textDecorationLine: 'underline',
     },
