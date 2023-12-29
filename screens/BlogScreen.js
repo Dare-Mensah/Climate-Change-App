@@ -102,7 +102,7 @@ const BlogScreen = () => {
           {/* Add the topic selection FlatList */}
           <Text style={[styles.text_footer, { marginTop: 35, marginBottom: 20 }]}>Select Topic</Text>
           <FlatList
-            data={['Technology', 'Food', 'Transport', 'Finanace' ]} // Add more topics as needed
+            data={['Wordle','Technology', 'Food', 'Transport', 'Finanace' ]} // Add more topics as needed
             keyExtractor={(item) => item}
             horizontal
             renderItem={({ item }) => (

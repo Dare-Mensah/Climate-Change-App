@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, Button,TouchableOpacity,Image, Alert } from 'react-native';
+import { StyleSheet, Text, View, Button,TouchableOpacity,Image, Alert,TextInput, FlatList } from 'react-native';
 import { firebase } from '../config';
 import COLORS from '../data/colors';
 
@@ -9,6 +9,66 @@ const BlogDetails = ({ route, navigation }) => {
   const [blogDetails, setBlogDetails] = useState(null);
   const [isCurrentUserAuthor, setIsCurrentUserAuthor] = useState(false);
   const [likes, setLikes] = useState(0); // Local state to track likes count
+
+  const [comments, setComments] = useState([]);
+  const [newComment, setNewComment] = useState('');
+
+  useEffect(() => {
+    const fetchComments = async () => {
+      try {
+        const commentsSnapshot = await firebase.firestore()
+          .collection('comments')
+          .where('postId', '==', postId)
+          .orderBy('timestamp', 'desc')
+          .get();
+
+        const commentsData = [];
+
+        // Loop through each comment
+        for (const commentDoc of commentsSnapshot.docs) {
+          const comment = commentDoc.data();
+
+          // Fetch user details from the 'users' collection
+          const userDoc = await firebase.firestore().collection('users').doc(comment.userId).get();
+          const userData = userDoc.data();
+
+          // Add a new comment object with user details
+          commentsData.push({
+            ...comment,
+            user: {
+              userId: comment.userId,
+              username: userData ? userData.username : 'Unknown User',
+            },
+          });
+        }
+
+        setComments(commentsData);
+      } catch (error) {
+        console.error('Error fetching comments:', error);
+      }
+    };
+
+    fetchComments();
+  }, [postId]);
+
+  const handleAddComment = async () => {
+    try {
+      const currentUser = firebase.auth().currentUser;
+
+      // Add the new comment to the 'comments' collection
+      await firebase.firestore().collection('comments').add({
+        userId: currentUser.uid,
+        postId,
+        content: newComment,
+        timestamp: new Date(),
+      });
+
+      // Clear the comment input field after successful submission
+      setNewComment('');
+    } catch (error) {
+      console.error('Error adding comment:', error);
+    }
+  };
 
   useEffect(() => {
     const fetchBlogDetails = async () => {
@@ -41,40 +101,73 @@ const BlogDetails = ({ route, navigation }) => {
     navigation.navigate('EditBlog', { postId });
   };
 
-  const handleLikePress = async () => {
-    try {
-      const currentUser = firebase.auth().currentUser;
-      if (!currentUser) {
-        // Handle the case where the user is not authenticated
-        return;
-      }
-  
-      // Check if the user has already liked the post
-      const likeDoc = await firebase.firestore().collection('likes').doc(`${currentUser.uid}_${postId}`).get();
-  
-      if (!likeDoc.exists) {
-        // User has not liked the post, proceed with liking
-        setLikes((prevLikes) => prevLikes + 1);
-  
-        // Update likes count in Firebase
-        await firebase.firestore().collection('posts').doc(postId).update({
-          likes: firebase.firestore.FieldValue.increment(1),
-        });
-  
-        // Add like document to the 'likes' collection
-        await firebase.firestore().collection('likes').doc(`${currentUser.uid}_${postId}`).set({
-          userId: currentUser.uid,
-          postId,
-        });
-      } else {
-        // User has already liked the post
-        Alert.alert('You have already liked this post.');
-      }
-    } catch (error) {
-      console.error('Error updating likes:', error);
-      // Handle error, show alert, etc.
+const handleLikePress = async () => {
+  try {
+    const currentUser = firebase.auth().currentUser;
+    if (!currentUser) {
+      // Handle the case where the user is not authenticated
+      return;
     }
-  };
+
+    // Check if the user has already liked the post
+    const likeDoc = await firebase.firestore().collection('likes').doc(`${currentUser.uid}_${postId}`).get();
+
+    if (!likeDoc.exists) {
+      // User has not liked the post, proceed with liking
+      setLikes((prevLikes) => prevLikes + 1);
+
+      // Update likes count in Firebase
+      await firebase.firestore().collection('posts').doc(postId).update({
+        likes: firebase.firestore.FieldValue.increment(1),
+      });
+
+      // Add like document to the 'likes' collection
+      await firebase.firestore().collection('likes').doc(`${currentUser.uid}_${postId}`).set({
+        userId: currentUser.uid,
+        postId,
+      });
+    } else {
+      // User has already liked the post
+      Alert.alert('You have already liked this post.');
+    }
+  } catch (error) {
+    console.error('Error updating likes:', error);
+    // Handle error, show alert, etc.
+  }
+};
+
+const handleEditCommentPress = (comment) => {
+  // Navigate to the EditComment screen with the comment details
+  navigation.navigate('EditComment', { comment });
+};
+
+
+const handleDeletePress = async (comment) => {
+  if (!comment || !comment.id) {
+    console.error('Invalid comment object:', comment);
+    return;
+  }
+
+  console.log('Comment to delete:', comment);
+
+  // Extract the comment ID
+  const commentId = comment.id;
+
+  try {
+    // Delete the comment from the 'comments' collection
+    await firebase.firestore().collection('comments').doc(commentId).delete();
+
+    // Update the local comments state by removing the deleted comment
+    setComments((prevComments) =>
+      prevComments.filter((c) => c.id !== commentId)
+    );
+
+    // Optionally, you may want to update the UI or show a success message
+  } catch (error) {
+    console.error('Error deleting comment:', error);
+    // Handle error, show alert, etc.
+  }
+};
 
   if (!blogDetails) {
     return (
@@ -108,7 +201,46 @@ const BlogDetails = ({ route, navigation }) => {
           <Text style={[styles.text1, { color: COLORS.white }]}>Edit Blog</Text>
         </TouchableOpacity>
       )}
+
+
+      <Text style={styles.heading}>Comments</Text>
+      <FlatList
+        data={comments}
+        keyExtractor={(item, index) => index.toString()}
+        renderItem={({ item }) => (
+          <View style={styles.commentContainer}>
+            <Text>{item.content}</Text>
+            <Text style={{ fontSize: 12, color: '#888' }}>{`By ${item.user.username}`}</Text>
+
+            {/* Render edit and delete buttons for the user's own comments */}
+            {item.user.userId === firebase.auth().currentUser?.uid && (
+              <View style={{ flexDirection: 'row', marginTop: 8 }}>
+                <TouchableOpacity onPress={() => handleEditCommentPress(item)}>
+                  <Text style={{ color: 'blue', marginRight: 8 }}>Edit</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => handleDeletePress(item.id)}>
+                  <Text style={{ color: 'red' }}>Delete</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+        )}
+      />
+
+      {/* Add a section to allow users to add comments */}
+      <Text style={styles.heading}>Add Comment</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Type your comment here"
+        value={newComment}
+        onChangeText={(text) => setNewComment(text)}
+      />
+      <TouchableOpacity onPress={handleAddComment} style={styles.likeButton}>
+        <Text style={styles.likeButtonText}>Add Comment</Text>
+      </TouchableOpacity>
     </View>
+
+    
   );
 };
 
@@ -182,6 +314,12 @@ const styles = StyleSheet.create({
   likeButtonText: {
     color: COLORS.white,
     fontWeight: 'bold',
+  },
+  commentContainer: {
+    padding: 8,
+    backgroundColor: '#F2F2F2',
+    marginVertical: 8,
+    borderRadius: 8,
   },
 });
 

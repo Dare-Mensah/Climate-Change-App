@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View, SafeAreaView,ScrollView, LogBox, Alert, ActivityIndicator, TouchableOpacity} from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { LinearGradient } from 'expo-linear-gradient';
 import colors from '../src/constants'
 import COLORS from '../data/colors';
@@ -12,6 +12,8 @@ import { ENTER } from '../src/constants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import {firebase} from '../config'
+import * as Notifications from 'expo-notifications';
+import Constants from 'expo-constants';
 
 const Number = ({number, label}) => (
     <View style ={{alignItems: 'center', margin: 10}}>
@@ -21,32 +23,40 @@ const Number = ({number, label}) => (
 )
 
 
-const GuessDistribution = ({distribution}) => {
-    if(!distribution) {
-        return null;
-    }
-    const sum = distribution.reduce((total, dist) => dist + total, 0)
-    return (
-        //the postion and amounts for the guess distribution
-        <View style={{width:'100%', padding: 20, justifyContent:'flex-start'}}> 
-            {distribution.map((dist, index) => (
-                <GuessDistributionLine position={index + 1} amount={dist} percentage={100 * dist / sum}/>
-            ))}  
-        </View>
-    )
-}
+const GuessDistribution = ({ distribution }) => {
+  if (!distribution) {
+    return null;
+  }
+  const sum = distribution.reduce((total, dist) => dist + total, 0);
+  return (
+    <View style={{ width: '100%', padding: 20, justifyContent: 'flex-start' }}>
+      {distribution.map((dist, index) => (
+        <GuessDistributionLine key={index} position={index + 1} amount={dist} percentage={sum !== 0 ? (100 * dist) / sum : 0} />
+      ))}
+    </View>
+  );
+};
 
-const GuessDistributionLine =({position, amount, percentage}) => {
-    return (
-        //viewing the guess distribution for the user
-        <View style={{flexDirection: 'row', alignItems:'center', width:'100%', justifyContent:'flex-start'}}>
-            <Text style={{fontSize: 17}}>{position}</Text>
-            <View style={{backgroundColor: COLORS.grey, margin: 5, padding: 5, width: `${percentage}%`, minWidth: 20, maxWidth: 290}}>
-                <Text style={{fontSize: 17}}>{amount}</Text>
-            </View>
-        </View>
-    )
-}
+const GuessDistributionLine = ({ position, amount, percentage }) => {
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'flex-start' }}>
+      <Text style={{ fontSize: 17 }}>{position}</Text>
+      <View style={{ backgroundColor: COLORS.grey, margin: 5, padding: 5, width: `${percentage}%`, minWidth: 20, maxWidth: 290 }}>
+        <Text style={{ fontSize: 17 }}>{amount}</Text>
+      </View>
+    </View>
+  );
+};
+
+
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: true
+  })
+});
 
 
 
@@ -59,8 +69,70 @@ const EndScreen = ({ won = false, rows, getCellBGColor, navigation }) => {
     const [maxStreak, setMaxStreak] = useState(0);
     const [distribution, setDistribution] = useState(null)
 
+    const [notification, setNotification] = useState(false);
+    const notificationListener = useRef();
+    const responseListener = useRef();
+  
+    useEffect(() => {
+      const getPermission = async () => {
+        if (Constants.isDevice) {
+            const { status: existingStatus } = await Notifications.getPermissionsAsync();
+            let finalStatus = existingStatus;
+            if (existingStatus !== 'granted') {
+              const { status } = await Notifications.requestPermissionsAsync();
+              finalStatus = status;
+            }
+            if (finalStatus !== 'granted') {
+              alert('Enable push notifications to use the app!');
+              await storage.setItem('expopushtoken', "");
+              return;
+            }
+            const token = (await Notifications.getExpoPushTokenAsync()).data;
+            await storage.setItem('expopushtoken', token);
+        } else {
+          alert('Must use physical device for Push Notifications');
+        }
+  
+          if (Platform.OS === 'android') {
+            Notifications.setNotificationChannelAsync('default', {
+              name: 'default',
+              importance: Notifications.AndroidImportance.MAX,
+              vibrationPattern: [0, 250, 250, 250],
+              lightColor: '#FF231F7C',
+            });
+          }
+      }
+  
+      getPermission();
+  
+      notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
+        setNotification(notification);
+      });
+  
+      responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {});
+  
+      return () => {
+        Notifications.removeNotificationSubscription(notificationListener.current);
+        Notifications.removeNotificationSubscription(responseListener.current);
+      };
+    }, []);
+  
+    const onClick = async () => {
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: "Title",
+          body: "body",
+          data: { data: "data goes here" }
+        },
+        trigger: {
+          hour: 14,
+          minute: 30,
+          repeats: true
+        }
+      });
+    }
+
     const saveStatsToAsyncStorage = async () => {
-      try {
         const statsData = {
           curStreak,
           winRate,
@@ -71,43 +143,17 @@ const EndScreen = ({ won = false, rows, getCellBGColor, navigation }) => {
         // Save to AsyncStorage
         const statsString = JSON.stringify(statsData);
         await AsyncStorage.setItem('@game_stats', statsString);
-    
-        // Save to Firebase
-        const userId = firebase.auth().currentUser.uid;
-        const userStatsRef = firebase.firestore().collection('user_stats').doc(userId);
-        await userStatsRef.set(statsData);
-      } catch (error) {
-        console.error('Error saving stats:', error);
-      }
+      
     };
 
 
 
-    const saveStatsToFirebase = async () => {
-      try {
-        const userId = firebase.auth().currentUser.uid;
-        const userStatsRef = firebase.firestore().collection('user_stats').doc(userId);
-  
-        const statsData = {
-          curStreak,
-          winRate,
-          played,
-          distribution,
-        };
-  
-        // Save to Firebase
-        await userStatsRef.set(statsData);
-      } catch (error) {
-        console.error('Error saving stats to Firebase:', error);
-      }
-    };
 
 
 
     useEffect(() => {
       readState();
       saveStatsToAsyncStorage(); // Save stats to AsyncStorage
-      saveStatsToFirebase(); // Save stats to Firebase
     }, []);
   
     const share = () => {

@@ -1,4 +1,4 @@
-import { Pressable, ScrollView, StyleSheet, Text, View, Image, Dimensions, SafeAreaView, StatusBar, FlatList, ImageBackground, TouchableOpacity } from 'react-native'
+import { Pressable, ScrollView, StyleSheet, Text, View, Image, Dimensions, SafeAreaView, StatusBar, FlatList, ImageBackground, TouchableOpacity,RefreshControl } from 'react-native'
 import React, {useState, useEffect} from 'react'
 import COLORS from '../data/colors'
 import DATA from '../data/data1'
@@ -9,6 +9,8 @@ import { Divider } from 'react-native-paper';
 import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
+import { LineChart } from 'react-native-chart-kit';
+
 const {width} = Dimensions.get('screen')
 
 
@@ -32,24 +34,58 @@ const Home = ({route}) => {
 
   const [blogPosts, setBlogPosts] = useState([]);
   const [selectedTopic, setSelectedTopic] = useState('Latest'); // Set the default topic to 'Latest'
+  const [refreshing, setRefreshing] = useState(false); // State to track whether the data is being refreshed
+  const [carbonFootprintData, setCarbonFootprintData] = useState(null);
+
 
   useEffect(() => {
-    const fetchBlogPosts = async () => {
-      try {
-        const postsSnapshot = await firebase.firestore().collection('posts').get();
-        const postsData = postsSnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        postsData.sort((a, b) => b.date - a.date);
-        setBlogPosts(postsData);
-      } catch (error) {
-        console.error('Error fetching blog posts:', error);
-      }
-    };
-
-    fetchBlogPosts();
+    fetchCarbonFootprintData();
   }, []);
+  
+  const fetchCarbonFootprintData = async () => {
+    try {
+      const userId = firebase.auth().currentUser.uid;
+  
+      const snapshot = await firebase
+        .firestore()
+        .collection('carbon_footprints')
+        .where('userId', '==', userId)
+        .orderBy('timestamp', 'desc')
+        .limit(1)
+        .get();
+  
+      if (!snapshot.empty) {
+        const data = snapshot.docs[0].data();
+        setCarbonFootprintData(data);
+      }
+    } catch (error) {
+      console.error('Error fetching carbon footprint data:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchBlogPosts();
+  }, [refreshing]); // Add refreshing to the dependency array
+
+  const fetchBlogPosts = async () => {
+    try {
+      const postsSnapshot = await firebase.firestore().collection('posts').get();
+      const postsData = postsSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      postsData.sort((a, b) => b.date - a.date);
+      setBlogPosts(postsData);
+    } catch (error) {
+      console.error('Error fetching blog posts:', error);
+    } finally {
+      setRefreshing(false); // Set refreshing to false after data fetching is completed
+    }
+  };
+
+  const handleRefresh = () => {
+    setRefreshing(true); // Set refreshing to true when the user triggers the refresh
+  };
 
 
   const filterPostsByTopic = () => {
@@ -64,6 +100,10 @@ const Home = ({route}) => {
       return blogPosts.filter((post) => post.topic === selectedTopic);
     }
   };
+
+  
+
+  
 
 
 
@@ -137,13 +177,56 @@ const Home = ({route}) => {
 
         </View>
 
-        <ScrollView showsVerticalScrollIndicator={false}>
+        <ScrollView showsVerticalScrollIndicator={false}
+                refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+                }>
 
         <View>
           <Animatable.Text 
           animation={"fadeInUpBig"}
           style={[styles.Title1, style={paddingHorizontal:20, paddingTop:10}]}>Dashboard </Animatable.Text>
         </View>
+
+        <Text style={styles.sectionTitle}>Carbon Footprint</Text>
+
+<View>
+  {/* Display the latest carbon footprint data */}
+  <View style={{        
+    backgroundColor: '#FFFFFF',
+    elevation: 4,
+    borderRadius: 25,
+    width:'90%',
+    height: 150,
+    marginLeft:20,
+  }}>
+    <Text style={{
+      paddingHorizontal: 10,
+      marginTop: 10,
+      fontWeight: 400,
+    }}>Total Carbon Footprint:</Text>
+
+    {carbonFootprintData ? (
+      <>
+        <Text style={{
+          textAlign: 'center',
+          fontSize: 40,
+          marginTop: 17,
+          fontWeight: '600',
+        }}>{carbonFootprintData.totalCarbonFootprint} CO2e</Text>
+
+        <Text style={{
+          textAlign: 'center',
+          fontSize: 18,
+          marginTop: 15,
+          fontWeight: '200',
+        }}>Recorded on: {carbonFootprintData.timestamp.toDate().toLocaleDateString()}</Text>
+      </>
+    ) : (
+      <Text style={{textAlign:'center', fontSize: 40, marginTop: 17, fontWeight:'300'}}>Loading...</Text>
+    )}
+  </View>
+  </View>
 
         <Text style={styles.sectionTitle}>Wordle</Text>
 
@@ -299,53 +382,80 @@ const Home = ({route}) => {
 
         <Text style={styles.sectionTitle}>Filter by Topic</Text>
         <FlatList
-          contentContainerStyle={{ paddingLeft: 20 }}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          data={['Latest', 'Technology', 'Food', 'Transport', 'Finance']}
-          keyExtractor={(item) => item}
-          renderItem={({ item }) => (
-        <Pressable
-          style={[
-            styles.topicButton,
-            {
-              backgroundColor:
+    contentContainerStyle={{ paddingLeft: 20 }}
+    horizontal
+    showsHorizontalScrollIndicator={false}
+    data={['Latest', 'Wordle','Technology', 'Food', 'Transport', 'Finance']}
+    keyExtractor={(item) => item}
+    renderItem={({ item }) => (
+      <Pressable
+        style={[
+          styles.topicButton,
+          {
+            backgroundColor:
               selectedTopic === item ? COLORS.third : item === 'Latest' ? COLORS.third : COLORS.gray,
-            },
-          ]}
+          },
+        ]}
         onPress={() => handleTopicChange(item)}
-        >
-          <Text style={{ color: COLORS.black }}>{item}</Text>
+      >
+        <Text style={{ color: COLORS.black }}>{item}</Text>
       </Pressable>
-      )}
+    )}
+  />
+
+  <FlatList
+    contentContainerStyle={{ paddingLeft: 20 }}
+    horizontal
+    showsHorizontalScrollIndicator={false}
+    data={filterPostsByTopic()}
+    keyExtractor={(item) => item.id}
+    renderItem={({ item }) => (
+      <BlogPostCard
+        post={item}
+        onPress={() => navigation.navigate('BlogDetails', { postId: item.id, selectedTopic })}
       />
-      
+    )}
+  />
 
-      <FlatList
-  contentContainerStyle={{ paddingLeft: 20 }}
-  horizontal
-  showsHorizontalScrollIndicator={false}
-  data={filterPostsByTopic()}
-  keyExtractor={(item) => item.id}
-  renderItem={({ item }) => (
-    <BlogPostCard
-      post={item}
-      onPress={() => navigation.navigate('BlogDetails', { postId: item.id, selectedTopic })}
-    />
+  {/* Conditional rendering for no blogs in the selected category */}
+  {filterPostsByTopic().length === 0 && (
+    <View style={styles.noBlogsContainer}>
+      <Text style={styles.noBlogsText}>
+        There are no blogs in this category.
+      </Text>
+      <TouchableOpacity onPress={createBlogButtonPressed}>
+        <Text style={styles.createBlogLink}>Create one!</Text>
+      </TouchableOpacity>
+    </View>
   )}
-/>
 
-{/* Conditional rendering for no blogs in the selected category */}
-{filterPostsByTopic().length === 0 && (
-  <View style={styles.noBlogsContainer}>
-    <Text style={styles.noBlogsText}>
-      There are no blogs in this category.
-    </Text>
-    <TouchableOpacity onPress={createBlogButtonPressed}>
-      <Text style={styles.createBlogLink}>Create one!</Text>
-    </TouchableOpacity>
-  </View>
-)}
+
+
+      <Text style={styles.sectionTitle}>Carbon Footprint</Text>
+
+      <View>
+
+      <Pressable onPress={() => navigation.navigate("CarbonFootPrintCalc")}
+      style={{        
+        backgroundColor: '#FFFFFF',
+        elevation: 4,
+        borderRadius: 25,
+        width:'90%',
+        height: 150,
+        marginTop: 20,
+        marginLeft:20,}}>
+
+        <Text 
+        style={{
+        paddingHorizontal: 10,
+        marginTop: 10, 
+        fontWeight: 400}}>
+        Blogs:</Text>
+
+      </Pressable>
+
+      </View>
+
   
         </ScrollView>
       </LinearGradient>

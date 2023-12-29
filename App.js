@@ -26,6 +26,8 @@ import GuestProfile from './screens/GuestProfile';
 import BlogScreen from './screens/BlogScreen';
 import BlogDetails from './screens/BlogDetails';
 import EditBlog from './screens/EditBlog';
+import EditComment from './screens/EditComment';
+import CarbonFootPrintCalc from './screens/CarbonFootPrintCalc';
 
 
 
@@ -74,6 +76,7 @@ function App(){
         <Stack.Screen name="SignUpComplete" component={SignUpComplete}/>
         <Stack.Screen name="ForgotPassword" component={ForgotPassword}/>
         
+        
       </Stack.Navigator>
     );
   }
@@ -92,6 +95,8 @@ function App(){
       <Stack.Screen name="BlogScreen" component={BlogScreen}/>
       <Stack.Screen name="BlogDetails" component={BlogDetails}/>
       <Stack.Screen name="EditBlog" component={EditBlog}/>
+      <Stack.Screen name="EditComment" component={EditComment}/>
+      <Stack.Screen name="CarbonFootPrintCalc" component={CarbonFootPrintCalc}/>
     </Stack.Navigator>
   )
 }
