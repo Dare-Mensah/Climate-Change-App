@@ -16,11 +16,11 @@ const SignUp = () => {
 
     signUpUser = async (username, email, password,) => {
         await firebase.auth().createUserWithEmailAndPassword(email,password)
-        navigation.navigate("Onboarding",{email})
+        navigation.navigate("Home",{email})
         .then(()=> {
             firebase.auth().currentUser.sendEmailVerification({
                 handleCodeInApp: true,
-                url:'https://climatesense-4328a.firebaseapp.com',
+                url:'https://climatesenseapp.firebaseapp.com',
             })
             .then(() => {
                 alert('Verification email sent')
@@ -103,12 +103,21 @@ const SignUp = () => {
         
                     </View>
         
-                    <Pressable 
+                <TouchableOpacity 
                     onPress={() => signUpUser(username, email, password)}
                     style={[styles.box1,{marginTop:60,justifyContent:'center',alignItems:'center', backgroundColor:COLORS.third}] }
                     >
                         <Text style={[styles.text1,{color:COLORS.white}]}>SignUp</Text>
-                    </Pressable>
+                </TouchableOpacity>
+
+            <View style={{flexDirection:'row', justifyContent:'center', padding:30}}>
+                <Text style={{fontWeight:'300', textAlign:'center', fontSize: 17}}>Already have an account?   </Text>
+                <TouchableOpacity 
+                    onPress={() => navigation.navigate("SignIn")}
+                >
+                    <Text style={{fontWeight:'500', textAlign:'center', fontSize: 17}}>Login</Text>
+                </TouchableOpacity>
+            </View>
         
         
                 </Animatable.View>

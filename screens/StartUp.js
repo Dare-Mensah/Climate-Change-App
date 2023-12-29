@@ -27,14 +27,11 @@ const StartUp = () => {
   
         />
         </Pressable>
-  
-  
-  
-  
+
   
         <Pressable 
         onPress={() => navigation.navigate("SignIn")}
-        style={[styles.box1,{marginTop:100,justifyContent:'center',alignItems:'center', backgroundColor:COLORS.third}] }
+        style={[styles.box1,{marginTop:70,justifyContent:'center',alignItems:'center', backgroundColor:COLORS.third}] }
         >
         <Text style={[styles.text1,{color:COLORS.white}]}>Login</Text>
         </Pressable>

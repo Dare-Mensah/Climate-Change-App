@@ -17,9 +17,15 @@ import Profile from './screens/Profile';
 import EditProfile from './screens/EditProfile';
 import Onboarding from './screens/Onboarding';
 import SignUpComplete from './screens/SignUpComplete';
+import GuestHome from './screens/GuestHome';
 import { ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Wordle from './screens/Wordle';
+import EndScreen from './screens/EndScreen';
+import GuestProfile from './screens/GuestProfile';
+import BlogScreen from './screens/BlogScreen';
+import BlogDetails from './screens/BlogDetails';
+import EditBlog from './screens/EditBlog';
 
 
 
@@ -57,9 +63,14 @@ function App(){
   if (!user){
     return (
       <Stack.Navigator screenOptions={{headerShown:false}}>
-        <Stack.Screen name="StartUp" component={StartUp}/>
+        <Stack.Screen name="Onboarding" component={Onboarding}/>
         <Stack.Screen name="SignIn" component={SignIn}/>
         <Stack.Screen name="SignUp" component={SignUp}/>
+        <Stack.Screen name="GuestHome" component={GuestHome}/>
+        <Stack.Screen name="GuestProfile" component={GuestProfile}/>
+        <Stack.Screen name="Wordle" component={Wordle}/>
+        <Stack.Screen name="EndScreen" component={EndScreen}/>
+        <Stack.Screen name="Tips" component={Tips}/>
         <Stack.Screen name="SignUpComplete" component={SignUpComplete}/>
         <Stack.Screen name="ForgotPassword" component={ForgotPassword}/>
         
@@ -71,13 +82,16 @@ function App(){
   return(
     <Stack.Navigator screenOptions={{headerShown:false}}>
       <Stack.Screen name="Home" component={Home}/>
-      <Stack.Screen name="Onboarding" component={Onboarding}/>
       <Stack.Screen name="SignUpComplete" component={SignUpComplete}/>
       <Stack.Screen name="News" component={News}/>
       <Stack.Screen name="Tips" component={Tips}/>
       <Stack.Screen name="Profile" component={Profile}/>
       <Stack.Screen name="EditProfile" component={EditProfile}/>
       <Stack.Screen name="Wordle" component={Wordle}/>
+      <Stack.Screen name="EndScreen" component={EndScreen}/>
+      <Stack.Screen name="BlogScreen" component={BlogScreen}/>
+      <Stack.Screen name="BlogDetails" component={BlogDetails}/>
+      <Stack.Screen name="EditBlog" component={EditBlog}/>
     </Stack.Navigator>
   )
 }

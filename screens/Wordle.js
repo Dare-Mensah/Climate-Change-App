@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, SafeAreaView,ScrollView, LogBox, Alert, } from 'react-native'
+import { StyleSheet, Text, View, SafeAreaView,ScrollView, LogBox, Alert, ActivityIndicator} from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { LinearGradient } from 'expo-linear-gradient';
 import Keyboard from '../src/components/Keyboard'
@@ -9,6 +9,9 @@ import { CLEAR } from '../src/constants';
 import { ENTER } from '../src/constants';
 import { colorsToEmoji } from '../src/constants';
 import * as Clipboard from 'expo-clipboard';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
+import EndScreen from './EndScreen';
 LogBox.ignoreAllLogs();
 
 const Number_Of_Tries = 6;
@@ -18,9 +21,37 @@ const copyArray = (arr) => { // making a copy of this aaray
   return [...arr.map((rows) => [...rows])];
 };
 
-const Wordle = () => {
+const words = ["hello","yesno"]
+  
+const getDayOfTheYear = () => {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 0);
+  const diff = now - start;
+  const oneDay = 1000 * 60 * 60 * 24;
+  const day = Math.floor(diff / oneDay);
+  return day;
+}
 
-  const word= "hello";
+
+const getDayKey = () => {
+  const d = new Date();
+  let year = d.getFullYear();
+  return `day-${getDayOfTheYear()}-${year}`;
+}
+
+
+const dayOfTheYear = getDayOfTheYear(); //add +2 to test for next day
+const dayKey = getDayKey();
+
+const  getWordForDay =(day)=>  {
+  return words[day % words.length];
+}
+
+const Wordle = () => {
+  const navigation = useNavigation();
+  //AsyncStorage.removeItem("@game") //resetting async storage for game
+  const word = getWordForDay(dayOfTheYear);
+
   const letters = word.split("");//returns an array of characters.
 
   const [rows, setRows] = useState(
@@ -30,7 +61,8 @@ const Wordle = () => {
 
   const [curRow, setCurRow] = useState(0);
   const [curCol, setCurCol] = useState(0);
-  const [gameSate, setGameState] = useState('playing')
+  const [gameSate, setGameState] = useState('playing');
+  const [loaded, setloaded] = useState(false)
 
   useEffect(() => {
     if(curRow > 0)
@@ -39,31 +71,74 @@ const Wordle = () => {
     }
   }, [curRow])
 
+
+
+  useEffect(() => {
+    if(loaded) {
+      persistState()
+    }
+  }, [rows,curRow,curCol, gameSate])
+
+
+  useEffect(() => {
+    readState()
+  },[])
+
+  const persistState = async () => {
+    //saving all the game state varibales in async storage
+    
+    const dataForToday = {
+      rows, curCol,curRow, gameSate
+    };
+
+    try{
+      //firstly reading the data
+      const existingStateString = await AsyncStorage.getItem("@game")
+      const existingState = existingStateString ?  JSON.parse(existingStateString) : {};
+      if(!existingState) { //then updating the data
+        existingState = {}
+      }
+      existingState[dayKey] =dataForToday
+      //writing the data back to async
+      const dataString =JSON.stringify(existingState); //parsing from JSON object to string
+      console.log("Saving", dataString)
+      await AsyncStorage.setItem("@game", dataString); 
+    } catch (e){
+      console.log("Could not save data to async storage", e)
+    }
+
+  }
+
+  const readState = async () =>
+  {
+    const dataString = await AsyncStorage.getItem("@game")
+    try{
+      const data = JSON.parse(dataString)
+      const day = data[dayKey]
+      setRows(day.rows)
+      setCurCol(day.curCol)
+      setCurRow(day.curRow)
+      setGameState(day.gameSate)
+    } catch(e){
+      console.log("Could not parse the state")
+    }
+    //console.log(dataString) //debugging
+
+    setloaded(true)
+  }
+
+
+
   const checkGameState = () => {
     if(checkIfWon() && gameSate != 'won')
     {
-      Alert.alert('Nice work!', 'Share our result with the community', [
-        {
-          text: 'Share', //Shows share button to share their game result
-          onPress: shareScore, //press to share result
-        },
-    ]);
       setGameState('won');
     }
     else if(checkIfLose() && gameSate != 'lost')
     {
-      Alert.alert('You have lost', 'Try again tomorrow') //shows and alert message if the user has lost
       setGameState('lost');
     }
   };
-
-  const shareScore = () => {
-    const textMap = rows.map((row, i) => row.map((cell,j) => colorsToEmoji[getCellBGColor(i,j)]).join('')). filter((row) => row).join('\n');
-    //console.log(textShare); //debugging
-    const textToShare = `Your Wordle Result:\n${textMap}`;;
-    Clipboard.setString(textToShare);
-    Alert.alert("Copied Sucessfully", "Spread the word on social media")
-  }
 
 
 
@@ -96,6 +171,9 @@ const Wordle = () => {
       }
       return;
     }
+
+
+  
 
     if (key == ENTER)
     {
@@ -150,6 +228,14 @@ const Wordle = () => {
  //for each of the keyboards caps on the virtual keyboard
   
 
+  if(!loaded) {
+    return (<ActivityIndicator/>)
+  }
+
+
+  if (gameSate != 'playing') {
+    return (<EndScreen won={gameSate == 'won'} rows={rows} getCellBGColor={getCellBGColor} navigation={navigation}/>)
+  }
 
 
 
