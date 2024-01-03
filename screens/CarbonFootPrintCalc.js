@@ -27,6 +27,103 @@ const CarbonFootPrintCalc = ({ navigation }) => {
     saveDataToFirebase(totalCarbonFootprint);
   };
 
+  const CarbonFootprintCard = ({ carbonFootprintData }) => {
+    const navigation = useNavigation();
+  
+    return (
+      <Pressable onPress={() => navigation.navigate("CarbonFootPrintCalc")}>
+        <View
+          style={{
+            backgroundColor: '#FFFFFF',
+            elevation: 4,
+            borderRadius: 25,
+            width: '90%',
+            height: 200,
+            marginLeft: 20,
+            marginTop: 20,
+          }}
+        >
+          <Text style={{ paddingHorizontal: 10, marginTop: 10, fontWeight: 400 }}>
+            Total Carbon Footprint:
+          </Text>
+  
+          {carbonFootprintData ? (
+            <>
+              <Text
+                style={{
+                  textAlign: 'center',
+                  fontSize: 40,
+                  marginTop: 17,
+                  fontWeight: '600',
+                }}
+              >
+                {carbonFootprintData.totalCarbonFootprint} CO2e
+              </Text>
+  
+              <Text
+                style={{
+                  textAlign: 'center',
+                  fontSize: 18,
+                  marginTop: 15,
+                  fontWeight: '200',
+                }}
+              >
+                Recorded on:{' '}
+                {carbonFootprintData.timestamp
+                  .toDate()
+                  .toLocaleDateString()}
+              </Text>
+  
+              {/* Display electricity, transportation, and gas usage */}
+              <Text
+                style={{
+                  textAlign: 'center',
+                  fontSize: 18,
+                  marginTop: 15,
+                  fontWeight: '200',
+                }}
+              >
+                Electricity Usage: {carbonFootprintData.electricityUsage} kWh
+              </Text>
+              <Text
+                style={{
+                  textAlign: 'center',
+                  fontSize: 18,
+                  marginTop: 15,
+                  fontWeight: '200',
+                }}
+              >
+                Transportation Usage: {carbonFootprintData.transportationUsage} miles
+              </Text>
+              <Text
+                style={{
+                  textAlign: 'center',
+                  fontSize: 18,
+                  marginTop: 15,
+                  fontWeight: '200',
+                }}
+              >
+                Gas Usage: {carbonFootprintData.gasUsage} gallons
+              </Text>
+            </>
+          ) : (
+            <Text
+              style={{
+                textAlign: 'center',
+                fontSize: 40,
+                marginTop: 17,
+                fontWeight: '300',
+              }}
+            >
+              Loading...
+            </Text>
+          )}
+        </View>
+      </Pressable>
+    );
+  };
+  
+
   const saveDataToFirebase = async (carbonFootprint) => {
     try {
       const userId = firebase.auth().currentUser.uid;

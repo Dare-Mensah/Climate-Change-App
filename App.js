@@ -28,6 +28,8 @@ import BlogDetails from './screens/BlogDetails';
 import EditBlog from './screens/EditBlog';
 import EditComment from './screens/EditComment';
 import CarbonFootPrintCalc from './screens/CarbonFootPrintCalc';
+import WordleCoop from './screens/WordleCoop';
+import EndScreenCoop from './screens/EndScreenCoop';
 
 
 
@@ -97,6 +99,8 @@ function App(){
       <Stack.Screen name="EditBlog" component={EditBlog}/>
       <Stack.Screen name="EditComment" component={EditComment}/>
       <Stack.Screen name="CarbonFootPrintCalc" component={CarbonFootPrintCalc}/>
+      <Stack.Screen name="WordleCoop" component={WordleCoop}/>
+      <Stack.Screen name="EndScreenCoop" component={EndScreenCoop}/>
     </Stack.Navigator>
   )
 }

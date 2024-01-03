@@ -15,17 +15,21 @@ const {width} = Dimensions.get('screen')
 
 
 
-const BlogPostCard = ({ post, onPress }) => {
+const BlogPostCard = ({ post, onPress, latestLikes, commentCount }) => {
   return (
     <TouchableOpacity onPress={onPress} style={styles.blogCardContainer}>
       <Image source={{ uri: post.imageURL }} style={styles.blogCardImage} />
       <View style={styles.blogCardContent}>
         <Text style={styles.blogPostTitle}>{post.title}</Text>
         <Text style={styles.blogPostAuthor}>{`By ${post.author}`}</Text>
+        <View style={{flexDirection: 'row'}}>
+        <Text style={[styles.blogPostLikes, {paddingRight:75}]}>{`Likes: ${latestLikes}`}   </Text>
+        <Text style={styles.blogPostComments}>{`Comments: ${commentCount}`}</Text>
+        </View>
       </View>
     </TouchableOpacity>
   );
-}
+};
 
 
 
@@ -57,35 +61,71 @@ const Home = ({route}) => {
       if (!snapshot.empty) {
         const data = snapshot.docs[0].data();
         setCarbonFootprintData(data);
+  
+        // Additional data for electricity, transportation, and gas usage
+        console.log('Electricity Usage:', data.electricityUsage);
+        console.log('Transportation Usage:', data.transportationUsage);
+        console.log('Gas Usage:', data.gasUsage);
+      }
+      else {
+        // No carbon footprint data found, you can guide the user to input their details
+        console.log('No carbon footprint data found. Please input your details.');
       }
     } catch (error) {
       console.error('Error fetching carbon footprint data:', error);
     }
   };
 
+
+
   useEffect(() => {
+    fetchCarbonFootprintData();
     fetchBlogPosts();
   }, [refreshing]); // Add refreshing to the dependency array
 
   const fetchBlogPosts = async () => {
     try {
       const postsSnapshot = await firebase.firestore().collection('posts').get();
-      const postsData = postsSnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      postsData.sort((a, b) => b.date - a.date);
-      setBlogPosts(postsData);
+      const postsData = postsSnapshot.docs.map(async (doc) => {
+        const postData = doc.data();
+  
+        // Fetch latest likes
+        const likesSnapshot = await firebase.firestore().collection('likes').where('postId', '==', doc.id).get();
+        const latestLikes = likesSnapshot.size;
+  
+        // Fetch comment count
+        const commentsSnapshot = await firebase.firestore().collection('comments').where('postId', '==', doc.id).get();
+        const commentCount = commentsSnapshot.size;
+  
+        return {
+          id: doc.id,
+          ...postData,
+          latestLikes,
+          commentCount,
+        };
+      });
+  
+      // Use Promise.all to wait for all the asynchronous operations to complete
+      const postsWithData = await Promise.all(postsData);
+      postsWithData.sort((a, b) => b.date - a.date);
+      setBlogPosts(postsWithData);
     } catch (error) {
       console.error('Error fetching blog posts:', error);
     } finally {
-      setRefreshing(false); // Set refreshing to false after data fetching is completed
+      setRefreshing(false);
     }
   };
+
+
+  
 
   const handleRefresh = () => {
     setRefreshing(true); // Set refreshing to true when the user triggers the refresh
   };
+
+
+
+
 
 
   const filterPostsByTopic = () => {
@@ -188,54 +228,15 @@ const Home = ({route}) => {
           style={[styles.Title1, style={paddingHorizontal:20, paddingTop:10}]}>Dashboard </Animatable.Text>
         </View>
 
+
         <Text style={styles.sectionTitle}>Carbon Footprint</Text>
 
-<View>
-  {/* Display the latest carbon footprint data */}
-  <View style={{        
-    backgroundColor: '#FFFFFF',
-    elevation: 4,
-    borderRadius: 25,
-    width:'90%',
-    height: 150,
-    marginLeft:20,
-  }}>
-    <Text style={{
-      paddingHorizontal: 10,
-      marginTop: 10,
-      fontWeight: 400,
-    }}>Total Carbon Footprint:</Text>
 
-    {carbonFootprintData ? (
-      <>
-        <Text style={{
-          textAlign: 'center',
-          fontSize: 40,
-          marginTop: 17,
-          fontWeight: '600',
-        }}>{carbonFootprintData.totalCarbonFootprint} CO2e</Text>
-
-        <Text style={{
-          textAlign: 'center',
-          fontSize: 18,
-          marginTop: 15,
-          fontWeight: '200',
-        }}>Recorded on: {carbonFootprintData.timestamp.toDate().toLocaleDateString()}</Text>
-      </>
-    ) : (
-      <Text style={{textAlign:'center', fontSize: 40, marginTop: 17, fontWeight:'300'}}>Loading...</Text>
-    )}
-  </View>
-  </View>
-
-        <Text style={styles.sectionTitle}>Wordle</Text>
-
-        
-        <View 
-        style={{flexDirection: 'row'}}>
-
-        <View style={{flexDirection: 'column'}}>
-        <Pressable onPress={() => navigation.navigate("Wordle")}>
+  {carbonFootprintData ? (
+    <>
+      <View style={{flexDirection: 'row'}}>
+      <View style={{flexDirection: 'column'}}>
+        <Pressable onPress={() => navigation.navigate("CarbonFootPrintCalc")}>
         <Animatable.View
         animation={"fadeInUpBig"}
         style={{        
@@ -252,7 +253,7 @@ const Home = ({route}) => {
           paddingHorizontal: 10,
           marginTop: 10, 
           fontWeight: 400}}>
-         Current Streak:</Text>
+         Electricity Use:</Text>
 
           <Text 
           style={{
@@ -260,13 +261,21 @@ const Home = ({route}) => {
           fontSize: 40,
           marginTop: 17,
           fontWeight: '600'
-          }}></Text>
+          }}>{carbonFootprintData.electricityUsage}</Text>
+
+          <Text 
+          style={{
+          textAlign: 'center',
+          fontSize: 18,
+          marginTop: 15,
+          fontWeight: '200'
+          }}>kWh</Text>
 
 
         </Animatable.View>
         </Pressable>
 
-        <Pressable onPress={() => navigation.navigate("Wordle")}>
+        <Pressable onPress={() => navigation.navigate("CarbonFootPrintCalc")}>
         <Animatable.View
         animation={"fadeInUpBig"}
         delay={5}
@@ -284,7 +293,7 @@ const Home = ({route}) => {
           paddingHorizontal: 10,
           marginTop: 10, 
           fontWeight: 400}}>
-          Games Played:</Text>
+          Gas Usage:</Text>
 
           <Text 
           style={{
@@ -292,14 +301,22 @@ const Home = ({route}) => {
           fontSize: 40,
           marginTop: 17,
           fontWeight: '600'
-          }}></Text>
+          }}>{carbonFootprintData.gasUsage}</Text>
+
+          <Text 
+          style={{
+          textAlign: 'center',
+          fontSize: 18,
+          marginTop: 15,
+          fontWeight: '200'
+          }}>gallons</Text>
 
 
         </Animatable.View>
         </Pressable>
         </View>
-        
-        <Pressable onPress={() => navigation.navigate("Wordle")}>
+
+        <Pressable onPress={() => navigation.navigate("CarbonFootPrintCalc")}>
         <Animatable.View
         animation={"fadeInUpBig"}
         delay={9}
@@ -317,7 +334,7 @@ const Home = ({route}) => {
           paddingHorizontal: 10,
           marginTop: 10, 
           fontWeight: 400}}>
-          Wins:</Text>
+          Total CarbonFootprint:</Text>
 
           <Text 
           style={{
@@ -325,7 +342,16 @@ const Home = ({route}) => {
           fontSize: 50,
           marginTop: 67,
           fontWeight: '600'
-          }}>%</Text>
+          }}>{carbonFootprintData.totalCarbonFootprint}</Text>
+
+
+          <Text 
+          style={{
+          textAlign: 'center',
+          fontSize: 24,
+          marginTop: 12,
+          fontWeight: '200'
+          }}>CO2e</Text>
 
           <Text 
           style={{
@@ -333,39 +359,40 @@ const Home = ({route}) => {
           fontSize: 18,
           marginTop: 37,
           fontWeight: '200'
-          }}>Your win percentage</Text>
+          }}>{carbonFootprintData.timestamp.toDate().toLocaleDateString()}</Text>
 
 
         </Animatable.View>
         </Pressable>
+
+      </View>
+    </>
+  ) : (
+    <View style={styles.noDataContainer}>
+          <Text style={styles.noDataText}>
+            No carbon footprint data found. Please input your details.
+          </Text>
+          <TouchableOpacity onPress={() => navigation.navigate("CarbonFootPrintCalc")}>
+            <Text style={styles.inputDetailsLink}>Input Details</Text>
+          </TouchableOpacity>
         </View>
-        
-    
-        <Text style={styles.sectionTitle}>Tips</Text>
-        
-  
-        <View>
-          <FlatList 
-          contentContainerStyle={{paddingLeft:20}}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          data={DATA} 
-          renderItem={({item}) => <Card Tips={item}/>}
-          />
-        </View>
+  )}
 
 
-        <Text style={styles.sectionTitle}>Blogs</Text>
-        <View>
 
-        <Pressable onPress={() => navigation.navigate("BlogScreen")}
+  <Text style={styles.sectionTitle}>Wordle</Text>
+
+
+  <View style={{flexDirection: 'row'}}>
+        <Pressable onPress={() => navigation.navigate("Wordle")}>
+        <Animatable.View
+        animation={"fadeInUpBig"}
         style={{        
           backgroundColor: '#FFFFFF',
           elevation: 4,
           borderRadius: 25,
-          width:'90%',
+          width:'95%',
           height: 150,
-          marginTop: 20,
           marginLeft:20,}}>
 
           <Text 
@@ -373,10 +400,49 @@ const Home = ({route}) => {
           paddingHorizontal: 10,
           marginTop: 10, 
           fontWeight: 400}}>
-          Blogs:</Text>
+         SinglePlayer Wordle:</Text>
 
+          <Text 
+          style={{
+          textAlign: 'center',
+          fontSize: 40,
+          marginTop: 17,
+          fontWeight: '600'
+          }}>Play</Text>
+
+
+        </Animatable.View>
         </Pressable>
 
+        <Pressable onPress={() => navigation.navigate("WordleCoop")}>
+        <Animatable.View
+        animation={"fadeInUpBig"}
+        delay={5}
+        style={{        
+          backgroundColor: '#FFFFFF',
+          elevation: 4,
+          borderRadius: 25,
+          width:'95%',
+          height: 150,
+          marginLeft:20,}}>
+
+          <Text 
+          style={{
+          paddingHorizontal: 10,
+          marginTop: 10, 
+          fontWeight: 400}}>
+          Coop Player Wordle</Text>
+
+          <Text 
+          style={{
+          textAlign: 'center',
+          fontSize: 40,
+          marginTop: 17,
+          fontWeight: '600'
+          }}>Play</Text>
+
+        </Animatable.View>
+        </Pressable>
         </View>
 
 
@@ -403,19 +469,21 @@ const Home = ({route}) => {
     )}
   />
 
-  <FlatList
-    contentContainerStyle={{ paddingLeft: 20 }}
-    horizontal
-    showsHorizontalScrollIndicator={false}
-    data={filterPostsByTopic()}
-    keyExtractor={(item) => item.id}
-    renderItem={({ item }) => (
-      <BlogPostCard
-        post={item}
-        onPress={() => navigation.navigate('BlogDetails', { postId: item.id, selectedTopic })}
-      />
-    )}
-  />
+<FlatList
+  contentContainerStyle={{ paddingLeft: 20 }}
+  horizontal
+  showsHorizontalScrollIndicator={false}
+  data={filterPostsByTopic()}
+  keyExtractor={(item) => item.id}
+  renderItem={({ item }) => (
+    <BlogPostCard
+      post={item}
+      latestLikes={item.latestLikes}
+      commentCount={item.commentCount}
+      onPress={() => navigation.navigate('BlogDetails', { postId: item.id, selectedTopic })}
+    />
+  )}
+/>
 
   {/* Conditional rendering for no blogs in the selected category */}
   {filterPostsByTopic().length === 0 && (
@@ -428,33 +496,45 @@ const Home = ({route}) => {
       </TouchableOpacity>
     </View>
   )}
+     
+        <Text style={styles.sectionTitle}>Blogs</Text>
+        <View>
+
+        <Pressable onPress={() => navigation.navigate("BlogScreen")}
+        style={{        
+          backgroundColor: '#FFFFFF',
+          elevation: 4,
+          borderRadius: 25,
+          width:'90%',
+          height: 150,
+          marginTop: 20,
+          marginLeft:20,}}>
+
+          <Text 
+          style={{
+          paddingHorizontal: 10,
+          marginTop: 10, 
+          fontWeight: 400}}>
+          Blogs:</Text>
+
+        </Pressable>
+
+        </View>
 
 
 
-      <Text style={styles.sectionTitle}>Carbon Footprint</Text>
-
-      <View>
-
-      <Pressable onPress={() => navigation.navigate("CarbonFootPrintCalc")}
-      style={{        
-        backgroundColor: '#FFFFFF',
-        elevation: 4,
-        borderRadius: 25,
-        width:'90%',
-        height: 150,
-        marginTop: 20,
-        marginLeft:20,}}>
-
-        <Text 
-        style={{
-        paddingHorizontal: 10,
-        marginTop: 10, 
-        fontWeight: 400}}>
-        Blogs:</Text>
-
-      </Pressable>
-
-      </View>
+      <Text style={styles.sectionTitle}>Tips</Text>
+        
+  
+        <View>
+          <FlatList 
+          contentContainerStyle={{paddingLeft:20}}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          data={DATA} 
+          renderItem={({item}) => <Card Tips={item}/>}
+          />
+        </View>
 
   
         </ScrollView>
@@ -582,6 +662,27 @@ const styles = StyleSheet.create({
     createBlogLink: {
       fontSize: 14,
       paddingHorizontal:7,
+      color: COLORS.third,
+      textDecorationLine: 'underline',
+    },
+
+    noDataContainer: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginTop: 20,
+      marginBottom: 40,
+    },
+  
+    noDataText: {
+      fontSize: 14,
+      color: COLORS.black,
+      textAlign: 'center',
+    },
+  
+    inputDetailsLink: {
+      fontSize: 14,
+      paddingHorizontal: 7,
       color: COLORS.third,
       textDecorationLine: 'underline',
     },

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, Button,TouchableOpacity,Image, Alert,TextInput, FlatList } from 'react-native';
 import { firebase } from '../config';
 import COLORS from '../data/colors';
+import { RefreshControl } from 'react-native';
 
 const BlogDetails = ({ route, navigation }) => {
   const localImage = require("../assets/loading.gif")
@@ -50,6 +51,9 @@ const BlogDetails = ({ route, navigation }) => {
 
     fetchComments();
   }, [postId]);
+
+
+
 
   const handleAddComment = async () => {
     try {
@@ -136,38 +140,6 @@ const handleLikePress = async () => {
   }
 };
 
-const handleEditCommentPress = (comment) => {
-  // Navigate to the EditComment screen with the comment details
-  navigation.navigate('EditComment', { comment });
-};
-
-
-const handleDeletePress = async (comment) => {
-  if (!comment || !comment.id) {
-    console.error('Invalid comment object:', comment);
-    return;
-  }
-
-  console.log('Comment to delete:', comment);
-
-  // Extract the comment ID
-  const commentId = comment.id;
-
-  try {
-    // Delete the comment from the 'comments' collection
-    await firebase.firestore().collection('comments').doc(commentId).delete();
-
-    // Update the local comments state by removing the deleted comment
-    setComments((prevComments) =>
-      prevComments.filter((c) => c.id !== commentId)
-    );
-
-    // Optionally, you may want to update the UI or show a success message
-  } catch (error) {
-    console.error('Error deleting comment:', error);
-    // Handle error, show alert, etc.
-  }
-};
 
   if (!blogDetails) {
     return (
@@ -179,18 +151,20 @@ const handleDeletePress = async (comment) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{blogDetails.title}</Text>
+      <Text style={styles.Title1}>{blogDetails.title}</Text>
       <Text style={styles.author}>{`By ${blogDetails.author}`}</Text>
       <Text style={{ fontSize: 18, fontWeight: 'bold', marginVertical: 10 }}>
         Selected Topic: {selectedTopic}
       </Text>
       <Text style={styles.content}>{blogDetails.content}</Text>
 
-      <View style={styles.likesContainer}>
+      <View style={[styles.likesContainer, {flexDirection: 'row'}]}>
         <Text style={styles.likesText}>{likes} Likes</Text>
         <TouchableOpacity onPress={handleLikePress} style={styles.likeButton}>
           <Text style={styles.likeButtonText}>Like</Text>
         </TouchableOpacity>
+
+        
       </View>
 
       {isCurrentUserAuthor && (
@@ -208,6 +182,7 @@ const handleDeletePress = async (comment) => {
         data={comments}
         keyExtractor={(item, index) => index.toString()}
         renderItem={({ item }) => (
+          
           <View style={styles.commentContainer}>
             <Text>{item.content}</Text>
             <Text style={{ fontSize: 12, color: '#888' }}>{`By ${item.user.username}`}</Text>
@@ -215,16 +190,11 @@ const handleDeletePress = async (comment) => {
             {/* Render edit and delete buttons for the user's own comments */}
             {item.user.userId === firebase.auth().currentUser?.uid && (
               <View style={{ flexDirection: 'row', marginTop: 8 }}>
-                <TouchableOpacity onPress={() => handleEditCommentPress(item)}>
-                  <Text style={{ color: 'blue', marginRight: 8 }}>Edit</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => handleDeletePress(item.id)}>
-                  <Text style={{ color: 'red' }}>Delete</Text>
-                </TouchableOpacity>
               </View>
             )}
           </View>
         )}
+
       />
 
       {/* Add a section to allow users to add comments */}
@@ -251,6 +221,14 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
   },
 
+  Title1:{
+    fontSize: 34,
+    marginTop: 20,
+    //fontFamily: 'Montserrat',
+    fontWeight: 'bold',
+
+},
+
   container1: {
     flex: 1,
     padding: 16,
@@ -267,6 +245,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#555',
     marginBottom: 16,
+    fontWeight: '300',
   },
   content: {
     fontSize: 18,
