@@ -5,6 +5,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Avatar, Title, Caption, TouchableRipple } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import COLORS from '../data/colors';
+import ImagePicker from 'react-native-image-picker';
+import storage from '@react-native-firebase/storage';
 
 const EditProfile = ({route}) => {
 
@@ -107,6 +109,10 @@ const EditProfile = ({route}) => {
           showAlert('Error', 'Failed to delete account. Please try again.');
         }
       };
+
+
+
+      
   return (
     <LinearGradient style={{flex: 1}} colors={['#B7F1B5', '#EAEAEA']}>
     <View style={styles.container}>
@@ -151,7 +157,7 @@ const EditProfile = ({route}) => {
                     source={require('../assets/envelope.png')}/>
         
                     <TextInput
-                        placeholder='Your Email'
+                        placeholder='Your Username'
                         style={styles.textInput}
                         autoCapitalize='none'
                         onChangeText={(email) => setNewUsername(email)}

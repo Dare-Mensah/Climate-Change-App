@@ -101,6 +101,10 @@ const EndScreen = ({ won = false, rows, getCellBGColor, navigation }) => {
               lightColor: '#FF231F7C',
             });
           }
+        
+        
+
+
       }
   
       getPermission();
@@ -117,21 +121,6 @@ const EndScreen = ({ won = false, rows, getCellBGColor, navigation }) => {
       };
     }, []);
   
-    const onClick = async () => {
-      await Notifications.scheduleNotificationAsync({
-        content: {
-          title: "Title",
-          body: "body",
-          data: { data: "data goes here" }
-        },
-        trigger: {
-          hour: 14,
-          minute: 30,
-          repeats: true
-        }
-      });
-    }
-
     const saveStatsToAsyncStorage = async () => {
         const statsData = {
           curStreak,

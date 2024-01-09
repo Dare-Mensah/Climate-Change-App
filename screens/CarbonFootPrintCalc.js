@@ -1,15 +1,18 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, Button, Alert, Image, Pressable} from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, Text, View, TextInput, Button, Alert, Image, Pressable, ScrollView} from 'react-native';
 import { firebase } from '../config';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Animatable from 'react-native-animatable';
 import COLORS from '../data/colors';
+import { BarChart } from 'react-native-chart-kit';
+import { Dimensions } from 'react-native';
 
 const CarbonFootPrintCalc = ({ navigation }) => {
   const [electricityUsage, setElectricityUsage] = useState('');
   const [gasUsage, setGasUsage] = useState('');
   const [transportationMiles, setTransportationMiles] = useState('');
   const [carbonFootprint, setCarbonFootprint] = useState(null);
+
 
   const calculateCarbonFootprint = () => {
     // Perform your carbon footprint calculation based on the input values
@@ -163,6 +166,8 @@ const CarbonFootPrintCalc = ({ navigation }) => {
         Carbon Footprint Calculator
       </Animatable.Text>
 
+      <ScrollView showsVerticalScrollIndicator={false}>
+
       <Text style={[styles.text_footer, { marginTop: 30, marginBottom:10 }]}>Electricity</Text>
 
       <TextInput
@@ -209,6 +214,7 @@ const CarbonFootPrintCalc = ({ navigation }) => {
         </Text>
       )}
 
+    </ScrollView>
     </LinearGradient>
   );
 };
@@ -239,6 +245,13 @@ const styles = StyleSheet.create({
     fontSize: 34,
     //fontFamily: 'Montserrat',
     fontWeight: 'bold',
+},
+
+Title2:{
+  fontSize: 34,
+  //fontFamily: 'Montserrat',
+  fontWeight: 'bold',
+  marginTop:20,
 },
 
 text_footer:{

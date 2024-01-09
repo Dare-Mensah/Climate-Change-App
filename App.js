@@ -30,6 +30,8 @@ import EditComment from './screens/EditComment';
 import CarbonFootPrintCalc from './screens/CarbonFootPrintCalc';
 import WordleCoop from './screens/WordleCoop';
 import EndScreenCoop from './screens/EndScreenCoop';
+import WordleMultiplayer from './screens/WordleMultiplayer';
+import MultiplayerRoom from './screens/MultiplayerRoom';
 
 
 
@@ -101,6 +103,8 @@ function App(){
       <Stack.Screen name="CarbonFootPrintCalc" component={CarbonFootPrintCalc}/>
       <Stack.Screen name="WordleCoop" component={WordleCoop}/>
       <Stack.Screen name="EndScreenCoop" component={EndScreenCoop}/>
+      <Stack.Screen name="WordleMultiplayer" component={WordleMultiplayer}/>
+      <Stack.Screen name="MultiplayerRoom" component={MultiplayerRoom}/>
     </Stack.Navigator>
   )
 }

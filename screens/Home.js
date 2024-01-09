@@ -1,4 +1,4 @@
-import { Pressable, ScrollView, StyleSheet, Text, View, Image, Dimensions, SafeAreaView, StatusBar, FlatList, ImageBackground, TouchableOpacity,RefreshControl } from 'react-native'
+import { Pressable, ScrollView, StyleSheet, Text, View, Image, Dimensions, SafeAreaView, StatusBar, FlatList, ImageBackground, TouchableOpacity,RefreshControl,backgroundImage } from 'react-native'
 import React, {useState, useEffect} from 'react'
 import COLORS from '../data/colors'
 import DATA from '../data/data1'
@@ -10,25 +10,63 @@ import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { LineChart } from 'react-native-chart-kit';
+import { BarChart } from 'react-native-chart-kit';
+
 
 const {width} = Dimensions.get('screen')
 
+const topicBackgroundImages = {
+  Technology: require('../assets/TechImage.png'),
+  Food: require('../assets/food.png'),
+  Transport: require('../assets/pic3.jpg'),
+  Finance: require('../assets/pic4.jpg'),
+  Wordle: require('../assets/Worlde.png'),
+  // Add more mappings for other topics
+};
 
 
 const BlogPostCard = ({ post, onPress, latestLikes, commentCount }) => {
+  const backgroundImage = topicBackgroundImages[post.topic];
+
   return (
     <TouchableOpacity onPress={onPress} style={styles.blogCardContainer}>
-      <Image source={{ uri: post.imageURL }} style={styles.blogCardImage} />
-      <View style={styles.blogCardContent}>
-        <Text style={styles.blogPostTitle}>{post.title}</Text>
-        <Text style={styles.blogPostAuthor}>{`By ${post.author}`}</Text>
-        <View style={{flexDirection: 'row'}}>
-        <Text style={[styles.blogPostLikes, {paddingRight:75}]}>{`Likes: ${latestLikes}`}   </Text>
-        <Text style={styles.blogPostComments}>{`Comments: ${commentCount}`}</Text>
+      <ImageBackground source={backgroundImage} style={styles.blogCardImage}>
+        <View style={{ flex: 1, justifyContent: 'flex-end' }}>
+          <View style={styles.blogCardDetailBox}>
+            {/* Topic and Likes on the top row */}
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom:15 }}>
+              <Text style={styles.blogPostTopic}>{post.topic}</Text>
+              <View style={{flexDirection:'row'}}>
+              <Text style={styles.blogPostLikes}>{`${latestLikes}`}</Text>
+              <Image style={{height: 20, width:20,marginLeft: 4}} source={require('../assets/heart.png')}/>
+              </View>
+            </View>
+
+            {/* Title and Author with Divider */}
+            <Text style={styles.blogPostTitle}>{post.title}</Text>
+            <Divider style={styles.divider} />
+            <Text style={styles.blogPostAuthor}>{`By ${post.author}`}</Text>
+          </View>
         </View>
-      </View>
+      </ImageBackground>
     </TouchableOpacity>
   );
+};
+
+const fetchLeastCarbonFootprintData = async () => {
+  try {
+    const snapshot = await firebase.firestore().collection('carbon_footprints')
+      .orderBy('totalCarbonFootprint', 'asc') // Order by the total carbon footprint in ascending order
+      .limit(1) // Get only the first document (user with least carbon footprint)
+      .get();
+
+    if (!snapshot.empty) {
+      const leastFootprintData = snapshot.docs[0].data();
+      return leastFootprintData; // Return the least carbon footprint data
+    }
+  } catch (error) {
+    console.error('Error fetching least carbon footprint data:', error);
+  }
 };
 
 
@@ -40,11 +78,14 @@ const Home = ({route}) => {
   const [selectedTopic, setSelectedTopic] = useState('Latest'); // Set the default topic to 'Latest'
   const [refreshing, setRefreshing] = useState(false); // State to track whether the data is being refreshed
   const [carbonFootprintData, setCarbonFootprintData] = useState(null);
-
+  const [leastCarbonFootprintData, setLeastCarbonFootprintData] = useState(null);
 
   useEffect(() => {
     fetchCarbonFootprintData();
-  }, []);
+    fetchLeastCarbonFootprintData().then(leastFootprintData => {
+      setLeastCarbonFootprintData(leastFootprintData);
+    });
+  }, [refreshing]);
   
   const fetchCarbonFootprintData = async () => {
     try {
@@ -75,6 +116,27 @@ const Home = ({route}) => {
       console.error('Error fetching carbon footprint data:', error);
     }
   };
+
+
+
+
+
+  useEffect(() => {
+    // Assuming you store user details under a 'users' collection in Firebase Firestore
+    const userId = firebase.auth().currentUser.uid;
+    firebase.firestore().collection('users')
+      .doc(userId).get()
+      .then((snapshot) => {
+        if (snapshot.exists) {
+          const userData = snapshot.data();
+          setName(userData.username); // Set the username in state
+        } else {
+          console.log('User does not exist');
+        }
+      }).catch(error => {
+        console.error("Error fetching user data: ", error);
+      });
+  }, []);
 
 
 
@@ -122,7 +184,22 @@ const Home = ({route}) => {
   const handleRefresh = () => {
     setRefreshing(true); // Set refreshing to true when the user triggers the refresh
   };
+  
 
+
+  const prepareGraphData = () => {
+    const labels = ['My Footprint', 'Least Footprint'];
+    const datasets = [{
+      data: [
+        carbonFootprintData?.totalCarbonFootprint || 0,
+        leastCarbonFootprintData?.totalCarbonFootprint || 0
+      ],
+      color: (opacity = 1) => `rgba(134, 65, 244, ${opacity})`,
+      strokeWidth: 2
+    }];
+  
+    return { labels, datasets };
+  };
 
 
 
@@ -141,15 +218,11 @@ const Home = ({route}) => {
     }
   };
 
-  
 
   
 
-
-
-
-
   
+
 
   const handleTopicChange = (topic) => {
     setSelectedTopic(topic);
@@ -340,7 +413,7 @@ const Home = ({route}) => {
           style={{
           textAlign: 'center',
           fontSize: 50,
-          marginTop: 67,
+          marginTop: 37,
           fontWeight: '600'
           }}>{carbonFootprintData.totalCarbonFootprint}</Text>
 
@@ -379,6 +452,30 @@ const Home = ({route}) => {
   )}
 
 
+  <Text style={styles.sectionTitle}>Carbon Footprint Comparison</Text>
+    <BarChart
+      data={prepareGraphData()}
+      width={Dimensions.get("window").width-40}
+      height={220}
+      chartConfig={{
+        backgroundColor: "#e26a00",
+        backgroundGradientFrom: "#fb8c00",
+        backgroundGradientTo: "#ffa726",
+        decimalPlaces: 2,
+        color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+        labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+      }}
+      bezier
+      style={{
+        paddingHorizontal: 20, // Add horizontal padding
+        alignItems: 'center', // Center the graph horizontally
+        marginTop: 10, 
+        marginBottom: 20, 
+        borderRadius:16,
+      }}
+    />
+
+
 
   <Text style={styles.sectionTitle}>Wordle</Text>
 
@@ -400,15 +497,15 @@ const Home = ({route}) => {
           paddingHorizontal: 10,
           marginTop: 10, 
           fontWeight: 400}}>
-         SinglePlayer Wordle:</Text>
+         :</Text>
 
           <Text 
           style={{
           textAlign: 'center',
-          fontSize: 40,
+          fontSize: 20,
           marginTop: 17,
           fontWeight: '600'
-          }}>Play</Text>
+          }}>SinglePlayer </Text>
 
 
         </Animatable.View>
@@ -431,22 +528,53 @@ const Home = ({route}) => {
           paddingHorizontal: 10,
           marginTop: 10, 
           fontWeight: 400}}>
-          Coop Player Wordle</Text>
+          </Text>
 
           <Text 
           style={{
           textAlign: 'center',
-          fontSize: 40,
+          fontSize: 20,
           marginTop: 17,
           fontWeight: '600'
-          }}>Play</Text>
+          }}>Co-op Mode</Text>
+
+        </Animatable.View>
+        </Pressable>
+
+
+        <Pressable onPress={() => navigation.navigate("MultiplayerRoom")}>
+        <Animatable.View
+        animation={"fadeInUpBig"}
+        delay={5}
+        style={{        
+          backgroundColor: '#FFFFFF',
+          elevation: 4,
+          borderRadius: 25,
+          width:'95%',
+          height: 150,
+          marginLeft:20,}}>
+
+          <Text 
+          style={{
+          paddingHorizontal: 10,
+          marginTop: 10, 
+          fontWeight: 400}}>
+          </Text>
+
+          <Text 
+          style={{
+          textAlign: 'center',
+          fontSize: 20,
+          marginTop: 17,
+          fontWeight: '600'
+          }}>MultiPlayer</Text>
 
         </Animatable.View>
         </Pressable>
         </View>
 
 
-        <Text style={styles.sectionTitle}>Filter by Topic</Text>
+        <Text style={[styles.sectionTitle, {marginTop:50}]}>Filter by Topic</Text>
         <FlatList
     contentContainerStyle={{ paddingLeft: 20 }}
     horizontal
@@ -552,6 +680,44 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
 
     },
+    blogPostTopic: {
+      fontSize:15,
+      fontWeight:'500'
+    },
+
+    blogCardImage: {
+      height: 240,
+      width: '100%',
+      flex: 1, // Add this line
+    },
+
+  blogCardDetailBox: {
+    backgroundColor: 'rgba(255, 255, 255, 1)',
+    padding: 17, // Increase padding
+    borderRadius: 10,
+    margin: 10,
+    // Increase the size of the detail box as needed
+  },
+  blogPostTitle: {
+    fontSize: 28, // Adjust as needed
+    fontWeight: 'bold',
+    color: COLORS.black,
+    
+    // other styles...
+  },
+  blogPostAuthor: {
+    fontSize: 14,
+    color: COLORS.darkgrey,
+    // other styles...
+  },
+  divider: {
+    marginVertical: 10, // Adjust space around the divider
+    backgroundColor: COLORS.darkgrey, // Choose a color for the divider
+  },
+    blogPostLikes: {
+      fontSize: 14,
+      // other styles...
+    },
 
     header:{
       //paddingVertical: 21,
@@ -617,20 +783,11 @@ const styles = StyleSheet.create({
       overflow: 'hidden',
     },
     blogCardImage: {
-      height: 120,
+      height: 290,
       width: '100%',
     },
-    blogCardContent: {
-      padding: 10,
-    },
-    blogPostTitle: {
-      fontSize: 16,
-      fontWeight: 'bold',
-    },
-    blogPostAuthor: {
-      fontSize: 14,
-      color: COLORS.darkgrey,
-    },
+
+
 
     topicButton: {
       marginRight: 10,

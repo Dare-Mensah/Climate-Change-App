@@ -46,11 +46,7 @@ const  getWordForDay =(day)=>  {
 }
 
 
-
-
-
-
-const Wordle = () => {
+const WordleMultiplayer = () => {
   const navigation = useNavigation();
   //AsyncStorage.removeItem("@game") //resetting async storage for game
   const word = getWordForDay(dayOfTheYear);
@@ -247,6 +243,7 @@ const Wordle = () => {
     <LinearGradient style={{flex: 1}} colors={['#EAEAEA', '#B7F1B5']}>
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>WORDLE</Text>
+      <Text style={styles.title2}>MultiPlayer</Text>
 
       <View style={[styles.map]}>
         {rows.map((row, i) =>(
@@ -276,65 +273,71 @@ const Wordle = () => {
   )
 }
 
-export default Wordle
+export default WordleMultiplayer
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        alignItems: 'center',
+  container: {
+    flex: 1,
+    alignItems: 'center',
 
-    },
-    title: {  
-        fontSize: 32,
-        fontWeight: 'bold',
-        letterSpacing: 5,
-        marginTop: 20
-    },
-    map: {
-      //backgroundColor: "red",
-      alignSelf: 'stretch',
-      height: 100,
+},
+title: {  
+    fontSize: 32,
+    fontWeight: 'bold',
+    letterSpacing: 5,
+    marginTop: 15
+},
+title2: {  
+  fontSize: 32,
+  fontWeight: 'bold',
+  letterSpacing: 5,
+  marginTop: 5,
+},
+map: {
+  //backgroundColor: "red",
+  alignSelf: 'stretch',
+  height: 100,
 
-    },
-    
-    row: {
-      //backgroundColor: "blue",
-      alignSelf: "stretch",
-      height: 50,
-      flexDirection: "row",
-      marginTop: 30,
-      justifyContent: "center"
-    },
+},
 
-    cell: {
-      borderWidth: 3,
-      borderColor: "#818384",
-      width: 30,
-      flex: 1,
-      height: 30,
-      aspectRatio: 1,
-      margin: 3,
-      maxWidth: 70,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
+row: {
+  //backgroundColor: "blue",
+  alignSelf: "stretch",
+  height: 50,
+  flexDirection: "row",
+  marginTop: 30,
+  justifyContent: "center"
+},
 
-    cellText: {
-      color: "black",
-      fontSize: 28,
-      fontWeight: 'bold'
-    },
+cell: {
+  borderWidth: 3,
+  borderColor: "#818384",
+  width: 30,
+  flex: 1,
+  height: 30,
+  aspectRatio: 1,
+  margin: 3,
+  maxWidth: 70,
+  justifyContent: 'center',
+  alignItems: 'center',
+},
 
-    multiplayerButton: {
-      marginTop: 4,
-      backgroundColor: COLORS.primary,
-      padding: 10,
-      borderRadius: 8,
-    },
-  
-    multiplayerButtonText: {
-      color: COLORS.white,
-      fontSize: 18,
-      fontWeight: 'bold',
-    },
+cellText: {
+  color: "black",
+  fontSize: 28,
+  fontWeight: 'bold'
+},
+
+multiplayerButton: {
+  marginTop: 4,
+  backgroundColor: COLORS.primary,
+  padding: 10,
+  borderRadius: 8,
+},
+
+multiplayerButtonText: {
+  color: COLORS.white,
+  fontSize: 18,
+  fontWeight: 'bold',
+},
 })

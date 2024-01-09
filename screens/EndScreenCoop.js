@@ -23,87 +23,41 @@ const Number = ({number, label}) => (
 )
 
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true
-  })
-});
+const GuessDistribution = ({ distribution }) => {
+  if (!distribution) {
+    return null;
+  }
+  const sum = distribution.reduce((total, dist) => dist + total, 0);
+  return (
+    <View style={{ width: '100%', padding: 20, justifyContent: 'flex-start' }}>
+      {distribution.map((dist, index) => (
+        <GuessDistributionLine key={index} position={index + 1} amount={dist} percentage={sum !== 0 ? (100 * dist) / sum : 0} />
+      ))}
+    </View>
+  );
+};
 
-const EndScreenCoop = ({ won, winner, rows, getCellBGColor, navigation, gameSate }) => {
+const GuessDistributionLine = ({ position, amount, percentage }) => {
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'flex-start' }}>
+      <Text style={{ fontSize: 17 }}>{position}</Text>
+      <View style={{ backgroundColor: COLORS.grey, margin: 5, padding: 5, width: `${percentage}%`, minWidth: 20, maxWidth: 290 }}>
+        <Text style={{ fontSize: 17 }}>{amount}</Text>
+      </View>
+    </View>
+  );
+};
+
+
+const EndScreenCoop = ({ won = false, rows, getCellBGColor, navigation }) => {
 
     const [secondsTillTmr, setSecondsTillTmr] = useState(0);
     const [played, setPlayed] = useState(0);
     const [winRate, setWinRate] = useState(0);
     const [curStreak, setCurStreak] = useState(0);
     const [maxStreak, setMaxStreak] = useState(0);
+    const [distribution, setDistribution] = useState(null)
 
-    const [player1Wins, setPlayer1Wins] = useState(0);
-    const [player2Wins, setPlayer2Wins] = useState(0);
-
-    const [notification, setNotification] = useState(false);
-    const notificationListener = useRef();
-    const responseListener = useRef();
-  
-    useEffect(() => {
-      const getPermission = async () => {
-        if (Constants.isDevice) {
-            const { status: existingStatus } = await Notifications.getPermissionsAsync();
-            let finalStatus = existingStatus;
-            if (existingStatus !== 'granted') {
-              const { status } = await Notifications.requestPermissionsAsync();
-              finalStatus = status;
-            }
-            if (finalStatus !== 'granted') {
-              alert('Enable push notifications to use the app!');
-              await storage.setItem('expopushtoken', "");
-              return;
-            }
-            const token = (await Notifications.getExpoPushTokenAsync()).data;
-            await storage.setItem('expopushtoken', token);
-        } else {
-          alert('Must use physical device for Push Notifications');
-        }
-  
-          if (Platform.OS === 'android') {
-            Notifications.setNotificationChannelAsync('default', {
-              name: 'default',
-              importance: Notifications.AndroidImportance.MAX,
-              vibrationPattern: [0, 250, 250, 250],
-              lightColor: '#FF231F7C',
-            });
-          }
-      }
-  
-      getPermission();
-  
-      notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
-        setNotification(notification);
-      });
-  
-      responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {});
-  
-      return () => {
-        Notifications.removeNotificationSubscription(notificationListener.current);
-        Notifications.removeNotificationSubscription(responseListener.current);
-      };
-    }, []);
-  
-    const onClick = async () => {
-      await Notifications.scheduleNotificationAsync({
-        content: {
-          title: "Title",
-          body: "body",
-          data: { data: "data goes here" }
-        },
-        trigger: {
-          hour: 14,
-          minute: 30,
-          repeats: true
-        }
-      });
-    }
 
     const saveStatsToAsyncStorage = async () => {
         const statsData = {
@@ -224,25 +178,25 @@ const EndScreenCoop = ({ won, winner, rows, getCellBGColor, navigation, gameSate
     };
 
   return (
-    <LinearGradient style={{flex: 1}} colors={['#EAEAEA', '#B7F1B5']}>
+    <LinearGradient style={{flex: 1}} colors={['#D3DD97', '#CCDF56']}>
         <ScrollView showsVerticalScrollIndicator={false}>
         <SafeAreaView style={{width:'100%', alignContent:'center'}}>
         <View>
             <Text style={styles.title}>WORDLE Coop</Text>
             <Text style ={{fontSize: 30, color:"black", fontWeight: 400, textAlign: 'center',}}>{won ? 'You Won!' : 'Try again tomorrow'}</Text>
-            <Text style={{fontSize: 30, color: "black", fontWeight: 'bold', textAlign: 'center'}}>
-  {won ? `${winner} Won!` : 'No winner'}
-</Text>
         </View>
 
         <Text style ={{fontSize: 30, color:"black", fontWeight: 200, marginVertical: 20, textAlign: 'center',}}>Your Statisitics</Text>
-
         <View>
             <Number number={played} label ={"Played"}/>
             <Number number={winRate} label ={"Win %"}/>
             <Number number={curStreak} label ={"Current Streak"}/>
             <Number number={maxStreak} label ={"Max Streak"}/> 
         </View>
+
+        <Text style ={{fontSize: 30, color:"black", fontWeight: 200, marginVertical: 20, textAlign: 'center',}}>Guess Distribution</Text>
+
+        <GuessDistribution distribution={distribution}/>
 
         <View>
             
@@ -320,14 +274,5 @@ const styles = StyleSheet.create({
         fontWeight:'bold',
         fontSize: 20,
       
-      },
-
-      statsContainer: {
-        alignItems: 'center',
-        marginTop: 20,
-      },
-      statText: {
-        fontSize: 20,
-        fontWeight: 'bold',
       },
 })

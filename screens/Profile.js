@@ -12,13 +12,6 @@ import * as Notifications from 'expo-notifications';
 import { LinearGradient } from 'expo-linear-gradient';
 import Constants from 'expo-constants';
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true
-  })
-});
 
 
 const Profile = ({route}) => {
@@ -27,69 +20,10 @@ const Profile = ({route}) => {
 
     const navigation = useNavigation();
 
-    const [notification, setNotification] = useState(false);
-    const notificationListener = useRef();
-    const responseListener = useRef();
-  
-    useEffect(() => {
-      const getPermission = async () => {
-        if (Constants.isDevice) {
-            const { status: existingStatus } = await Notifications.getPermissionsAsync();
-            let finalStatus = existingStatus;
-            if (existingStatus !== 'granted') {
-              const { status } = await Notifications.requestPermissionsAsync();
-              finalStatus = status;
-            }
-            if (finalStatus !== 'granted') {
-              alert('Enable push notifications to use the app!');
-              await storage.setItem('expopushtoken', "");
-              return;
-            }
-            const token = (await Notifications.getExpoPushTokenAsync()).data;
-            await storage.setItem('expopushtoken', token);
-        } else {
-          alert('Must use physical device for Push Notifications');
-        }
-  
-          if (Platform.OS === 'android') {
-            Notifications.setNotificationChannelAsync('default', {
-              name: 'default',
-              importance: Notifications.AndroidImportance.MAX,
-              vibrationPattern: [0, 250, 250, 250],
-              lightColor: '#FF231F7C',
-            });
-          }
-      }
-  
-      getPermission();
-  
-      notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
-        setNotification(notification);
-      });
-  
-      responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {});
-  
-      return () => {
-        Notifications.removeNotificationSubscription(notificationListener.current);
-        Notifications.removeNotificationSubscription(responseListener.current);
-      };
-    }, []);
-  
-    const onClick = async () => {
-      await Notifications.scheduleNotificationAsync({
-        content: {
-          title: "Title",
-          body: "body",
-          data: { data: "data goes here" }
-        },
-        trigger: {
-          hour: 14,
-          minute: 30,
-          repeats: true
-        }
-      });
-    }
-  
+
+
+
+
 
   return (
     <LinearGradient style={{flex: 1}} colors={['#B7F1B5','#EAEAEA']}>
@@ -124,14 +58,14 @@ const Profile = ({route}) => {
                 </View>
             </TouchableRipple>
 
-            <TouchableRipple onPress={onClick}>
+            <TouchableRipple >
                 <View style={styles.menuItem}>
                     <Image source={require('../assets/headset.png')} style={{height: 30, width: 30}}/>
                     <Text style={styles.menuItemText}>Help and Support</Text>
                 </View>
             </TouchableRipple>
 
-            <TouchableOpacity onPress={() => {onClick}}>
+            <TouchableOpacity onPress={() => {}}>
                 <View style={styles.menuItem}>
                     <Image source={require('../assets/bell.png')} style={{height: 30, width: 30}}/>
                     <Text style={styles.menuItemText}>Notifications</Text>

@@ -44,10 +44,15 @@ const getWordForDay = (day) => {
   return words[day % words.length];
 };
 
+
+
+
+
 const WordleCoop = () => {
   const navigation = useNavigation();
   const word = getWordForDay(dayOfTheYear);
   const letters = word.split("");
+  //AsyncStorage.removeItem("@game_coop") //resetting async storage for game
 
   // Player specific states
   const [player1Rows, setPlayer1Rows] = useState(new Array(Number_Of_Tries).fill(new Array(letters.length).fill("")));
@@ -125,6 +130,7 @@ const WordleCoop = () => {
     if (row.every((letter, i) => letter === letters[i])) {
       setGameState('won');
       // New code to identify the winner
+      console.log(isPlayer1Turn ? 'Player 1 is the winner' : 'Player 2 is the winner'); // Add console.log here
       setWinner(isPlayer1Turn ? 'Player 1' : 'Player 2');
     } else if (curRow === Number_Of_Tries) {
       setGameState('lost');
