@@ -32,6 +32,8 @@ import WordleCoop from './screens/WordleCoop';
 import EndScreenCoop from './screens/EndScreenCoop';
 import WordleMultiplayer from './screens/WordleMultiplayer';
 import MultiplayerRoom from './screens/MultiplayerRoom';
+import EndlessWordle from './screens/EndlessWordle';
+import EndlessEndScreen from './screens/EndlessEndScreen';
 
 
 
@@ -105,6 +107,8 @@ function App(){
       <Stack.Screen name="EndScreenCoop" component={EndScreenCoop}/>
       <Stack.Screen name="WordleMultiplayer" component={WordleMultiplayer}/>
       <Stack.Screen name="MultiplayerRoom" component={MultiplayerRoom}/>
+      <Stack.Screen name="EndlessWordle" component={EndlessWordle}/>
+      <Stack.Screen name="EndlessEndScreen" component={EndlessEndScreen}/>
     </Stack.Navigator>
   )
 }

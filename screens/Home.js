@@ -18,8 +18,8 @@ const {width} = Dimensions.get('screen')
 const topicBackgroundImages = {
   Technology: require('../assets/TechImage.png'),
   Food: require('../assets/food.png'),
-  Transport: require('../assets/pic3.jpg'),
-  Finance: require('../assets/pic4.jpg'),
+  Transport: require('../assets/transport.jpg'),
+  Finance: require('../assets/Finance.png'),
   Wordle: require('../assets/Worlde.png'),
   // Add more mappings for other topics
 };
@@ -219,9 +219,25 @@ const Home = ({route}) => {
   };
 
 
-  
+  const wordleOptions = [
+    { id: '1', title: 'SinglePlayer Mode', navigateTo: 'Wordle' },
+    { id: '2', title: 'Co-op Mode', navigateTo: 'WordleCoop' },
+    { id: '3', title: 'Endless Mode', navigateTo: 'EndlessWordle' },
+  ];
 
-  
+
+
+
+  const WordleOption = ({ item }) => {
+    return (
+      <Pressable onPress={() => navigation.navigate(item.navigateTo)} style={styles.wordleOption}>
+        <Animatable.View animation={"fadeInUpBig"} style={styles.wordleOptionView}>
+          <Text style={styles.wordleOptionText}>{item.title}</Text>
+        </Animatable.View>
+      </Pressable>
+    );
+  };
+
 
 
   const handleTopicChange = (topic) => {
@@ -476,20 +492,29 @@ const Home = ({route}) => {
     />
 
 
+<Text style={styles.sectionTitle}>Wordle</Text>
 
-  <Text style={styles.sectionTitle}>Wordle</Text>
+<FlatList
+  contentContainerStyle={{ paddingLeft: 20 }}
+  horizontal
+  showsHorizontalScrollIndicator={false}
+  data={wordleOptions}
+  keyExtractor={(item) => item.id}
+  renderItem={({ item }) => <WordleOption item={item} />}
 
+/>
 
-  <View style={{flexDirection: 'row'}}>
-        <Pressable onPress={() => navigation.navigate("Wordle")}>
-        <Animatable.View
-        animation={"fadeInUpBig"}
+<Text style={styles.sectionTitle}>Create a Blog</Text>
+        <View>
+
+        <Pressable onPress={() => navigation.navigate("BlogScreen")}
         style={{        
           backgroundColor: '#FFFFFF',
           elevation: 4,
           borderRadius: 25,
-          width:'95%',
+          width:'90%',
           height: 150,
+          marginTop: 20,
           marginLeft:20,}}>
 
           <Text 
@@ -497,81 +522,13 @@ const Home = ({route}) => {
           paddingHorizontal: 10,
           marginTop: 10, 
           fontWeight: 400}}>
-         :</Text>
+          Create a Blogs:</Text>
 
-          <Text 
-          style={{
-          textAlign: 'center',
-          fontSize: 20,
-          marginTop: 17,
-          fontWeight: '600'
-          }}>SinglePlayer </Text>
-
-
-        </Animatable.View>
         </Pressable>
 
-        <Pressable onPress={() => navigation.navigate("WordleCoop")}>
-        <Animatable.View
-        animation={"fadeInUpBig"}
-        delay={5}
-        style={{        
-          backgroundColor: '#FFFFFF',
-          elevation: 4,
-          borderRadius: 25,
-          width:'95%',
-          height: 150,
-          marginLeft:20,}}>
-
-          <Text 
-          style={{
-          paddingHorizontal: 10,
-          marginTop: 10, 
-          fontWeight: 400}}>
-          </Text>
-
-          <Text 
-          style={{
-          textAlign: 'center',
-          fontSize: 20,
-          marginTop: 17,
-          fontWeight: '600'
-          }}>Co-op Mode</Text>
-
-        </Animatable.View>
-        </Pressable>
-
-
-        <Pressable onPress={() => navigation.navigate("MultiplayerRoom")}>
-        <Animatable.View
-        animation={"fadeInUpBig"}
-        delay={5}
-        style={{        
-          backgroundColor: '#FFFFFF',
-          elevation: 4,
-          borderRadius: 25,
-          width:'95%',
-          height: 150,
-          marginLeft:20,}}>
-
-          <Text 
-          style={{
-          paddingHorizontal: 10,
-          marginTop: 10, 
-          fontWeight: 400}}>
-          </Text>
-
-          <Text 
-          style={{
-          textAlign: 'center',
-          fontSize: 20,
-          marginTop: 17,
-          fontWeight: '600'
-          }}>MultiPlayer</Text>
-
-        </Animatable.View>
-        </Pressable>
         </View>
+
+
 
 
         <Text style={[styles.sectionTitle, {marginTop:50}]}>Filter by Topic</Text>
@@ -625,30 +582,6 @@ const Home = ({route}) => {
     </View>
   )}
      
-        <Text style={styles.sectionTitle}>Blogs</Text>
-        <View>
-
-        <Pressable onPress={() => navigation.navigate("BlogScreen")}
-        style={{        
-          backgroundColor: '#FFFFFF',
-          elevation: 4,
-          borderRadius: 25,
-          width:'90%',
-          height: 150,
-          marginTop: 20,
-          marginLeft:20,}}>
-
-          <Text 
-          style={{
-          paddingHorizontal: 10,
-          marginTop: 10, 
-          fontWeight: 400}}>
-          Blogs:</Text>
-
-        </Pressable>
-
-        </View>
-
 
 
       <Text style={styles.sectionTitle}>Tips</Text>
@@ -689,6 +622,7 @@ const styles = StyleSheet.create({
       height: 240,
       width: '100%',
       flex: 1, // Add this line
+      marginBottom:10
     },
 
   blogCardDetailBox: {
@@ -696,6 +630,7 @@ const styles = StyleSheet.create({
     padding: 17, // Increase padding
     borderRadius: 10,
     margin: 10,
+    marginBottom:10
     // Increase the size of the detail box as needed
   },
   blogPostTitle: {
@@ -718,6 +653,60 @@ const styles = StyleSheet.create({
       fontSize: 14,
       // other styles...
     },
+
+
+
+    createBlogButton: {
+      backgroundColor: '#FFFFFF',
+      elevation: 4,
+      borderRadius: 25,
+      width: '90%',
+      height: 150,
+      marginTop: 20,
+      marginLeft: 20,
+      justifyContent: 'center', // Align the text in the center vertically
+      alignItems: 'center', // Align the text in the center horizontally
+    },
+    
+    createBlogButtonImage: {
+      borderRadius: 25, // Match the borderRadius of the button
+      resizeMode: 'cover', // or 'contain' based on your preference
+    },
+    
+    createBlogButtonText: {
+      paddingHorizontal: 10,
+      marginTop: 10,
+      fontWeight: 400,
+      color: '#fff', // Assuming you want white text, change as needed
+      fontSize: 18, // Adjust the font size as needed
+    },
+
+
+    wordleOption: {
+      height: 160,
+      width: width / 2.4,
+      marginRight: 20,
+      padding: 20,
+      overflow: "hidden",
+      borderRadius: 40,
+      backgroundColor: '#FFFFFF', // or any other color you prefer
+      elevation: 10,
+      marginBottom:20,
+    },
+
+
+    wordleOptionView: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    
+    wordleOptionText: {
+      color: COLORS.black, // Changed to black for better visibility
+      fontSize: 18,
+      fontWeight: '800',
+    },
+    
 
     header:{
       //paddingVertical: 21,
@@ -781,10 +770,12 @@ const styles = StyleSheet.create({
       width: 250,
       marginRight: 20,
       overflow: 'hidden',
+      marginBottom:10
     },
     blogCardImage: {
       height: 290,
       width: '100%',
+      
     },
 
 
@@ -822,6 +813,10 @@ const styles = StyleSheet.create({
       color: COLORS.third,
       textDecorationLine: 'underline',
     },
+
+
+
+
 
     noDataContainer: {
       flex: 1,

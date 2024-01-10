@@ -8,7 +8,6 @@ import {firebase} from '../config'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import storage from "@react-native-async-storage/async-storage";
 import { useRoute } from '@react-navigation/native';
-import * as Notifications from 'expo-notifications';
 import { LinearGradient } from 'expo-linear-gradient';
 import Constants from 'expo-constants';
 

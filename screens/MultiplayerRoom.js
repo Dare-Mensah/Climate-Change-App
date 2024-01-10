@@ -5,59 +5,44 @@ import { ref, set, push, onValue, update } from 'firebase/database';
 import { useNavigation } from '@react-navigation/native';
 
 const MultiplayerRoom = () => {
-  const [roomId, setRoomId] = useState(null);
   const [players, setPlayers] = useState([]);
   const navigation = useNavigation();
-
-  // Function to create a new game room
-  const createGameRoom = async () => {
-    const newRoomRef = push(ref(db, 'gameRooms'));
-    await set(newRoomRef, {
-      roomId: newRoomRef.key,
-      players: [],
-      isFull: false,
-    });
-    setRoomId(newRoomRef.key);
-    listenForRoomUpdates(newRoomRef.key);
-  };
-
-  // Function to join a game room
-  const joinGameRoom = async (roomId) => {
-    const roomRef = ref(db, `gameRooms/${roomId}`);
-    update(roomRef, (currentRoom) => {
-      if (!currentRoom.players.includes(/* your player ID */)) {
-        currentRoom.players.push(/* your player ID */);
-        if (currentRoom.players.length === 2) {
-          currentRoom.isFull = true;
-        }
-      }
-      return currentRoom;
-    });
-  };
-
-  // Listener for room updates
-  const listenForRoomUpdates = (roomId) => {
-    const roomRef = ref(db, `gameRooms/${roomId}`);
-    onValue(roomRef, (snapshot) => {
-      const roomData = snapshot.val();
-      if (roomData) {
-        setPlayers(roomData.players);
-        if (roomData.isFull) {
-          navigation.navigate('WordleMultiplayer', { roomId: roomId });
-        }
-      }
-    });
-  };
+  const roomRef = ref(db, 'multiplayerRoom/');
 
   useEffect(() => {
-    // Example: create a room when the component mounts
-    createGameRoom();
+    const unsubscribe = onValue(roomRef, (snapshot) => {
+      const data = snapshot.val();
+      console.log("Firebase Data:", data); // Log to check the data structure
+      if (data) {
+        setPlayers(Object.values(data));
+      } else {
+        setPlayers([]);
+      }
+    });
+  
+    return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    console.log("Players State Updated:", players); // Log to check the updated state
+  }, [players]);
+
+  const joinRoom = () => {
+    const newPlayerRef = push(roomRef);
+    set(newPlayerRef, { player: 'Player' + (players.length + 1) });
+
+    if (players.length === 1) {
+      navigation.navigate('MultiplayerWordle'); // Replace 'MultiplayerWordle' with your multiplayer Wordle screen name
+    }
+  };
 
   return (
     <View style={styles.container}>
-      <Text>Multiplayer Room: {roomId}</Text>
-
+      <Text>Multiplayer Room: </Text>
+      <Button title="Join Room" onPress={joinRoom} />
+      {players.map((player, index) => (
+        <Text key={index}>{player.player}</Text>
+      ))}
     </View>
   );
 };

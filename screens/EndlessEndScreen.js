@@ -12,6 +12,7 @@ import { ENTER } from '../src/constants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import {firebase} from '../config'
+import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
 
 const Number = ({number, label}) => (
@@ -47,9 +48,7 @@ const GuessDistributionLine = ({ position, amount, percentage }) => {
   );
 };
 
-
-const EndScreen = ({ won = false, rows, getCellBGColor, navigation }) => {
-
+const EndlessEndScreen = ({ won = false, rows, getCellBGColor, navigation, correctWordsCount }) => {
     const [secondsTillTmr, setSecondsTillTmr] = useState(0);
     const [played, setPlayed] = useState(0);
     const [winRate, setWinRate] = useState(0);
@@ -58,23 +57,18 @@ const EndScreen = ({ won = false, rows, getCellBGColor, navigation }) => {
     const [distribution, setDistribution] = useState(null)
 
 
-  
     const saveStatsToAsyncStorage = async () => {
         const statsData = {
-          curStreak,
-          winRate,
-          played,
-          distribution,
+            curStreak,
+            winRate,
+            played,
+            distribution,
         };
-    
-        // Save to AsyncStorage
+
+        // Save to AsyncStorage with a different key
         const statsString = JSON.stringify(statsData);
-        await AsyncStorage.setItem('@game_stats', statsString);
-      
+        await AsyncStorage.setItem('@game_stats_endless', statsString);
     };
-
-
-
 
 
 
@@ -109,7 +103,7 @@ const EndScreen = ({ won = false, rows, getCellBGColor, navigation }) => {
     }, []);
   
     const readState = async () => {
-      const dataString = await AsyncStorage.getItem('@game');
+      const dataString = await AsyncStorage.getItem('@game_endless');
       let data;
       try {
         data = JSON.parse(dataString);
@@ -182,11 +176,11 @@ const EndScreen = ({ won = false, rows, getCellBGColor, navigation }) => {
     };
 
   return (
-    <LinearGradient style={{flex: 1}} colors={['#EAEAEA', '#B7F1B5']}>
+    <LinearGradient style={{flex: 1}} colors={['#D3DD97', '#CCDF56']}>
         <ScrollView showsVerticalScrollIndicator={false}>
         <SafeAreaView style={{width:'100%', alignContent:'center'}}>
         <View>
-            <Text style={styles.title}>WORDLE</Text>
+            <Text style={styles.title}>WORDLE EndScreen</Text>
             <Text style ={{fontSize: 30, color:"black", fontWeight: 400, textAlign: 'center',}}>{won ? 'You Won!' : 'Try again tomorrow'}</Text>
         </View>
 
@@ -196,11 +190,9 @@ const EndScreen = ({ won = false, rows, getCellBGColor, navigation }) => {
             <Number number={winRate} label ={"Win %"}/>
             <Number number={curStreak} label ={"Current Streak"}/>
             <Number number={maxStreak} label ={"Max Streak"}/> 
+            <Text>Total Correct Words: {correctWordsCount}</Text>
+
         </View>
-
-        <Text style ={{fontSize: 30, color:"black", fontWeight: 200, marginVertical: 20, textAlign: 'center',}}>Guess Distribution</Text>
-
-        <GuessDistribution distribution={distribution}/>
 
         <View>
             
@@ -238,7 +230,7 @@ const EndScreen = ({ won = false, rows, getCellBGColor, navigation }) => {
   )
 }
 
-export default EndScreen
+export default EndlessEndScreen
 
 const styles = StyleSheet.create({
     container: {
@@ -279,6 +271,4 @@ const styles = StyleSheet.create({
         fontSize: 20,
       
       },
-
-
 })
