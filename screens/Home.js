@@ -81,41 +81,6 @@ const Home = ({route}) => {
   const [carbonFootprintData, setCarbonFootprintData] = useState(null);
   const [leastCarbonFootprintData, setLeastCarbonFootprintData] = useState(null);
 
-  const scheduleNotification = async () => {
-    // Cancel all previous notifications
-    await Notifications.cancelAllScheduledNotificationsAsync();
-  
-    // Schedule a new notification for 24 hours later
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title: "Don't forget to log in!",
-        body: 'Log in to stay updated with the latest posts and activities.',
-      },
-      trigger: { seconds: 24 * 60 * 60 }, // 24 hours in seconds
-    });
-  };
-
-
-  useEffect(() => {
-    const requestNotificationPermission = async () => {
-      const { status } = await Notifications.requestPermissionsAsync();
-      if (status !== 'granted') {
-        alert('Permission for notifications was denied');
-      }
-    };
-  
-    requestNotificationPermission();
-  }, []);
-
-
-  useEffect(() => {
-    const subscription = Notifications.addNotificationResponseReceivedListener(response => {
-      console.log('Notification tapped, response:', response);
-      // Navigate to a specific screen if needed
-    });
-  
-    return () => subscription.remove();
-  }, []);
   
 
   useEffect(() => {

@@ -61,6 +61,27 @@ const GuestHome = ({route}) => {
       readStatsFromAsyncStorage();
     }, []);
 
+
+
+    const wordleOptions = [
+      { id: '1', title: 'SinglePlayer Mode', navigateTo: 'GuestWordle' },
+      { id: '2', title: 'Co-op Mode', navigateTo: 'CoopWordleInfo' },
+      { id: '3', title: 'Endless Mode', navigateTo: 'EndlessWordleInfo' },
+    ];
+  
+  
+  
+  
+    const WordleOption = ({ item }) => {
+      return (
+        <Pressable onPress={() => navigation.navigate(item.navigateTo)} style={styles.wordleOption}>
+          <View style={styles.wordleOptionView}>
+            <Text style={styles.wordleOptionText}>{item.title}</Text>
+          </View>
+        </Pressable>
+      );
+    };
+
   
 
     const Card =({Tips}) => {
@@ -99,117 +120,17 @@ const GuestHome = ({route}) => {
           style={[styles.Title1, style={paddingHorizontal:20, paddingTop:10}]}>Dashboard </Animatable.Text>
         </View>
 
-        <Text style={styles.sectionTitle}>Wordle</Text>
+<Text style={styles.sectionTitle}>Wordle</Text>
 
-        
-        <View 
-        style={{flexDirection: 'row'}}>
+<FlatList
+  contentContainerStyle={{ paddingLeft: 20 }}
+  horizontal
+  showsHorizontalScrollIndicator={false}
+  data={wordleOptions}
+  keyExtractor={(item) => item.id}
+  renderItem={({ item }) => <WordleOption item={item} />}
 
-        <View style={{flexDirection: 'column'}}>
-        <Pressable onPress={() => navigation.navigate("Wordle")}>
-        <Animatable.View
-        animation={"fadeInUpBig"}
-        style={{        
-          backgroundColor: '#FFFFFF',
-          elevation: 4,
-          borderRadius: 25,
-          width:'95%',
-          height: 150,
-          marginTop: 5,
-          marginLeft:20,}}>
-
-          <Text 
-          style={{
-          paddingHorizontal: 10,
-          marginTop: 10, 
-          fontWeight: 400}}>
-         Current Streak:</Text>
-
-          <Text 
-          style={{
-          textAlign: 'center',
-          fontSize: 40,
-          marginTop: 17,
-          fontWeight: '600'
-          }}>{currentStreak } </Text>
-
-
-        </Animatable.View>
-        </Pressable>
-
-        <Pressable onPress={() => navigation.navigate("Wordle")}>
-        <Animatable.View
-        animation={"fadeInUpBig"}
-        delay={5}
-        style={{        
-          backgroundColor: '#FFFFFF',
-          elevation: 4,
-          borderRadius: 25,
-          width:'95%',
-          height: 150,
-          marginTop: 20,
-          marginLeft:20,}}>
-
-          <Text 
-          style={{
-          paddingHorizontal: 10,
-          marginTop: 10, 
-          fontWeight: 400}}>
-          Games Played:</Text>
-
-          <Text 
-          style={{
-          textAlign: 'center',
-          fontSize: 40,
-          marginTop: 17,
-          fontWeight: '600'
-          }}>{playedState}</Text>
-
-
-        </Animatable.View>
-        </Pressable>
-        </View>
-        
-        <Pressable onPress={() => navigation.navigate("Wordle")}>
-        <Animatable.View
-        animation={"fadeInUpBig"}
-        delay={9}
-        style={{        
-          backgroundColor: '#FFFFFF',
-          elevation: 4,
-          borderRadius: 25,
-          width:'72%',
-          height: 319,
-          marginTop: 5,
-          marginLeft:55,}}>
-
-          <Text 
-          style={{
-          paddingHorizontal: 10,
-          marginTop: 10, 
-          fontWeight: 400}}>
-          Wins:</Text>
-
-          <Text 
-          style={{
-          textAlign: 'center',
-          fontSize: 50,
-          marginTop: 67,
-          fontWeight: '600'
-          }}>{winPercentage}%</Text>
-
-          <Text 
-          style={{
-          textAlign: 'center',
-          fontSize: 18,
-          marginTop: 37,
-          fontWeight: '200'
-          }}>Your win percentage</Text>
-
-
-        </Animatable.View>
-        </Pressable>
-        </View>
+/>
         
     
         <Text style={styles.sectionTitle}>Tips</Text>
@@ -299,5 +220,31 @@ othercards:{
   overflow:"hidden",
   marginLeft: 20,
   elevation:10,
+},
+
+wordleOption: {
+  height: 160,
+  width: width / 2.4,
+  marginRight: 20,
+  padding: 20,
+  overflow: "hidden",
+  borderRadius: 40,
+  backgroundColor: '#FFFFFF', // or any other color you prefer
+  elevation: 10,
+  marginBottom:20,
+},
+
+
+wordleOptionView: {
+  flex: 1,
+  justifyContent: 'center',
+  alignItems: 'center',
+},
+
+wordleOptionText: {
+  color: COLORS.black, // Changed to black for better visibility
+  fontSize: 18,
+  fontWeight: '800',
+  textAlign:'center',
 },
 })

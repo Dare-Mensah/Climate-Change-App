@@ -36,6 +36,7 @@ import WordleCoop2 from './screens/WordleCoop2';
 import Achievements from './screens/Achievements';
 import CoopWordleInfo from './screens/CoopWordleInfo';
 import EndlessWordleInfo from './screens/EndlessWordleInfo';
+import GuestWordle from './screens/GuestWordle';
 
 
 
@@ -78,11 +79,15 @@ function App(){
         <Stack.Screen name="SignUp" component={SignUp}/>
         <Stack.Screen name="GuestHome" component={GuestHome}/>
         <Stack.Screen name="GuestProfile" component={GuestProfile}/>
-        <Stack.Screen name="Wordle" component={Wordle}/>
+        <Stack.Screen name="GuestWordle" component={GuestWordle}/>
+        <Stack.Screen name="WordleCoop2" component={WordleCoop2}/>
+        <Stack.Screen name="CoopWordleInfo" component={CoopWordleInfo}/>
         <Stack.Screen name="EndScreen" component={EndScreen}/>
         <Stack.Screen name="Tips" component={Tips}/>
         <Stack.Screen name="SignUpComplete" component={SignUpComplete}/>
         <Stack.Screen name="ForgotPassword" component={ForgotPassword}/>
+        <Stack.Screen name="EndlessWordleInfo" component={EndlessWordleInfo}/>
+        <Stack.Screen name="EndlessWordle" component={EndlessWordle}/>
         
         
         

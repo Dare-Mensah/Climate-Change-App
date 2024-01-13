@@ -13,7 +13,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import {firebase} from '../config'
 import Constants from 'expo-constants';
-import * as Notifications from 'expo-notifications';
 
 const Number = ({number, label}) => (
     <View style ={{alignItems: 'center', margin: 10}}>
@@ -74,6 +73,39 @@ const EndScreen = ({ won = false, rows, getCellBGColor, navigation }) => {
       
     };
 
+    const saveCurStreakToFirebase = async () => {
+      try {
+        // Retrieve curStreak from AsyncStorage
+        const statsString = await AsyncStorage.getItem('@game_stats');
+        const stats = statsString ? JSON.parse(statsString) : null;
+    
+        if (stats && stats.curStreak !== undefined) {
+          const curStreak = stats.curStreak;
+          
+          // Get the current user from Firebase Authentication
+          const currentUser = firebase.auth().currentUser;
+          
+          if (currentUser) {
+            // Update curStreak in Firebase Firestore
+            const userRef = firebase.firestore().collection('users').doc(currentUser.uid);
+            await userRef.update({ curStreak });
+            console.log("curStreak updated successfully in Firebase");
+          } else {
+            console.log("User not logged in");
+          }
+        } else {
+          console.log("curStreak not found in AsyncStorage");
+        }
+      } catch (error) {
+        console.error("Error updating curStreak in Firebase:", error);
+      }
+    };
+    
+    // Call this function to update curStreak in Firebase
+    saveCurStreakToFirebase();
+
+
+
 
 
 
@@ -107,35 +139,7 @@ const EndScreen = ({ won = false, rows, getCellBGColor, navigation }) => {
     }, []);
 
 
-    useEffect(() => {
-      // Check if the current streak is more than 2
-      if (curStreak > 1) {
-        scheduleMotivationNotification();
-      }
-    }, [curStreak]);
-    
-    const scheduleMotivationNotification = async () => {
-      await Notifications.scheduleNotificationAsync({
-        content: {
-          title: "Keep it up!",
-          body: "You're on a roll with a streak of more than 2 days. Keep playing to maintain your streak!",
-          data: { type: 'motivation' },
-        },
-        trigger: { seconds: 2 }, // Schedule for 2 seconds later, adjust as needed
-      });
-    };
 
-
-    useEffect(() => {
-      registerForPushNotificationsAsync();
-    }, []);
-    
-    const registerForPushNotificationsAsync = async () => {
-      const { status } = await Notifications.requestPermissionsAsync();
-      if (status !== 'granted') {
-        alert('Sorry, we need notification permissions to make this work!');
-      }
-    };
 
 
   

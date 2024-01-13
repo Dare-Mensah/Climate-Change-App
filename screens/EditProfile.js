@@ -81,6 +81,47 @@ const EditProfile = ({route}) => {
       });
     };
 
+    const deleteUserProfile = async () => {
+      const uid = firebase.auth().currentUser.uid;
+    
+      try {
+        // Delete likes associated with the user
+        await deleteUserDataFromCollection('likes', uid);
+    
+        // Delete comments associated with the user
+        await deleteUserDataFromCollection('comments', uid);
+    
+        // Delete posts associated with the user
+        await deleteUserDataFromCollection('posts', uid);
+    
+        // Delete carbon footprint data associated with the user
+        await deleteUserDataFromCollection('carbon_footprints', uid);
+    
+        // Delete user document from 'users' collection
+        await firebase.firestore().collection('users').doc(uid).delete();
+    
+        // Delete user account
+        await firebase.auth().currentUser.delete();
+    
+        showAlert('Account Deleted', 'Your account and all associated data have been deleted successfully.');
+        navigation.navigate('Home'); // Navigate to home or login screen
+      } catch (error) {
+        console.error('Error deleting user profile:', error.message);
+        showAlert('Error', 'Failed to delete user profile. Please try again.');
+      }
+    };
+    
+    const deleteUserDataFromCollection = async (collectionName, userId) => {
+      const querySnapshot = await firebase.firestore().collection(collectionName).where('userId', '==', userId).get();
+      querySnapshot.forEach(async (doc) => {
+        await doc.ref.delete();
+      });
+    };
+  
+    
+    // Call this function to delete the user profile
+    deleteUserProfile();
+
 
     const deleteProfile = () => {
         Alert.alert(
