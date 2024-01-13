@@ -52,7 +52,7 @@ const WordleCoop = () => {
   const navigation = useNavigation();
   const word = getWordForDay(dayOfTheYear);
   const letters = word.split("");
-  //AsyncStorage.removeItem("@game_coop") //resetting async storage for game
+  AsyncStorage.removeItem("@game_coop") //resetting async storage for game
 
   // Player specific states
   const [player1Rows, setPlayer1Rows] = useState(new Array(Number_Of_Tries).fill(new Array(letters.length).fill("")));

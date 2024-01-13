@@ -13,6 +13,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import {firebase} from '../config'
 import Constants from 'expo-constants';
+import * as Notifications from 'expo-notifications';
 
 const Number = ({number, label}) => (
     <View style ={{alignItems: 'center', margin: 10}}>
@@ -82,6 +83,61 @@ const EndScreen = ({ won = false, rows, getCellBGColor, navigation }) => {
       readState();
       saveStatsToAsyncStorage(); // Save stats to AsyncStorage
     }, []);
+
+
+
+    useEffect(() => {
+      const updateUserGameCount = async () => {
+        const currentUser = firebase.auth().currentUser;
+        const userRef = firebase.firestore().collection('users').doc(currentUser.uid);
+        const userDoc = await userRef.get();
+    
+        if (userDoc.exists) {
+          const userData = userDoc.data();
+          const newGameCount = (userData.wordleGamesPlayed || 0) + 1;
+    
+          await userRef.update({
+            wordleGamesPlayed: newGameCount,
+            hasPlayedOver10WordleGames: newGameCount > 10,
+          });
+        }
+      };
+    
+      updateUserGameCount();
+    }, []);
+
+
+    useEffect(() => {
+      // Check if the current streak is more than 2
+      if (curStreak > 1) {
+        scheduleMotivationNotification();
+      }
+    }, [curStreak]);
+    
+    const scheduleMotivationNotification = async () => {
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: "Keep it up!",
+          body: "You're on a roll with a streak of more than 2 days. Keep playing to maintain your streak!",
+          data: { type: 'motivation' },
+        },
+        trigger: { seconds: 2 }, // Schedule for 2 seconds later, adjust as needed
+      });
+    };
+
+
+    useEffect(() => {
+      registerForPushNotificationsAsync();
+    }, []);
+    
+    const registerForPushNotificationsAsync = async () => {
+      const { status } = await Notifications.requestPermissionsAsync();
+      if (status !== 'granted') {
+        alert('Sorry, we need notification permissions to make this work!');
+      }
+    };
+
+
   
     const share = () => {
       // Sharing the game result.

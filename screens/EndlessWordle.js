@@ -76,6 +76,9 @@ const EndlessWordle = () => {
 
     const [timer, setTimer] = useState(60); // Initialize timer with 60 seconds
 
+    const [startTime, setStartTime] = useState(null);
+    const [guessDurations, setGuessDurations] = useState([]);
+
 
 
 
@@ -211,11 +214,24 @@ const EndlessWordle = () => {
     const checkIfLose = () => { //lose state
       return !checkIfWon() && curRow == rows.length;
     }
+
+
+    const calculateAverageDuration = () => {
+      if (guessDurations.length === 0) return 0;
+      const total = guessDurations.reduce((acc, duration) => acc + duration, 0);
+      return (total / guessDurations.length).toFixed(2);
+    };
+
   
     const onKeyPressed = (key) => {
       if(gameSate != 'playing')
       {
         return;
+      }
+
+        // Start timer for a new guess
+      if (curCol === 0 && curRow < rows.length && gameSate === 'playing' && !startTime) {
+        setStartTime(new Date());
       }
   
       const updatedRows = copyArray(rows);
@@ -235,15 +251,17 @@ const EndlessWordle = () => {
   
     
   
-      if (key == ENTER)
-      {
-        if(curCol == rows[0].length)
-        {
-          setCurRow(curRow+1);
+      if (key === ENTER) {
+        if (curCol === rows[0].length) {
+          const endTime = new Date();
+          const duration = (endTime - startTime) / 1000; // duration in seconds
+          setGuessDurations([...guessDurations, duration]);
+          setCurRow(curRow + 1);
           setCurCol(0);
+          setStartTime(null); // Reset start time for the next guess
         }
-        return
-      } 
+        return;
+      }
   
       if(curCol < rows[0].length) { //Checking if the current collumn doesnt extend past the lenght of the word
         updatedRows[curRow][curCol] = key;
@@ -294,7 +312,8 @@ const EndlessWordle = () => {
   
   
     if (gameSate != 'playing') {
-      return (<EndlessEndScreen won={gameSate == 'won'} correctWordsCount={correctWordsCount} rows={rows} getCellBGColor={getCellBGColor} navigation={navigation}/>)
+      const averageDuration = calculateAverageDuration();
+      return (<EndlessEndScreen won={gameSate == 'won'} correctWordsCount={correctWordsCount} rows={rows} getCellBGColor={getCellBGColor} navigation={navigation} averageDuration={averageDuration}/>)
     }
 
 
@@ -302,9 +321,14 @@ const EndlessWordle = () => {
     <LinearGradient style={{flex: 1}} colors={['#EAEAEA', '#B7F1B5']}>
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>WORDLE Endless</Text>
-      <Text>
+      <View style={{flexDirection:'row'}}>
+      <Text style={{fontWeight:'500', fontSize:20}}>
           Time Remaining: {Math.floor(timer / 60)}:{String(timer % 60).padStart(2, '0')}
         </Text>
+        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Home")}>
+          <Text style={{fontSize:20, fontWeight:'bold'}}>  Go Home</Text>
+        </TouchableOpacity>
+      </View>
       <View style={[styles.map]}>
         {rows.map((row, i) =>(
           <View key={'row-${i}'} style={styles.row}>

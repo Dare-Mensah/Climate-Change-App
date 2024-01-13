@@ -48,7 +48,7 @@ const GuessDistributionLine = ({ position, amount, percentage }) => {
   );
 };
 
-const EndlessEndScreen = ({ won = false, rows, getCellBGColor, navigation, correctWordsCount }) => {
+const EndlessEndScreen = ({ won = false, rows, getCellBGColor, navigation, correctWordsCount, averageDuration }) => {
     const [secondsTillTmr, setSecondsTillTmr] = useState(0);
     const [played, setPlayed] = useState(0);
     const [winRate, setWinRate] = useState(0);
@@ -76,6 +76,20 @@ const EndlessEndScreen = ({ won = false, rows, getCellBGColor, navigation, corre
       readState();
       saveStatsToAsyncStorage(); // Save stats to AsyncStorage
     }, []);
+
+    // Assuming correctWordsCount is the total number of words guessed correctly
+useEffect(() => {
+  const updateAchievementStatus = async () => {
+    const currentUser = firebase.auth().currentUser;
+    if (correctWordsCount > 3) {
+      await firebase.firestore().collection('users').doc(currentUser.uid).update({
+        hasAchievedWordMaster: true,
+      });
+    }
+  };
+
+  updateAchievementStatus();
+}, [correctWordsCount]);
   
     const share = () => {
       // Sharing the game result.
@@ -176,52 +190,27 @@ const EndlessEndScreen = ({ won = false, rows, getCellBGColor, navigation, corre
     };
 
   return (
-    <LinearGradient style={{flex: 1}} colors={['#D3DD97', '#CCDF56']}>
+    <LinearGradient style={{flex: 1}} colors={['#EAEAEA', '#B7F1B5']}>
         <ScrollView showsVerticalScrollIndicator={false}>
         <SafeAreaView style={{width:'100%', alignContent:'center'}}>
         <View>
             <Text style={styles.title}>WORDLE EndScreen</Text>
-            <Text style ={{fontSize: 30, color:"black", fontWeight: 400, textAlign: 'center',}}>{won ? 'You Won!' : 'Try again tomorrow'}</Text>
         </View>
 
         <Text style ={{fontSize: 30, color:"black", fontWeight: 200, marginVertical: 20, textAlign: 'center',}}>Your Statisitics</Text>
         <View>
-            <Number number={played} label ={"Played"}/>
-            <Number number={winRate} label ={"Win %"}/>
-            <Number number={curStreak} label ={"Current Streak"}/>
-            <Number number={maxStreak} label ={"Max Streak"}/> 
-            <Text>Total Correct Words: {correctWordsCount}</Text>
-
+            <Number number={correctWordsCount} label ={"Words Guessed Correctly"}/>
+            <Number number={averageDuration} label ={"Average Time per Guess"}/>
         </View>
 
-        <View>
-            
-            <View>
-                <Text style ={{fontSize: 30, color:"black", fontWeight: 200, marginTop:20, textAlign: 'center',}}>Next Game</Text>
-                <Text style ={{fontSize: 30, color:"black", fontWeight: 'bold',marginTop:10, textAlign: 'center',}}>{calculateTimeTillNextGame()}</Text>
-            </View>
-            
-            <TouchableOpacity onPress={share}
-                style={[styles.box1, {marginTop:40, backgroundColor:COLORS.third}]}
-            >
-                <Text style={[styles.text1,{color:COLORS.white}]}>Share</Text>
-            </TouchableOpacity>
+      <View style={styles.buttonsContainer}>
 
 
-
-            <TouchableOpacity onPress={() => {
-              navigation.navigate("Home", {
-                currentStreak: curStreak,
-                winPercentage: winRate,
-                playedState: played,
-              })
-            }}
-                style={[styles.box1, {marginTop:40, backgroundColor:COLORS.third}]}
-            >
-                <Text style={[styles.text1,{color:COLORS.white}]}>Return Home</Text>
-            </TouchableOpacity>
-
-        </View>
+        {/* Home Button */}
+        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Home")}>
+          <Text style={styles.buttonText}>Home</Text>
+        </TouchableOpacity>
+      </View>
 
         </SafeAreaView>
         </ScrollView>
@@ -270,5 +259,43 @@ const styles = StyleSheet.create({
         fontWeight:'bold',
         fontSize: 20,
       
+      },
+
+
+      buttonsContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-evenly',
+        alignItems: 'center',
+        shadowColor: '#000000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.09,
+        shadowRadius: 10,
+        marginTop:20
+        
+
+        // You can adjust padding, margin, etc. as needed
+      },
+
+
+      button: {
+        backgroundColor: '#4CAF50', // Example color
+        padding: 15, // Increased padding
+        borderRadius: 8, // Slightly larger border radius
+        // Optional: define width and height if you want fixed size buttons
+        width: 120, // Example fixed width
+        height: 50,  // Example fixed height
+        justifyContent: 'center', // Centers text vertically
+        alignItems: 'center', // Centers text horizontally
+        margin: 5, // Add margin if buttons are too close to each other
+        // other styling for the button
+      },
+      buttonText: {
+        color: '#fff',
+        fontSize: 20, // Larger font size
+        fontWeight: 'bold', // Optional: make text bold
+        // other text styling
       },
 })

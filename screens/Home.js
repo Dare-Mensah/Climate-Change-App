@@ -11,6 +11,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { LineChart } from 'react-native-chart-kit';
 import { BarChart } from 'react-native-chart-kit';
+import * as Notifications from 'expo-notifications';
 
 
 const {width} = Dimensions.get('screen')
@@ -79,6 +80,43 @@ const Home = ({route}) => {
   const [refreshing, setRefreshing] = useState(false); // State to track whether the data is being refreshed
   const [carbonFootprintData, setCarbonFootprintData] = useState(null);
   const [leastCarbonFootprintData, setLeastCarbonFootprintData] = useState(null);
+
+  const scheduleNotification = async () => {
+    // Cancel all previous notifications
+    await Notifications.cancelAllScheduledNotificationsAsync();
+  
+    // Schedule a new notification for 24 hours later
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: "Don't forget to log in!",
+        body: 'Log in to stay updated with the latest posts and activities.',
+      },
+      trigger: { seconds: 24 * 60 * 60 }, // 24 hours in seconds
+    });
+  };
+
+
+  useEffect(() => {
+    const requestNotificationPermission = async () => {
+      const { status } = await Notifications.requestPermissionsAsync();
+      if (status !== 'granted') {
+        alert('Permission for notifications was denied');
+      }
+    };
+  
+    requestNotificationPermission();
+  }, []);
+
+
+  useEffect(() => {
+    const subscription = Notifications.addNotificationResponseReceivedListener(response => {
+      console.log('Notification tapped, response:', response);
+      // Navigate to a specific screen if needed
+    });
+  
+    return () => subscription.remove();
+  }, []);
+  
 
   useEffect(() => {
     fetchCarbonFootprintData();
@@ -221,8 +259,8 @@ const Home = ({route}) => {
 
   const wordleOptions = [
     { id: '1', title: 'SinglePlayer Mode', navigateTo: 'Wordle' },
-    { id: '2', title: 'Co-op Mode', navigateTo: 'WordleCoop' },
-    { id: '3', title: 'Endless Mode', navigateTo: 'EndlessWordle' },
+    { id: '2', title: 'Co-op Mode', navigateTo: 'CoopWordleInfo' },
+    { id: '3', title: 'Endless Mode', navigateTo: 'EndlessWordleInfo' },
   ];
 
 
@@ -231,9 +269,9 @@ const Home = ({route}) => {
   const WordleOption = ({ item }) => {
     return (
       <Pressable onPress={() => navigation.navigate(item.navigateTo)} style={styles.wordleOption}>
-        <Animatable.View animation={"fadeInUpBig"} style={styles.wordleOptionView}>
+        <View style={styles.wordleOptionView}>
           <Text style={styles.wordleOptionText}>{item.title}</Text>
-        </Animatable.View>
+        </View>
       </Pressable>
     );
   };
@@ -504,34 +542,8 @@ const Home = ({route}) => {
 
 />
 
-<Text style={styles.sectionTitle}>Create a Blog</Text>
-        <View>
 
-        <Pressable onPress={() => navigation.navigate("BlogScreen")}
-        style={{        
-          backgroundColor: '#FFFFFF',
-          elevation: 4,
-          borderRadius: 25,
-          width:'90%',
-          height: 150,
-          marginTop: 20,
-          marginLeft:20,}}>
-
-          <Text 
-          style={{
-          paddingHorizontal: 10,
-          marginTop: 10, 
-          fontWeight: 400}}>
-          Create a Blogs:</Text>
-
-        </Pressable>
-
-        </View>
-
-
-
-
-        <Text style={[styles.sectionTitle, {marginTop:50}]}>Filter by Topic</Text>
+        <Text style={[styles.sectionTitle, {marginTop:50}]}>Filter Blogs by Topic</Text>
         <FlatList
     contentContainerStyle={{ paddingLeft: 20 }}
     horizontal
@@ -569,6 +581,14 @@ const Home = ({route}) => {
     />
   )}
 />
+
+
+      <TouchableOpacity
+      style={styles.addImageButtonContainer} 
+      onPress={() => navigation.navigate("BlogScreen")}>
+          <Image style={styles.addImage} source={require('../assets/add.png')}/>
+      </TouchableOpacity>
+
 
   {/* Conditional rendering for no blogs in the selected category */}
   {filterPostsByTopic().length === 0 && (
@@ -705,6 +725,7 @@ const styles = StyleSheet.create({
       color: COLORS.black, // Changed to black for better visibility
       fontSize: 18,
       fontWeight: '800',
+      textAlign:'center',
     },
     
 
@@ -837,6 +858,17 @@ const styles = StyleSheet.create({
       paddingHorizontal: 7,
       color: COLORS.third,
       textDecorationLine: 'underline',
+    },
+
+    addImageButtonContainer: {
+      justifyContent: 'center', // Center vertically
+      alignItems: 'center', // Center horizontally
+      marginTop: 30, // Add some top margin
+      marginBottom: 20, // Add some bottom margin
+    },
+    addImage: {
+      height: 40,
+      width: 40,
     },
 
 

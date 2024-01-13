@@ -30,10 +30,12 @@ import EditComment from './screens/EditComment';
 import CarbonFootPrintCalc from './screens/CarbonFootPrintCalc';
 import WordleCoop from './screens/WordleCoop';
 import EndScreenCoop from './screens/EndScreenCoop';
-import WordleMultiplayer from './screens/WordleMultiplayer';
-import MultiplayerRoom from './screens/MultiplayerRoom';
 import EndlessWordle from './screens/EndlessWordle';
 import EndlessEndScreen from './screens/EndlessEndScreen';
+import WordleCoop2 from './screens/WordleCoop2';
+import Achievements from './screens/Achievements';
+import CoopWordleInfo from './screens/CoopWordleInfo';
+import EndlessWordleInfo from './screens/EndlessWordleInfo';
 
 
 
@@ -83,6 +85,7 @@ function App(){
         <Stack.Screen name="ForgotPassword" component={ForgotPassword}/>
         
         
+        
       </Stack.Navigator>
     );
   }
@@ -105,10 +108,12 @@ function App(){
       <Stack.Screen name="CarbonFootPrintCalc" component={CarbonFootPrintCalc}/>
       <Stack.Screen name="WordleCoop" component={WordleCoop}/>
       <Stack.Screen name="EndScreenCoop" component={EndScreenCoop}/>
-      <Stack.Screen name="WordleMultiplayer" component={WordleMultiplayer}/>
-      <Stack.Screen name="MultiplayerRoom" component={MultiplayerRoom}/>
       <Stack.Screen name="EndlessWordle" component={EndlessWordle}/>
       <Stack.Screen name="EndlessEndScreen" component={EndlessEndScreen}/>
+      <Stack.Screen name="WordleCoop2" component={WordleCoop2}/>
+      <Stack.Screen name="Achievements" component={Achievements}/>
+      <Stack.Screen name="CoopWordleInfo" component={CoopWordleInfo}/>
+      <Stack.Screen name="EndlessWordleInfo" component={EndlessWordleInfo}/>
     </Stack.Navigator>
   )
 }

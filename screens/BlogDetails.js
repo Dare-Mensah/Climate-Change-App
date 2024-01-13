@@ -66,6 +66,10 @@ const BlogDetails = ({ route, navigation }) => {
         content: newComment,
         timestamp: new Date(),
       });
+          // Update the user's profile to indicate they've posted a comment
+    await firebase.firestore().collection('users').doc(currentUser.uid).update({
+      hasPostedComment: true,
+    });
 
       // Clear the comment input field after successful submission
       setNewComment('');
@@ -73,6 +77,8 @@ const BlogDetails = ({ route, navigation }) => {
       console.error('Error adding comment:', error);
     }
   };
+
+
 
   useEffect(() => {
     const fetchBlogDetails = async () => {
@@ -129,6 +135,10 @@ const handleLikePress = async () => {
       await firebase.firestore().collection('likes').doc(`${currentUser.uid}_${postId}`).set({
         userId: currentUser.uid,
         postId,
+      });
+
+      await firebase.firestore().collection('users').doc(currentUser.uid).update({
+        hasLikedPost: true,
       });
     } else {
       // User has already liked the post

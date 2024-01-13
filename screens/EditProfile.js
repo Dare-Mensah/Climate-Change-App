@@ -15,6 +15,8 @@ const EditProfile = ({route}) => {
 
     const navigation = useNavigation();
 
+    const [hasGalleryPermission, setHasGalleryPermission] = useState(null);
+
     const { uid } = firebase.auth().currentUser; // Get user UID
     //const {username} = route.params;
   

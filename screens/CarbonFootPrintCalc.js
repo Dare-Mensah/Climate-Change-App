@@ -141,6 +141,11 @@ const CarbonFootPrintCalc = ({ navigation }) => {
         timestamp: firebase.firestore.FieldValue.serverTimestamp(),
       });
 
+      // Update the user's profile to indicate they've calculated their carbon footprint
+      await firebase.firestore().collection('users').doc(userId).update({
+      hasCalculatedCarbonFootprint: true,
+      });
+
       // Show an alert to notify the user
       Alert.alert('Success', 'Data saved to Firebase!', [
         { text: 'OK', onPress: () => console.log('OK Pressed') },

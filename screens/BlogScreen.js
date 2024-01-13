@@ -55,6 +55,11 @@ const BlogScreen = () => {
         ]
       );
 
+          // Update the user's profile to indicate they've posted a blog
+    await firebase.firestore().collection('users').doc(userId).update({
+      hasPostedBlog: true,
+    });
+
       console.log('Post saved successfully!');
     } catch (error) {
       console.error('Error saving post:', error);

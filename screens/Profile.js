@@ -20,10 +20,6 @@ const Profile = ({route}) => {
     const navigation = useNavigation();
 
 
-
-
-
-
   return (
     <LinearGradient style={{flex: 1}} colors={['#B7F1B5','#EAEAEA']}>
     <View style={styles.container}>
@@ -54,6 +50,13 @@ const Profile = ({route}) => {
                 <View style={styles.menuItem}>
                     <Image source={require('../assets/edit.png')} style={{height: 30, width: 30}}/>
                     <Text style={styles.menuItemText}>Edit Profile</Text>
+                </View>
+            </TouchableRipple>
+
+            <TouchableRipple onPress={() => navigation.navigate("Achievements")}>
+                <View style={styles.menuItem}>
+                    <Image source={require('../assets/trophy.png')} style={{height: 30, width: 30}}/>
+                    <Text style={styles.menuItemText}>Achievements</Text>
                 </View>
             </TouchableRipple>
 
