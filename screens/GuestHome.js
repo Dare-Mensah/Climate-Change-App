@@ -65,8 +65,8 @@ const GuestHome = ({route}) => {
 
     const wordleOptions = [
       { id: '1', title: 'SinglePlayer Mode', navigateTo: 'GuestWordle' },
-      { id: '2', title: 'Co-op Mode', navigateTo: 'CoopWordleInfo' },
-      { id: '3', title: 'Endless Mode', navigateTo: 'EndlessWordleInfo' },
+      { id: '2', title: 'Co-op Mode', navigateTo: 'GuestCoopInfo' },
+      { id: '3', title: 'Endless Mode', navigateTo: 'GuestEndlessInfo' },
     ];
   
   
@@ -146,11 +146,6 @@ const GuestHome = ({route}) => {
           />
         </View>
 
-
-        <Text style={styles.sectionTitle}>Blogs</Text>
-  
-       
-  
   
         </ScrollView>
       </LinearGradient>

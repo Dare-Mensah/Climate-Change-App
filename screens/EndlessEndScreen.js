@@ -23,30 +23,7 @@ const Number = ({number, label}) => (
 )
 
 
-const GuessDistribution = ({ distribution }) => {
-  if (!distribution) {
-    return null;
-  }
-  const sum = distribution.reduce((total, dist) => dist + total, 0);
-  return (
-    <View style={{ width: '100%', padding: 20, justifyContent: 'flex-start' }}>
-      {distribution.map((dist, index) => (
-        <GuessDistributionLine key={index} position={index + 1} amount={dist} percentage={sum !== 0 ? (100 * dist) / sum : 0} />
-      ))}
-    </View>
-  );
-};
 
-const GuessDistributionLine = ({ position, amount, percentage }) => {
-  return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'flex-start' }}>
-      <Text style={{ fontSize: 17 }}>{position}</Text>
-      <View style={{ backgroundColor: COLORS.grey, margin: 5, padding: 5, width: `${percentage}%`, minWidth: 20, maxWidth: 290 }}>
-        <Text style={{ fontSize: 17 }}>{amount}</Text>
-      </View>
-    </View>
-  );
-};
 
 const EndlessEndScreen = ({ won = false, rows, getCellBGColor, navigation, correctWordsCount, averageDuration }) => {
     const [secondsTillTmr, setSecondsTillTmr] = useState(0);

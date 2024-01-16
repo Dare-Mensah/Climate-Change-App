@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, SafeAreaView,ScrollView, LogBox, Alert, ActivityIndicator, TouchableOpacity} from 'react-native'
+import { StyleSheet, Text, View, SafeAreaView,ScrollView, LogBox, Alert, ActivityIndicator, TouchableOpacity, Pressable, Image} from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { LinearGradient } from 'expo-linear-gradient';
 import Keyboard from '../src/components/Keyboard'
@@ -12,7 +12,6 @@ import * as Clipboard from 'expo-clipboard';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import EndScreen from './EndScreen';
-import GuestEndScreen from './GuestEndScreen';
 LogBox.ignoreAllLogs();
 
 const Number_Of_Tries = 6;
@@ -46,9 +45,9 @@ const  getWordForDay =(day)=>  {
   return words[day % words.length];
 }
 
-const GuestWordle = () => {
+const GuestWordleCoop = () => {
     const navigation = useNavigation();
-    //AsyncStorage.removeItem("@game_Guest") //resetting async storage for game
+    AsyncStorage.removeItem("@game_coop2") //resetting async storage for game
     const word = getWordForDay(dayOfTheYear);
   
   
@@ -63,6 +62,12 @@ const GuestWordle = () => {
     const [curCol, setCurCol] = useState(0);
     const [gameSate, setGameState] = useState('playing');
     const [loaded, setloaded] = useState(false)
+
+
+    // New state variables for player management
+    const [playerTurn, setPlayerTurn] = useState(1); // Player 1 starts
+    const [player1State, setPlayer1State] = useState({ curRow: 0, curCol: 0, gameSate: 'playing' });
+    const [player2State, setPlayer2State] = useState({ curRow: 0, curCol: 0, gameSate: 'playing' });
   
     useEffect(() => {
       if(curRow > 0)
@@ -93,7 +98,7 @@ const GuestWordle = () => {
   
       try{
         //firstly reading the data
-        const existingStateString = await AsyncStorage.getItem("@game_Guest")
+        const existingStateString = await AsyncStorage.getItem("@game_coop2_Guest")
         const existingState = existingStateString ?  JSON.parse(existingStateString) : {};
         if(!existingState) { //then updating the data
           existingState = {}
@@ -102,7 +107,7 @@ const GuestWordle = () => {
         //writing the data back to async
         const dataString =JSON.stringify(existingState); //parsing from JSON object to string
         console.log("Saving", dataString)
-        await AsyncStorage.setItem("@game_Guest", dataString); 
+        await AsyncStorage.setItem("@game_coop2_Guest", dataString); 
       } catch (e){
         console.log("Could not save data to async storage", e)
       }
@@ -111,7 +116,7 @@ const GuestWordle = () => {
   
     const readState = async () =>
     {
-      const dataString = await AsyncStorage.getItem("@game_Guest")
+      const dataString = await AsyncStorage.getItem("@game_coop2_Guest")
       try{
         const data = JSON.parse(dataString)
         const day = data[dayKey]
@@ -129,34 +134,64 @@ const GuestWordle = () => {
   
   
   
+    // New function to check the game state for both players
     const checkGameState = () => {
-      if(checkIfWon() && gameSate != 'won')
-      {
-        setGameState('won');
-      }
-      else if(checkIfLose() && gameSate != 'lost')
-      {
-        setGameState('lost');
-      }
+        const checkPlayerState = (playerState, setPlayerState) => {
+          if (checkIfWon(playerState) && playerState.gameSate !== 'won') {
+            setPlayerState({ ...playerState, gameSate: 'won' });
+            Alert.alert(`Player ${playerTurn} Wins!`, "Congratulations!", [{
+              text: "OK", onPress: () => navigation.navigate('GuestHome')
+            }]);
+            return;
+          }
+          if (playerState.curRow === rows.length && playerState.gameSate !== 'lost') {
+            setPlayerState({ ...playerState, gameSate: 'lost' });
+          }
+        };
+    
+        checkPlayerState(player1State, setPlayer1State);
+        checkPlayerState(player2State, setPlayer2State);
+    
+        // Check if both players have lost and show the alert
+        if (player1State.gameSate === 'lost' && player2State.gameSate == 'lost') {
+          Alert.alert("Game Over", "Both players have lost!", [{
+            text: "OK", onPress: () => navigation.navigate('GuestHome')
+          }]);
+        }
+      };
+
+
+
+
+
+    useEffect(() => {
+        if (loaded) {
+            checkGameState();
+        }
+    }, [player1State, player2State, loaded]);
+
+
+  
+  
+    const checkIfWon = () => {
+        const row = rows[curRow - 1]; // This might be undefined if curRow is 0 or out of array bounds
+        if (!row) {
+            return false; // If row is undefined, then the player hasn't won
+        }
+        return row.every((letter, i) => letter === letters[i]);
     };
-  
-  
-  
-    const checkIfWon = () => { // winning state
-      const row = rows[curRow-1];
-  
-      return row.every((letter, i) => letter == letters[i]) //if every letter from a row is equalt to the letter we want to guess then we won
-    }
   
     const checkIfLose = () => { //lose state
       return !checkIfWon() && curRow == rows.length;
     }
   
     const onKeyPressed = (key) => {
-      if(gameSate != 'playing')
-      {
-        return;
-      }
+        let currentState = playerTurn == 1 ? player1State : player2State;
+        let setCurrentState = playerTurn == 1 ? setPlayer1State : setPlayer2State;
+
+        if (currentState.gameSate != 'playing') {
+            return;
+        }
   
       const updatedRows = copyArray(rows);
   
@@ -171,12 +206,13 @@ const GuestWordle = () => {
         }
         return;
       }
-  
+
   
     
   
       if (key == ENTER)
       {
+        setPlayerTurn(playerTurn === 1 ? 2 : 1);
         if(curCol == rows[0].length)
         {
           setCurRow(curRow+1);
@@ -234,7 +270,7 @@ const GuestWordle = () => {
   
   
     if (gameSate != 'playing') {
-      return (<GuestEndScreen won={gameSate == 'won'} rows={rows} getCellBGColor={getCellBGColor} navigation={navigation}/>)
+      return (<EndScreen won={gameSate == 'won'} rows={rows} getCellBGColor={getCellBGColor} navigation={navigation}/>)
     }
   
   
@@ -242,7 +278,16 @@ const GuestWordle = () => {
     return (
       <LinearGradient style={{flex: 1}} colors={['#EAEAEA', '#B7F1B5']}>
       <SafeAreaView style={styles.container}>
-        <Text style={styles.title}>WORDLE</Text>
+            <Text style={styles.title}>WORDLE Coop</Text>
+
+        <View style={{flexDirection:'row'}}>
+          <Text style={styles.currentPlayerText}>
+              Player {playerTurn}'s Turn
+            </Text>
+            <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("GuestHome")}>
+          <Text style={{fontSize:20, fontWeight:'bold'}}>    Go Home</Text>
+        </TouchableOpacity>
+        </View>
   
         <View style={[styles.map]}>
           {rows.map((row, i) =>(
@@ -272,7 +317,7 @@ const GuestWordle = () => {
     )
 }
 
-export default GuestWordle
+export default GuestWordleCoop
 
 const styles = StyleSheet.create({
     container: {
@@ -332,5 +377,15 @@ const styles = StyleSheet.create({
       color: COLORS.white,
       fontSize: 18,
       fontWeight: 'bold',
+    },
+    currentPlayerText:{
+      fontSize:20,
+      fontWeight:'500'
+    },
+    inputDetailsLink: {
+      fontSize: 14,
+      paddingHorizontal: 7,
+      color: COLORS.third,
+      textDecorationLine: 'underline',
     },
 })

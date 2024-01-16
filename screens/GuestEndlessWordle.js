@@ -13,6 +13,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import EndScreenCoop from './EndScreenCoop';
 import EndlessEndScreen from './EndlessEndScreen';
+import GuestEndlessEndScreen from './GuestEndlessEndScreen';
 LogBox.ignoreAllLogs();
 
 const Number_Of_Tries = 6;
@@ -21,6 +22,7 @@ const copyArray = (arr) => {
   return [...arr.map((rows) => [...rows])];
 };
 
+const words = ["hello", "yesno", "yooo", "noooo","minex"];
 
 const getDayOfTheYear = () => {
   const now = new Date();
@@ -38,7 +40,7 @@ const getDayKey = () => {
 };
 
 const dayOfTheYear = getDayOfTheYear();
-const dayKeyCoop = `${getDayKey()}-endless`;
+const dayKeyCoop = `${getDayKey()}-endless-Guest`;
 
 const getWordForDay = (day) => {
   return words[day % words.length];
@@ -49,39 +51,18 @@ const getRandomWord = () => {
     return words[Math.floor(Math.random() * words.length)];
   };
 
+const GuestEndlessWordle = () => {
+    const navigation = useNavigation();
+    //AsyncStorage.removeItem("@game") //resetting async storage for game
+    //const word = getWordForDay(dayOfTheYear);
 
+    const [wordIndex, setWordIndex] = useState(0);
+    const word = words[wordIndex];
   
-
-  const words = {
-    easy: ["hello", "yesno", "yooo", "noooo", "minex"],
-    medium: ["complex", "wordle", "reactjs", "endless", "mobile"],
-    hard: ["difficulty", "javascript", "persistent", "animation", "challenge"]
-  };
+    const letters = word.split("");//returns an array of characters.
   
-  // New function to get a word based on difficulty
-  const getWordByDifficulty = (difficulty, index) => {
-    return words[difficulty][index % words[difficulty].length];
-  };
-
-
-const EndlessWordle = () => {
-  const navigation = useNavigation();
-
-  const [difficulty, setDifficulty] = useState('easy'); // New state for difficulty
-  const [wordIndex, setWordIndex] = useState(0); // Existing state
-  const [correctWordsCount, setCorrectWordsCount] = useState(0);
-  const [timer, setTimer] = useState(60); // Initialize timer with 60 seconds
-  // ... [other state initializations]
-
-  // Define 'word' after state initializations
-  const word = getWordByDifficulty(difficulty, wordIndex); // Correct placement
-  const letters = word.split(""); // Now 'word' is defined before use
-
-  // Initialize 'rows' state with correct length based on 'letters'
-  const [rows, setRows] = useState(
-    new Array(Number_Of_Tries).fill(new Array(letters.length).fill(""))
-  );
-
+    const [rows, setRows] = useState(
+      new Array(Number_Of_Tries).fill(new Array(letters.length).fill("")));
   
     //const rows = new Array(Number_Of_Tries).fill(new Array(letters.length).fill(''))
   
@@ -90,13 +71,13 @@ const EndlessWordle = () => {
     const [gameSate, setGameState] = useState('playing');
     const [loaded, setloaded] = useState(false)
 
+    const [correctWordsCount, setCorrectWordsCount] = useState(0);
+
+
+    const [timer, setTimer] = useState(60); // Initialize timer with 60 seconds
 
     const [startTime, setStartTime] = useState(null);
     const [guessDurations, setGuessDurations] = useState([]);
-
-
-
-    
 
 
 
@@ -136,30 +117,20 @@ const EndlessWordle = () => {
 
 
   
-  // Modified resetGameForNextWord function
-  const resetGameForNextWord = () => {
-    const nextIndex = (wordIndex + 1) % words[difficulty].length;
-    setWordIndex(nextIndex);
+    const resetGameForNextWord = () => {
+        
+        const nextIndex = (wordIndex + 1) % words.length;
+        setWordIndex(nextIndex); // Move to the next word
 
-    // Update difficulty based on correctWordsCount
-    if (correctWordsCount % 5 === 0 && correctWordsCount > 0) {
-      if (difficulty === 'easy') setDifficulty('medium');
-      else if (difficulty === 'medium') setDifficulty('hard');
-    }
+        const nextWord = words[nextIndex]; // Get the next word
+        const nextLetters = nextWord.split("");
 
-    const nextWord = getWordByDifficulty(difficulty, nextIndex);
-    const nextLetters = nextWord.split("");
-
-    setRows(new Array(Number_Of_Tries).fill(new Array(nextLetters.length).fill("")));
-    setCurRow(0);
-    setCurCol(0);
-    setGameState('playing');
-
-    // Adjust timer based on difficulty
-    if (difficulty === 'easy') setTimer(60);
-    else if (difficulty === 'medium') setTimer(120);
-    else if (difficulty === 'hard') setTimer(180);
-  };
+        setRows(new Array(Number_Of_Tries).fill(new Array(nextLetters.length).fill("")));
+        setCurRow(0);
+        setCurCol(0);
+        setGameState('playing');
+        setTimer(60); // Reset timer for next word
+    };
   
   
   
@@ -183,7 +154,7 @@ const EndlessWordle = () => {
   
       try{
         //firstly reading the data
-        const existingStateString = await AsyncStorage.getItem("@game_endless")
+        const existingStateString = await AsyncStorage.getItem("@game_endless_Guest")
         const existingState = existingStateString ?  JSON.parse(existingStateString) : {};
         if(!existingState) { //then updating the data
           existingState = {}
@@ -192,7 +163,7 @@ const EndlessWordle = () => {
         //writing the data back to async
         const dataString =JSON.stringify(existingState); //parsing from JSON object to string
         console.log("Saving", dataString)
-        await AsyncStorage.setItem("@game_endless", dataString); 
+        await AsyncStorage.setItem("@game_endless_Guest", dataString); 
       } catch (e){
         console.log("Could not save data to async storage", e)
       }
@@ -201,7 +172,7 @@ const EndlessWordle = () => {
   
     const readState = async () =>
     {
-      const dataString = await AsyncStorage.getItem("@game_endless")
+      const dataString = await AsyncStorage.getItem("@game_endless_Guest")
       try{
         const data = JSON.parse(dataString)
         const day = data[dayKey]
@@ -342,7 +313,7 @@ const EndlessWordle = () => {
   
     if (gameSate != 'playing') {
       const averageDuration = calculateAverageDuration();
-      return (<EndlessEndScreen won={gameSate == 'won'} correctWordsCount={correctWordsCount} rows={rows} getCellBGColor={getCellBGColor} navigation={navigation} averageDuration={averageDuration}/>)
+      return (<GuestEndlessEndScreen won={gameSate == 'won'} correctWordsCount={correctWordsCount} rows={rows} getCellBGColor={getCellBGColor} navigation={navigation} averageDuration={averageDuration}/>)
     }
 
 
@@ -386,14 +357,14 @@ const EndlessWordle = () => {
   )
 }
 
+export default GuestEndlessWordle
 
-export default EndlessWordle
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        alignItems: 'center',
+    },
 
-const styles = StyleSheet.create({    container: {
-    flex: 1,
-    alignItems: 'center',
-
-},
 title: {  
     fontSize: 32,
     fontWeight: 'bold',
@@ -446,4 +417,5 @@ multiplayerButtonText: {
   color: COLORS.white,
   fontSize: 18,
   fontWeight: 'bold',
-},})
+},
+})

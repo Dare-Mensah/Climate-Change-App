@@ -11,7 +11,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { LineChart } from 'react-native-chart-kit';
 import { BarChart } from 'react-native-chart-kit';
-import * as Notifications from 'expo-notifications';
+
 
 
 const {width} = Dimensions.get('screen')

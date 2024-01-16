@@ -12,6 +12,7 @@ import { ENTER } from '../src/constants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import {firebase} from '../config'
+import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
 
 const Number = ({number, label}) => (
@@ -46,9 +47,7 @@ const GuessDistributionLine = ({ position, amount, percentage }) => {
     </View>
   );
 };
-
-
-const GuestEndScreen = ({ won = false, rows, getCellBGColor, navigation }) => {
+const GuestEndlessEndScreen = ({ won = false, rows, getCellBGColor, navigation, correctWordsCount, averageDuration }) => {
     const [secondsTillTmr, setSecondsTillTmr] = useState(0);
     const [played, setPlayed] = useState(0);
     const [winRate, setWinRate] = useState(0);
@@ -57,22 +56,18 @@ const GuestEndScreen = ({ won = false, rows, getCellBGColor, navigation }) => {
     const [distribution, setDistribution] = useState(null)
 
 
-  
     const saveStatsToAsyncStorage = async () => {
         const statsData = {
-          curStreak,
-          winRate,
-          played,
-          distribution,
+            curStreak,
+            winRate,
+            played,
+            distribution,
         };
-    
-        // Save to AsyncStorage
+
+        // Save to AsyncStorage with a different key
         const statsString = JSON.stringify(statsData);
-        await AsyncStorage.setItem('@game_stats_Guest', statsString);
-      
+        await AsyncStorage.setItem('@game_endless_Guest', statsString);
     };
-
-
 
 
 
@@ -81,7 +76,19 @@ const GuestEndScreen = ({ won = false, rows, getCellBGColor, navigation }) => {
       saveStatsToAsyncStorage(); // Save stats to AsyncStorage
     }, []);
 
+    // Assuming correctWordsCount is the total number of words guessed correctly
+useEffect(() => {
+  const updateAchievementStatus = async () => {
+    const currentUser = firebase.auth().currentUser;
+    if (correctWordsCount > 3) {
+      await firebase.firestore().collection('users').doc(currentUser.uid).update({
+        hasAchievedWordMaster: true,
+      });
+    }
+  };
 
+  updateAchievementStatus();
+}, [correctWordsCount]);
   
     const share = () => {
       // Sharing the game result.
@@ -109,7 +116,7 @@ const GuestEndScreen = ({ won = false, rows, getCellBGColor, navigation }) => {
     }, []);
   
     const readState = async () => {
-      const dataString = await AsyncStorage.getItem('@game_Guest');
+      const dataString = await AsyncStorage.getItem('@game_endless_Guest');
       let data;
       try {
         data = JSON.parse(dataString);
@@ -186,50 +193,23 @@ const GuestEndScreen = ({ won = false, rows, getCellBGColor, navigation }) => {
         <ScrollView showsVerticalScrollIndicator={false}>
         <SafeAreaView style={{width:'100%', alignContent:'center'}}>
         <View>
-            <Text style={styles.title}>WORDLE</Text>
-            <Text style ={{fontSize: 30, color:"black", fontWeight: 400, textAlign: 'center',}}>{won ? 'You Won!' : 'Try again tomorrow'}</Text>
+            <Text style={styles.title}>WORDLE EndScreen</Text>
         </View>
 
         <Text style ={{fontSize: 30, color:"black", fontWeight: 200, marginVertical: 20, textAlign: 'center',}}>Your Statisitics</Text>
         <View>
-            <Number number={played} label ={"Played"}/>
-            <Number number={winRate} label ={"Win %"}/>
-            <Number number={curStreak} label ={"Current Streak"}/>
-            <Number number={maxStreak} label ={"Max Streak"}/> 
+            <Number number={correctWordsCount} label ={"Words Guessed Correctly"}/>
+            <Number number={averageDuration} label ={"Average Time per Guess"}/>
         </View>
 
-        <Text style ={{fontSize: 30, color:"black", fontWeight: 200, marginVertical: 20, textAlign: 'center',}}>Guess Distribution</Text>
-
-        <GuessDistribution distribution={distribution}/>
-
-        <View>
-            
-            <View>
-                <Text style ={{fontSize: 30, color:"black", fontWeight: 200, marginTop:20, textAlign: 'center',}}>Next Game</Text>
-                <Text style ={{fontSize: 30, color:"black", fontWeight: 'bold',marginTop:10, textAlign: 'center',}}>{calculateTimeTillNextGame()}</Text>
-            </View>
-            
-            <TouchableOpacity onPress={share}
-                style={[styles.box1, {marginTop:40, backgroundColor:COLORS.third}]}
-            >
-                <Text style={[styles.text1,{color:COLORS.white}]}>Share</Text>
-            </TouchableOpacity>
+      <View style={styles.buttonsContainer}>
 
 
-
-            <TouchableOpacity onPress={() => {
-              navigation.navigate("GuestHome", {
-                currentStreak: curStreak,
-                winPercentage: winRate,
-                playedState: played,
-              })
-            }}
-                style={[styles.box1, {marginTop:40, backgroundColor:COLORS.third}]}
-            >
-                <Text style={[styles.text1,{color:COLORS.white}]}>Return Home</Text>
-            </TouchableOpacity>
-
-        </View>
+        {/* Home Button */}
+        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("GuestHome")}>
+          <Text style={styles.buttonText}>Home</Text>
+        </TouchableOpacity>
+      </View>
 
         </SafeAreaView>
         </ScrollView>
@@ -238,7 +218,7 @@ const GuestEndScreen = ({ won = false, rows, getCellBGColor, navigation }) => {
   )
 }
 
-export default GuestEndScreen
+export default GuestEndlessEndScreen
 
 const styles = StyleSheet.create({
     container: {
@@ -280,4 +260,41 @@ const styles = StyleSheet.create({
       
       },
 
+
+      buttonsContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-evenly',
+        alignItems: 'center',
+        shadowColor: '#000000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.09,
+        shadowRadius: 10,
+        marginTop:20
+        
+
+        // You can adjust padding, margin, etc. as needed
+      },
+
+
+      button: {
+        backgroundColor: '#4CAF50', // Example color
+        padding: 15, // Increased padding
+        borderRadius: 8, // Slightly larger border radius
+        // Optional: define width and height if you want fixed size buttons
+        width: 120, // Example fixed width
+        height: 50,  // Example fixed height
+        justifyContent: 'center', // Centers text vertically
+        alignItems: 'center', // Centers text horizontally
+        margin: 5, // Add margin if buttons are too close to each other
+        // other styling for the button
+      },
+      buttonText: {
+        color: '#fff',
+        fontSize: 20, // Larger font size
+        fontWeight: 'bold', // Optional: make text bold
+        // other text styling
+      },
 })
