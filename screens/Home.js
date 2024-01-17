@@ -11,6 +11,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { LineChart } from 'react-native-chart-kit';
 import { BarChart } from 'react-native-chart-kit';
+import axios from 'axios';
+import { Linking } from 'react-native';
 
 
 
@@ -80,15 +82,53 @@ const Home = ({route}) => {
   const [refreshing, setRefreshing] = useState(false); // State to track whether the data is being refreshed
   const [carbonFootprintData, setCarbonFootprintData] = useState(null);
   const [leastCarbonFootprintData, setLeastCarbonFootprintData] = useState(null);
+  const [newsArticles, setNewsArticles] = useState([]);
 
+
+  const fetchNewsArticles = async () => {
+    try {
+      const url = 'https://newsdata.io/api/1/news';
+      const params = {
+        country: 'gb',
+        category: 'environment',
+        apiKey: 'pub_36628886cd9bf05e85630c6f3e42168a0eb32',
+      };
+      
+      const response = await axios.get(url, { params });
+      if (response.data && response.data.results) {
+        setNewsArticles(response.data.results.slice(0, 4)); // Get only the first four articles
+      }
+    } catch (error) {
+      console.error('Error fetching news articles:', error);
+    }
+  };
+
+
+  const NewsArticleCard = ({ article }) => {
+    return (
+      <TouchableOpacity onPress={() => Linking.openURL(article.link)} style={styles.newsArticleCardContainer}>
+        <View style={styles.newsArticleCardDetailBox}>
+          <Text style={styles.newsArticleTitle}>{article.title}</Text>
+          <Text style={styles.newsArticleDescription}>{article.description}</Text>
+        </View>
+      </TouchableOpacity>
+    );
+  };
+  
   
 
   useEffect(() => {
+    fetchNewsArticles();
     fetchCarbonFootprintData();
     fetchLeastCarbonFootprintData().then(leastFootprintData => {
       setLeastCarbonFootprintData(leastFootprintData);
     });
   }, [refreshing]);
+
+
+
+
+
   
   const fetchCarbonFootprintData = async () => {
     try {
@@ -495,21 +535,14 @@ const Home = ({route}) => {
     />
 
 
-<Text style={styles.sectionTitle}>Wordle</Text>
+    <View style={{flexDirection:'row'}}>
+    <Text style={[styles.sectionTitle, {marginTop:50}]}>Filter Blogs by Topic</Text>
+    <TouchableOpacity onPress={() => navigation.navigate("BlogScreen")}>
+        <Text style={[styles.environmentLink, {marginTop:55}]}> Create One!</Text>
+    </TouchableOpacity>
+    </View>
 
-<FlatList
-  contentContainerStyle={{ paddingLeft: 20 }}
-  horizontal
-  showsHorizontalScrollIndicator={false}
-  data={wordleOptions}
-  keyExtractor={(item) => item.id}
-  renderItem={({ item }) => <WordleOption item={item} />}
-
-/>
-
-
-        <Text style={[styles.sectionTitle, {marginTop:50}]}>Filter Blogs by Topic</Text>
-        <FlatList
+    <FlatList
     contentContainerStyle={{ paddingLeft: 20 }}
     horizontal
     showsHorizontalScrollIndicator={false}
@@ -548,13 +581,6 @@ const Home = ({route}) => {
 />
 
 
-      <TouchableOpacity
-      style={styles.addImageButtonContainer} 
-      onPress={() => navigation.navigate("BlogScreen")}>
-          <Image style={styles.addImage} source={require('../assets/add.png')}/>
-      </TouchableOpacity>
-
-
   {/* Conditional rendering for no blogs in the selected category */}
   {filterPostsByTopic().length === 0 && (
     <View style={styles.noBlogsContainer}>
@@ -566,12 +592,40 @@ const Home = ({route}) => {
       </TouchableOpacity>
     </View>
   )}
-     
 
+
+  <Text style={styles.sectionTitle}>Wordle</Text>
+
+<FlatList
+  contentContainerStyle={{ paddingLeft: 20 }}
+  horizontal
+  showsHorizontalScrollIndicator={false}
+  data={wordleOptions}
+  keyExtractor={(item) => item.id}
+  renderItem={({ item }) => <WordleOption item={item} />}
+
+/>
+
+
+
+    <View style={{flexDirection:'row'}}>
+    <Text style={[styles.sectionTitle, {marginTop:50}]}>Environment News</Text>
+    <TouchableOpacity onPress={() => navigation.navigate("News")}>
+        <Text style={[styles.environmentLink, {marginTop:55}]}> See More!</Text>
+    </TouchableOpacity>
+    </View>
+
+    <FlatList
+  contentContainerStyle={{ paddingLeft: 20 }}
+  horizontal
+  showsHorizontalScrollIndicator={false}
+  data={newsArticles}
+  keyExtractor={(item, index) => 'news-' + index}
+  renderItem={({ item }) => <NewsArticleCard article={item} />}
+/>
 
       <Text style={styles.sectionTitle}>Tips</Text>
-        
-  
+      
         <View>
           <FlatList 
           contentContainerStyle={{paddingLeft:20}}
@@ -581,8 +635,6 @@ const Home = ({route}) => {
           renderItem={({item}) => <Card Tips={item}/>}
           />
         </View>
-
-  
         </ScrollView>
       </LinearGradient>
     )
@@ -801,6 +853,13 @@ const styles = StyleSheet.create({
     },
 
 
+    environmentLink: {
+      fontSize: 14,
+      color: COLORS.primary,
+      textDecorationLine: 'underline',
+    },
+
+
 
 
 
@@ -836,5 +895,47 @@ const styles = StyleSheet.create({
       width: 40,
     },
 
+    newsArticleContainer: {
+      padding: 10,
+      borderBottomWidth: 1,
+      borderColor: '#ddd',
+    },
+    newsArticleTitle: {
+      fontSize: 16,
+      fontWeight: 'bold',
+    },
+    newsArticleDescription: {
+      fontSize: 14,
+      color: 'grey',
+    },
+
+
+
+    newsArticleCardContainer: {
+      backgroundColor: COLORS.white,
+      elevation: 4,
+      borderRadius: 20,
+      width: 250,
+      marginRight: 20,
+      overflow: 'hidden',
+      marginBottom: 10,
+    },
+    
+    newsArticleCardDetailBox: {
+      padding: 17,
+      backgroundColor: 'rgba(255, 255, 255, 1)',
+    },
+    
+    newsArticleTitle: {
+      fontSize: 18,
+      fontWeight: 'bold',
+      color: COLORS.black,
+      marginBottom: 10,
+    },
+    
+    newsArticleDescription: {
+      fontSize: 14,
+      color: COLORS.darkgrey,
+    },
 
 })

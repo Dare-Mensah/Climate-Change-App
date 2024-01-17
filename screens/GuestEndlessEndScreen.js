@@ -12,7 +12,6 @@ import { ENTER } from '../src/constants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import {firebase} from '../config'
-import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
 
 const Number = ({number, label}) => (
