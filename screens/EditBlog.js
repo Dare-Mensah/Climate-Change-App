@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert, ScrollView } from 'react-native';
 import { firebase } from '../config';
 import COLORS from '../data/colors';
+import * as Animatable from 'react-native-animatable';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const EditBlog = ({ route, navigation }) => {
   const { postId } = route.params;
@@ -82,7 +84,16 @@ const EditBlog = ({ route, navigation }) => {
   }
 
   return (
+    <LinearGradient style={{flex: 1}} colors={['#EAEAEA', '#B7F1B5']}>
     <View style={styles.container}>
+      <View>
+        <Animatable.Text 
+        animation={"fadeInUpBig"}
+        style={[styles.title, style={paddingTop:10, marginBottom: 20}]}>Edit Blog </Animatable.Text>
+      </View>
+
+      <ScrollView showsVerticalScrollIndicator={false}>
+
 
       <Text style={styles.label}>Title</Text>
       <TextInput style={styles.input} value={title} onChangeText={setTitle} />
@@ -105,10 +116,14 @@ const EditBlog = ({ route, navigation }) => {
         </TouchableOpacity>
 
         <TouchableOpacity onPress={confirmDelete} style={styles.deleteButton}>
-          <Text style={styles.buttonText}>Delete</Text>
+          <Text style={styles.buttonText}>Delete Blog</Text>
         </TouchableOpacity>
       </View>
+      </ScrollView>
+    
     </View>
+    
+    </LinearGradient>
   );
 };
 
@@ -121,6 +136,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 4,
   },
+  title: {
+    fontSize: 44,
+    marginTop: 5,
+    //fontFamily: 'Montserrat',
+    fontWeight: 'bold',
+  },
   input: {
     height: 40,
     borderColor: 'gray',
@@ -130,7 +151,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   largeInput: {
-    height: 100,
+    height: 300,
   },
   buttonsContainer: {
     flexDirection: 'row',

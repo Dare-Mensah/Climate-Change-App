@@ -41,7 +41,7 @@ const dayOfTheYear = getDayOfTheYear();
 const dayKeyCoop = `${getDayKey()}-endless`;
 
 const getWordForDay = (day) => {
-  return words[day % words.length];
+  return words[day % words.length]; 
 };
 
 
@@ -93,12 +93,6 @@ const EndlessWordle = () => {
 
     const [startTime, setStartTime] = useState(null);
     const [guessDurations, setGuessDurations] = useState([]);
-
-
-
-    
-
-
 
 
     useEffect(() => {

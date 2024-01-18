@@ -511,30 +511,6 @@ const Home = ({route}) => {
   )}
 
 
-  <Text style={styles.sectionTitle}>Carbon Footprint Comparison</Text>
-    <BarChart
-      data={prepareGraphData()}
-      width={Dimensions.get("window").width-40}
-      height={220}
-      chartConfig={{
-        backgroundColor: "#e26a00",
-        backgroundGradientFrom: "#fb8c00",
-        backgroundGradientTo: "#ffa726",
-        decimalPlaces: 2,
-        color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-        labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-      }}
-      bezier
-      style={{
-        paddingHorizontal: 20, // Add horizontal padding
-        alignItems: 'center', // Center the graph horizontally
-        marginTop: 10, 
-        marginBottom: 20, 
-        borderRadius:16,
-      }}
-    />
-
-
     <View style={{flexDirection:'row'}}>
     <Text style={[styles.sectionTitle, {marginTop:50}]}>Filter Blogs by Topic</Text>
     <TouchableOpacity onPress={() => navigation.navigate("BlogScreen")}>

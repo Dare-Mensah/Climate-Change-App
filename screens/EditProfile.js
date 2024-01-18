@@ -118,40 +118,37 @@ const EditProfile = ({route}) => {
       });
     };
   
-    
-    // Call this function to delete the user profile
-    deleteUserProfile();
-
 
     const deleteProfile = () => {
-        Alert.alert(
-          'Delete Account',
-          'Are you sure you want to delete your account? This action cannot be undone.',
-          [
-            {
-              text: 'Cancel',
-              style: 'cancel',
-            },
-            {
-              text: 'Delete',
-              onPress: () => confirmDelete(),
-              style: 'destructive',
-            },
-          ]
-        );
-      };
+      Alert.alert(
+        'Delete Account',
+        'Are you sure you want to delete your account? This action cannot be undone.',
+        [
+          {
+            text: 'Cancel',
+            style: 'cancel',
+          },
+          {
+            text: 'Delete',
+            onPress: () => confirmDelete(),
+            style: 'destructive',
+          },
+        ]
+      );
+  };
+
+
     
-      const confirmDelete = async () => {
-        try {
-          await firebase.firestore().collection('users').doc(uid).delete(); // Delete user document
-          await firebase.auth().currentUser.delete(); // Delete user account
-          showAlert('Account Deleted', 'Your account has been deleted successfully.');
-          navigation.navigate('Home'); // Navigate to the home screen or login screen
-        } catch (error) {
-          console.error('Error deleting account:', error.message);
-          showAlert('Error', 'Failed to delete account. Please try again.');
-        }
-      };
+  const confirmDelete = async () => {
+    try {
+        await deleteUserProfile(); // Call deleteUserProfile here
+        showAlert('Account Deleted', 'Your account has been deleted successfully.');
+        navigation.navigate('Home'); // Navigate to the home screen or login screen
+    } catch (error) {
+        console.error('Error deleting account:', error.message);
+        showAlert('Error', 'Failed to delete account. Please try again.');
+    }
+}
 
 
 

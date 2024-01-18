@@ -12,6 +12,15 @@ const CarbonFootPrintCalc = ({ navigation }) => {
   const [gasUsage, setGasUsage] = useState('');
   const [transportationMiles, setTransportationMiles] = useState('');
   const [carbonFootprint, setCarbonFootprint] = useState(null);
+  const [name, setName] = useState('');
+  const [carbonFootprintData, setCarbonFootprintData] = useState(null);
+  const [leastCarbonFootprintData, setLeastCarbonFootprintData] = useState(null);
+
+  const [leastElectricityUsageData, setLeastElectricityUsageData] = useState(null);
+
+  const [leastGasUsageData, setLeastGasUsageData] = useState(null);
+
+  const [refreshing, setRefreshing] = useState(false); // State to track whether the data is being refreshed
 
 
   const calculateCarbonFootprint = () => {
@@ -125,6 +134,16 @@ const CarbonFootPrintCalc = ({ navigation }) => {
       </Pressable>
     );
   };
+
+
+  useEffect(() => {
+    fetchCarbonFootprintData();
+    fetchLeastElectricityUsageData();
+    fetchLeastGasUsageData();
+    fetchLeastCarbonFootprintData().then(leastFootprintData => {
+      setLeastCarbonFootprintData(leastFootprintData);
+    });
+  }, [refreshing]);
   
 
   const saveDataToFirebase = async (carbonFootprint) => {
@@ -162,6 +181,159 @@ const CarbonFootPrintCalc = ({ navigation }) => {
       ]);
     }
   };
+
+
+  const fetchCarbonFootprintData = async () => {
+    try {
+      const userId = firebase.auth().currentUser.uid;
+  
+      const snapshot = await firebase
+        .firestore()
+        .collection('carbon_footprints')
+        .where('userId', '==', userId)
+        .orderBy('timestamp', 'desc')
+        .limit(1)
+        .get();
+  
+      if (!snapshot.empty) {
+        const data = snapshot.docs[0].data();
+        setCarbonFootprintData(data);
+  
+        // Additional data for electricity, transportation, and gas usage
+        console.log('Electricity Usage:', data.electricityUsage);
+        console.log('Transportation Usage:', data.transportationUsage);
+        console.log('Gas Usage:', data.gasUsage);
+      }
+      else {
+        // No carbon footprint data found, you can guide the user to input their details
+        console.log('No carbon footprint data found. Please input your details.');
+      }
+    } catch (error) {
+      console.error('Error fetching carbon footprint data:', error);
+    }
+  };
+
+
+  const handleRefresh = () => {
+    setRefreshing(true); // Set refreshing to true when the user triggers the refresh
+  };
+  
+
+
+  useEffect(() => {
+    const userId = firebase.auth().currentUser.uid;
+    firebase.firestore().collection('users')
+      .doc(userId).get()
+      .then((snapshot) => {
+        if (snapshot.exists) {
+          const userData = snapshot.data();
+          setName(userData.username); // Set the username in state
+        } else {
+          console.log('User does not exist');
+        }
+      }).catch(error => {
+        console.error("Error fetching user data: ", error);
+      });
+  }, []);
+
+  const prepareGraphData = () => {
+    const labels = ['My Footprint', 'Least Footprint'];
+    const datasets = [{
+      data: [
+        carbonFootprintData?.totalCarbonFootprint || 0,
+        leastCarbonFootprintData?.totalCarbonFootprint || 0
+      ],
+      color: (opacity = 1) => `rgba(134, 65, 244, ${opacity})`,
+      strokeWidth: 2
+    }];
+  
+    return { labels, datasets };
+  };
+
+
+  const fetchLeastCarbonFootprintData = async () => {
+    try {
+      const snapshot = await firebase.firestore().collection('carbon_footprints')
+        .orderBy('totalCarbonFootprint', 'asc') // Order by the total carbon footprint in ascending order
+        .limit(1) // Get only the first document (user with least carbon footprint)
+        .get();
+  
+      if (!snapshot.empty) {
+        const leastFootprintData = snapshot.docs[0].data();
+        return leastFootprintData; // Return the least carbon footprint data
+      }
+    } catch (error) {
+      console.error('Error fetching least carbon footprint data:', error);
+    }
+  };
+
+  const fetchLeastElectricityUsageData = async () => {
+    try {
+      const snapshot = await firebase.firestore().collection('carbon_footprints')
+        .orderBy('electricityUsage', 'asc') // Order by electricity usage in ascending order
+        .limit(1) // Get only the first document (user with least electricity usage)
+        .get();
+  
+      if (!snapshot.empty) {
+        const leastElectricityUsageData = snapshot.docs[0].data();
+        setLeastElectricityUsageData(leastElectricityUsageData); // Update state with fetched data
+      }
+    } catch (error) {
+      console.error('Error fetching least electricity usage data:', error);
+    }
+  };
+
+
+
+  const prepareGraphDataElec = () => {
+    const labels = ['My Electricity Usage', 'Least Electricity Usage'];
+    const datasets = [{
+      data: [
+        parseFloat(electricityUsage) || 0, // Current user's electricity usage
+        leastElectricityUsageData ? parseFloat(leastElectricityUsageData.electricityUsage) : 0 // Least electricity usage
+      ],
+      color: (opacity = 1) => `rgba(134, 65, 244, ${opacity})`,
+      strokeWidth: 2
+    }];
+  
+    return { labels, datasets };
+  };
+
+
+
+  const fetchLeastGasUsageData = async () => {
+    try {
+      const snapshot = await firebase.firestore().collection('carbon_footprints')
+        .orderBy('gasUsage', 'asc') // Order by gas usage in ascending order
+        .limit(1) // Get only the first document (user with least gas usage)
+        .get();
+  
+      if (!snapshot.empty) {
+        const leastGasUsageData = snapshot.docs[0].data();
+        setLeastGasUsageData(leastGasUsageData); // Update state with fetched data
+      }
+    } catch (error) {
+      console.error('Error fetching least gas usage data:', error);
+    }
+  };
+
+
+  const prepareGraphDataGas = () => {
+    const labels = ['My Gas Usage', 'Least Gas Usage'];
+    const datasets = [{
+      data: [
+        parseFloat(gasUsage) || 0, // Current user's gas usage
+        leastGasUsageData ? parseFloat(leastGasUsageData.gasUsage) : 0 // Least gas usage
+      ],
+      color: (opacity = 1) => `rgba(134, 65, 244, ${opacity})`,
+      strokeWidth: 2
+    }];
+  
+    return { labels, datasets };
+  };
+
+
+
 
   return (
     <LinearGradient style={{flex: 1, padding: 16}} colors={['#EAEAEA', '#B7F1B5']}>
@@ -218,6 +390,101 @@ const CarbonFootPrintCalc = ({ navigation }) => {
           Total Carbon Footprint: {carbonFootprint} CO2e
         </Text>
       )}
+
+
+    <Text style={styles.sectionTitle}>Carbon Footprint Comparison</Text>
+    <BarChart
+      data={prepareGraphData()}
+      width={Dimensions.get("window").width-40}
+      height={220}
+      chartConfig={{
+        backgroundColor: "#e26a00",
+        backgroundGradientFrom: "#fb8c00",
+        backgroundGradientTo: "#ffa726",
+        decimalPlaces: 2,
+        color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+        labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+      }}
+      bezier
+      style={{
+        paddingHorizontal: 20, // Add horizontal padding
+        alignItems: 'center', // Center the graph horizontally
+        marginTop: 10, 
+        marginBottom: 20, 
+        borderRadius:16,
+      }}
+    />
+
+{carbonFootprintData?.totalCarbonFootprint <= leastCarbonFootprintData?.totalCarbonFootprint &&
+    <Text style={styles.congratulatoryMessage}>
+      Congratulations! You have the lowest carbon footprint!
+    </Text>
+  }
+
+
+<Text style={styles.sectionTitle}>Electricity Comparison</Text>
+
+<BarChart
+  data={prepareGraphDataElec()}
+  width={Dimensions.get("window").width - 40}
+  height={220}
+  chartConfig={{
+    backgroundColor: "#e26a00",
+    backgroundGradientFrom: "#fb8c00",
+    backgroundGradientTo: "#ffa726",
+    decimalPlaces: 2,
+    color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+    labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+  }}
+  bezier
+  style={{
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    marginTop: 10,
+    marginBottom: 20,
+    borderRadius: 16,
+  }}
+/>
+
+{parseFloat(electricityUsage) <= (leastElectricityUsageData?.electricityUsage || Infinity) &&
+    <Text style={styles.congratulatoryMessage}>
+      Congratulations! You have the lowest electricity usage!
+    </Text>
+  }
+
+
+
+<Text style={styles.sectionTitle}>Gas Usage Comparison</Text>
+
+<BarChart
+  data={prepareGraphDataGas()}
+  width={Dimensions.get("window").width - 40}
+  height={220}
+  chartConfig={{
+    backgroundColor: "#e26a00",
+    backgroundGradientFrom: "#fb8c00",
+    backgroundGradientTo: "#ffa726",
+    decimalPlaces: 2,
+    color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+    labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+  }}
+  bezier
+  style={{
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    marginTop: 10,
+    marginBottom: 20,
+    borderRadius: 16,
+  }}
+/>
+
+{parseFloat(gasUsage) <= (leastGasUsageData?.gasUsage || Infinity) &&
+    <Text style={styles.congratulatoryMessage}>
+      Congratulations! You have the lowest gas usage!
+    </Text>
+  }
+
+      
 
     </ScrollView>
     </LinearGradient>
@@ -304,6 +571,22 @@ text1:{
   fontWeight:'bold',
   fontSize: 20,
 
+},
+
+sectionTitle:{
+  marginHorizontal: 20,
+  marginVertical:25,
+  fontSize: 20,
+  fontWeight:'300'
+},
+
+congratulatoryMessage: {
+  textAlign: 'center',
+  color: 'green',
+  fontSize: 18,
+  fontWeight: 'bold',
+  marginTop: 20,
+  marginBottom: 20,
 },
 });
 
