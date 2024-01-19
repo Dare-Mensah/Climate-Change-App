@@ -13,6 +13,9 @@ const BlogDetails = ({ route, navigation }) => {
   const [newComment, setNewComment] = useState('');
   const [hasLiked, setHasLiked] = useState(false);
 
+  const [editCommentId, setEditCommentId] = useState(null);
+  const [editedComment, setEditedComment] = useState('');
+
   const heartIcon = require("../assets/heartNotFill.png");
   const heartFilledIcon = require("../assets/heart.png");
 
@@ -90,6 +93,11 @@ const BlogDetails = ({ route, navigation }) => {
 
   const handleAddComment = async () => {
     if (!currentUser) return;
+    // Check if newComment is empty or contains only whitespace
+    if (!newComment.trim()) {
+      Alert.alert('Invalid Comment', 'Please enter a comment.');
+      return;
+    }
     try {
       await firebase.firestore().collection('comments').add({
         userId: currentUser.uid,
@@ -120,6 +128,26 @@ const BlogDetails = ({ route, navigation }) => {
   };
 
 
+  const handleEditComment = (commentId, currentContent) => {
+    setEditCommentId(commentId);
+    setEditedComment(currentContent);
+  };
+
+  const handleUpdateComment = async () => {
+    try {
+      await firebase.firestore().collection('comments').doc(editCommentId).update({
+        content: editedComment,
+      });
+      setEditCommentId(null);
+      setEditedComment('');
+      fetchComments();
+    } catch (error) {
+      console.error('Error updating comment:', error);
+      Alert.alert('Error', 'An error occurred while updating the comment.');
+    }
+  };
+
+
   if (!blogDetails) {
     return (
       <View style={styles.container1}>
@@ -127,6 +155,11 @@ const BlogDetails = ({ route, navigation }) => {
       </View>
     );
   }
+
+  const renderNoCommentsText = () => {
+    return <Text style={styles.noCommentsText}>No comments</Text>;
+  };
+
 
   return (
     <LinearGradient style={{flex: 1}} colors={['#EAEAEA', '#B7F1B5']}>
@@ -161,25 +194,51 @@ const BlogDetails = ({ route, navigation }) => {
       </View>
 
       <Text style={styles.heading}>Comments</Text>
-      <FlatList
+        {comments.length === 0 ? (
+          renderNoCommentsText()
+        ) : (
+          <FlatList
           data={comments}
           keyExtractor={(item, index) => index.toString()}
           renderItem={({ item }) => (
             <View style={styles.commentContainer}>
-              <Text style={styles.commentContent}>{item.content}</Text>
+              {editCommentId === item.id ? (
+                <TextInput
+                  style={styles.input}
+                  value={editedComment}
+                  onChangeText={setEditedComment}
+                />
+              ) : (
+                <Text style={styles.commentContent}>{item.content}</Text>
+              )}
+              <View style={styles.buttonContainer}>
               <Text style={styles.commentAuthor}>{`By ${item.user.username}`}</Text>
               {item.userId === currentUser?.uid && (
-                <TouchableOpacity
-                  onPress={() => handleDeleteComment(item.id)}
-                  style={styles.deleteButton}
-                >
-                  <Text style={styles.deleteButtonText}>Delete</Text>
-                </TouchableOpacity>
+                <>
+                  <TouchableOpacity
+                    onPress={() => handleEditComment(item.id, item.content)}
+                    style={styles.editButton}
+                  >
+                    <Text style={styles.buttonText}>Edit</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => handleDeleteComment(item.id)}
+                    style={styles.deleteButton}
+                  >
+                    <Text style={styles.deleteButtonText}>Delete</Text>
+                  </TouchableOpacity>
+                </>
               )}
+            </View>
             </View>
           )}
         />
-
+        )}
+        {editCommentId && (
+          <TouchableOpacity onPress={handleUpdateComment} style={styles.commentButton}>
+            <Text style={styles.buttonText}>Save Changes </Text>
+          </TouchableOpacity>
+        )}
       <Text style={styles.heading}>Add Comment</Text>
       <TextInput
         style={styles.input}
@@ -251,11 +310,11 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   editButton: {
-    backgroundColor: COLORS.primary,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 20,
-    marginBottom: 0,
+    backgroundColor: 'green',
+    padding: 5,
+    borderRadius: 5,
+    marginTop: 5,
+    paddingHorizontal:10, marginRight: 10
     
   },
   buttonText: {
@@ -281,7 +340,8 @@ const styles = StyleSheet.create({
   commentAuthor: {
     fontSize: 12,
     color: COLORS.darkgrey,
-    marginTop: 4,
+    marginTop: 10,
+    marginRight:10
   },
   input: {
     borderWidth: 1,
@@ -294,10 +354,11 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   commentButton: {
-    backgroundColor: COLORS.primary,
+    backgroundColor: COLORS.third,
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 20,
+    marginBottom:50,
   },
   heartIcon: {
     width: 20,
@@ -310,9 +371,30 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   deleteButtonText: {
-    color: 'white',
-    fontSize: 12,
+    color: COLORS.white,
+    fontWeight: 'bold',
   },
+  noCommentsText: {
+    fontSize: 16,
+    color: COLORS.darkgrey,
+    textAlign: 'center',
+    marginTop: 10,
+    marginBottom: 40,
+    marginTop: 20
+  },
+
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    marginTop: 5,
+  },
+  actionButton: {
+    padding: 5,
+    borderRadius: 5,
+    marginLeft: 10,
+  },
+
+
 });
 
 export default BlogDetails

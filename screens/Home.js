@@ -19,10 +19,10 @@ import { Linking } from 'react-native';
 const {width} = Dimensions.get('screen')
 
 const topicBackgroundImages = {
-  Technology: require('../assets/TechImage.png'),
-  Food: require('../assets/food.png'),
-  Transport: require('../assets/transport.jpg'),
-  Finance: require('../assets/Finance.png'),
+  Technology: require('../assets/TechImage2.jpg'),
+  Food: require('../assets/Food4Image.jpg'),
+  Transport: require('../assets/TransportImage2.jpg'),
+  Finance: require('../assets/FinanceImage2.jpg'),
   Wordle: require('../assets/Worlde.png'),
   // Add more mappings for other topics
 };
@@ -883,6 +883,7 @@ const styles = StyleSheet.create({
     newsArticleDescription: {
       fontSize: 14,
       color: 'grey',
+      fontWeight: 300,
     },
 
 
