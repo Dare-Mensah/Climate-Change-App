@@ -13,8 +13,7 @@ import { LineChart } from 'react-native-chart-kit';
 import { BarChart } from 'react-native-chart-kit';
 import axios from 'axios';
 import { Linking } from 'react-native';
-
-
+import * as Notifications from 'expo-notifications';
 
 const {width} = Dimensions.get('screen')
 
@@ -83,6 +82,40 @@ const Home = ({route}) => {
   const [carbonFootprintData, setCarbonFootprintData] = useState(null);
   const [leastCarbonFootprintData, setLeastCarbonFootprintData] = useState(null);
   const [newsArticles, setNewsArticles] = useState([]);
+
+  useEffect(() => {
+    const userId = firebase.auth().currentUser.uid;
+  
+    // Listen for new likes on the user's blog posts
+    const unsubscribe = firebase.firestore()
+      .collection('likes')
+      .where('userId', '==', userId) // Adjust this condition based on your data model
+      .onSnapshot(snapshot => {
+        snapshot.docChanges().forEach(change => {
+          if (change.type === 'added') {
+            sendLikeNotification(change.doc.data());
+          }
+        });
+      });
+  
+    // Cleanup the listener when the component unmounts
+    return () => unsubscribe();
+  }, []);
+  
+  // Function to send a notification when the user's blog post is liked
+  const sendLikeNotification = async (likeData) => {
+    // You can customize this message based on likeData
+    const message = `Your blog post "${likeData.postTitle}" got a new like!`;
+  
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: "New Like!",
+        body: message,
+      },
+      trigger: { seconds: 1 },
+    });
+  };
+  
 
 
   const fetchNewsArticles = async () => {
@@ -359,6 +392,7 @@ const Home = ({route}) => {
           animation={"fadeInUpBig"}
           style={[styles.Title1, style={paddingHorizontal:20, paddingTop:10}]}>Dashboard </Animatable.Text>
         </View>
+
 
 
         <Text style={styles.sectionTitle}>Carbon Footprint</Text>
@@ -798,7 +832,7 @@ const styles = StyleSheet.create({
       marginRight: 10,
       paddingVertical: 8,
       paddingHorizontal: 16,
-      borderRadius: 20,
+      borderRadius: 10,
       borderWidth: 1,
       borderColor: COLORS.darkgrey,
       justifyContent: 'center',
