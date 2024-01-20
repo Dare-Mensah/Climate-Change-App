@@ -48,8 +48,7 @@ const GuessDistributionLine = ({ position, amount, percentage }) => {
 };
 
 
-const EndScreen = ({ won = false, rows, getCellBGColor, navigation }) => {
-
+const GuestEndScreen = ({ won = false, rows, getCellBGColor, navigation }) => {
     const [secondsTillTmr, setSecondsTillTmr] = useState(0);
     const [played, setPlayed] = useState(0);
     const [winRate, setWinRate] = useState(0);
@@ -69,43 +68,9 @@ const EndScreen = ({ won = false, rows, getCellBGColor, navigation }) => {
     
         // Save to AsyncStorage
         const statsString = JSON.stringify(statsData);
-        await AsyncStorage.setItem('@game_stats', statsString);
+        await AsyncStorage.setItem('@game_stats_Guest', statsString);
       
     };
-
-    const saveCurStreakToFirebase = async () => {
-      try {
-        // Retrieve curStreak from AsyncStorage
-        const statsString = await AsyncStorage.getItem('@game_stats');
-        const stats = statsString ? JSON.parse(statsString) : null;
-    
-        if (stats && stats.curStreak !== undefined) {
-          const curStreak = stats.curStreak;
-          
-          // Get the current user from Firebase Authentication
-          const currentUser = firebase.auth().currentUser;
-          
-          if (currentUser) {
-            // Update curStreak in Firebase Firestore
-            const userRef = firebase.firestore().collection('users').doc(currentUser.uid);
-            await userRef.update({ curStreak });
-            console.log("curStreak updated successfully in Firebase");
-          } else {
-            console.log("User not logged in");
-          }
-        } else {
-          console.log("curStreak not found in AsyncStorage");
-        }
-      } catch (error) {
-        console.error("Error updating curStreak in Firebase:", error);
-      }
-    };
-    
-    // Call this function to update curStreak in Firebase
-    saveCurStreakToFirebase();
-
-
-
 
 
 
@@ -115,31 +80,6 @@ const EndScreen = ({ won = false, rows, getCellBGColor, navigation }) => {
       readState();
       saveStatsToAsyncStorage(); // Save stats to AsyncStorage
     }, []);
-
-
-
-    useEffect(() => {
-      const updateUserGameCount = async () => {
-        const currentUser = firebase.auth().currentUser;
-        const userRef = firebase.firestore().collection('users').doc(currentUser.uid);
-        const userDoc = await userRef.get();
-    
-        if (userDoc.exists) {
-          const userData = userDoc.data();
-          const newGameCount = (userData.wordleGamesPlayed || 0) + 1;
-    
-          await userRef.update({
-            wordleGamesPlayed: newGameCount,
-            hasPlayedOver10WordleGames: newGameCount > 10,
-          });
-        }
-      };
-    
-      updateUserGameCount();
-    }, []);
-
-
-
 
 
   
@@ -169,7 +109,7 @@ const EndScreen = ({ won = false, rows, getCellBGColor, navigation }) => {
     }, []);
   
     const readState = async () => {
-      const dataString = await AsyncStorage.getItem('@game');
+      const dataString = await AsyncStorage.getItem('@game_Guest');
       let data;
       try {
         data = JSON.parse(dataString);
@@ -278,7 +218,7 @@ const EndScreen = ({ won = false, rows, getCellBGColor, navigation }) => {
 
 
             <TouchableOpacity onPress={() => {
-              navigation.navigate("Home", {
+              navigation.navigate("GuestHome", {
                 currentStreak: curStreak,
                 winPercentage: winRate,
                 playedState: played,
@@ -298,7 +238,7 @@ const EndScreen = ({ won = false, rows, getCellBGColor, navigation }) => {
   )
 }
 
-export default EndScreen
+export default GuestEndScreen
 
 const styles = StyleSheet.create({
     container: {
@@ -339,6 +279,5 @@ const styles = StyleSheet.create({
         fontSize: 20,
       
       },
-
 
 })

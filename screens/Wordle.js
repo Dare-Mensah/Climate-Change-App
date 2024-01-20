@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, SafeAreaView,ScrollView, LogBox, Alert, ActivityIndicator} from 'react-native'
+import { StyleSheet, Text, View, SafeAreaView,ScrollView, LogBox, Alert, ActivityIndicator, TouchableOpacity} from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { LinearGradient } from 'expo-linear-gradient';
 import Keyboard from '../src/components/Keyboard'
@@ -32,13 +32,11 @@ const getDayOfTheYear = () => {
   return day;
 }
 
-
 const getDayKey = () => {
   const d = new Date();
   let year = d.getFullYear();
   return `day-${getDayOfTheYear()}-${year}`;
 }
-
 
 const dayOfTheYear = getDayOfTheYear(); //add +2 to test for next day
 const dayKey = getDayKey();
@@ -47,10 +45,16 @@ const  getWordForDay =(day)=>  {
   return words[day % words.length];
 }
 
+
+
+
+
+
 const Wordle = () => {
   const navigation = useNavigation();
   //AsyncStorage.removeItem("@game") //resetting async storage for game
   const word = getWordForDay(dayOfTheYear);
+
 
   const letters = word.split("");//returns an array of characters.
 
@@ -244,7 +248,7 @@ const Wordle = () => {
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>WORDLE</Text>
 
-      <View style={styles.map}>
+      <View style={[styles.map]}>
         {rows.map((row, i) =>(
           <View key={'row-${i}'} style={styles.row}>
             {row.map((letter, j) => (
@@ -259,12 +263,14 @@ const Wordle = () => {
           </View>
         ))}
       </View>
-      <Keyboard 
+      
+      <Keyboard
       onKeyPressed={onKeyPressed}
       greenCaps={greenCaps}
       yellowCaps={yellowCaps}
       greyCaps={greyCaps}
       />
+      
     </SafeAreaView>
     </LinearGradient>
   )
@@ -278,8 +284,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
 
     },
-    title: {
-        
+    title: {  
         fontSize: 32,
         fontWeight: 'bold',
         letterSpacing: 5,
@@ -311,12 +316,25 @@ const styles = StyleSheet.create({
       margin: 3,
       maxWidth: 70,
       justifyContent: 'center',
-      alignItems: 'center'
+      alignItems: 'center',
     },
 
     cellText: {
       color: "black",
       fontSize: 28,
       fontWeight: 'bold'
+    },
+
+    multiplayerButton: {
+      marginTop: 4,
+      backgroundColor: COLORS.primary,
+      padding: 10,
+      borderRadius: 8,
+    },
+  
+    multiplayerButtonText: {
+      color: COLORS.white,
+      fontSize: 18,
+      fontWeight: 'bold',
     },
 })

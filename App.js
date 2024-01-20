@@ -26,6 +26,22 @@ import GuestProfile from './screens/GuestProfile';
 import BlogScreen from './screens/BlogScreen';
 import BlogDetails from './screens/BlogDetails';
 import EditBlog from './screens/EditBlog';
+import EditComment from './screens/EditComment';
+import CarbonFootPrintCalc from './screens/CarbonFootPrintCalc';
+import WordleCoop from './screens/WordleCoop';
+import EndScreenCoop from './screens/EndScreenCoop';
+import EndlessWordle from './screens/EndlessWordle';
+import EndlessEndScreen from './screens/EndlessEndScreen';
+import WordleCoop2 from './screens/WordleCoop2';
+import Achievements from './screens/Achievements';
+import CoopWordleInfo from './screens/CoopWordleInfo';
+import EndlessWordleInfo from './screens/EndlessWordleInfo';
+import GuestWordle from './screens/GuestWordle';
+import GuestWordleCoop from './screens/GuestWordleCoop';
+import GuestCoopInfo from './screens/GuestCoopInfo';
+import GuestEndlessWordle from './screens/GuestEndlessWordle';
+import GuestEndlessEndScreen from './screens/GuestEndlessEndScreen';
+import GuestEndlessInfo from './screens/GuestEndlessInfo';
 
 
 
@@ -68,11 +84,20 @@ function App(){
         <Stack.Screen name="SignUp" component={SignUp}/>
         <Stack.Screen name="GuestHome" component={GuestHome}/>
         <Stack.Screen name="GuestProfile" component={GuestProfile}/>
-        <Stack.Screen name="Wordle" component={Wordle}/>
+        <Stack.Screen name="GuestWordle" component={GuestWordle}/>
         <Stack.Screen name="EndScreen" component={EndScreen}/>
+        <Stack.Screen name="GuestWordleCoop" component={GuestWordleCoop}/>
+        <Stack.Screen name="GuestCoopInfo" component={GuestCoopInfo}/>
+        <Stack.Screen name="GuestEndlessWordle" component={GuestEndlessWordle}/>
+        <Stack.Screen name="GuestEndlessInfo" component={GuestEndlessInfo}/>
+        <Stack.Screen name="GuestEndlessEndScreen" component={GuestEndlessEndScreen}/>
         <Stack.Screen name="Tips" component={Tips}/>
         <Stack.Screen name="SignUpComplete" component={SignUpComplete}/>
         <Stack.Screen name="ForgotPassword" component={ForgotPassword}/>
+        <Stack.Screen name="EndlessWordleInfo" component={EndlessWordleInfo}/>
+        <Stack.Screen name="EndlessWordle" component={EndlessWordle}/>
+        
+        
         
       </Stack.Navigator>
     );
@@ -92,6 +117,16 @@ function App(){
       <Stack.Screen name="BlogScreen" component={BlogScreen}/>
       <Stack.Screen name="BlogDetails" component={BlogDetails}/>
       <Stack.Screen name="EditBlog" component={EditBlog}/>
+      <Stack.Screen name="EditComment" component={EditComment}/>
+      <Stack.Screen name="CarbonFootPrintCalc" component={CarbonFootPrintCalc}/>
+      <Stack.Screen name="WordleCoop" component={WordleCoop}/>
+      <Stack.Screen name="EndScreenCoop" component={EndScreenCoop}/>
+      <Stack.Screen name="EndlessWordle" component={EndlessWordle}/>
+      <Stack.Screen name="EndlessEndScreen" component={EndlessEndScreen}/>
+      <Stack.Screen name="WordleCoop2" component={WordleCoop2}/>
+      <Stack.Screen name="Achievements" component={Achievements}/>
+      <Stack.Screen name="CoopWordleInfo" component={CoopWordleInfo}/>
+      <Stack.Screen name="EndlessWordleInfo" component={EndlessWordleInfo}/>
     </Stack.Navigator>
   )
 }

@@ -13,7 +13,7 @@ const Tips = ({navigation, route}) => {
     <View style={{flex:1}}>
       <ImageBackground style={{flex:1}} source={Tips.image}>
       <View style={styles.header}>
-        <Pressable onPress={() => navi.navigate("Home")}>
+         <Pressable onPress={() => navi.navigate("Home")}>
           <Image style={{width:40, height:40}} source={require("../assets/back.png")}></Image>
         </Pressable>
       </View>

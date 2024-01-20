@@ -6,6 +6,8 @@ import COLORS from '../data/colors';
 import * as ImagePicker from 'expo-image-picker'
 import { firebase } from '../config';
 import { FlatList } from 'react-native-gesture-handler';
+import { Alert } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
 
 const BlogScreen = () => {
@@ -13,6 +15,7 @@ const BlogScreen = () => {
   const [author, setAuthor] = useState('');
   const [content, setContent] = useState('');
   const [selectedTopic, setSelectedTopic] = useState(null); // New state for selected topic
+  const navigation = useNavigation();
 
   const handleSavePost = async () => {
     try {
@@ -40,6 +43,22 @@ const BlogScreen = () => {
       setAuthor('');
       setContent('');
       setSelectedTopic(null); // Reset the selected topic
+      
+      Alert.alert(
+        "Post Shared",
+        "Your post has been shared successfully",
+        [
+          { 
+            text: "OK", 
+            onPress: () => navigation.navigate('Home') // Navigate back to Home screen
+          }
+        ]
+      );
+
+          // Update the user's profile to indicate they've posted a blog
+    await firebase.firestore().collection('users').doc(userId).update({
+      hasPostedBlog: true,
+    });
 
       console.log('Post saved successfully!');
     } catch (error) {
@@ -102,7 +121,7 @@ const BlogScreen = () => {
           {/* Add the topic selection FlatList */}
           <Text style={[styles.text_footer, { marginTop: 35, marginBottom: 20 }]}>Select Topic</Text>
           <FlatList
-            data={['Technology', 'Food', 'Transport', 'Finanace' ]} // Add more topics as needed
+            data={['Wordle','Technology', 'Food', 'Transport', 'Finance' ]} // Add more topics as needed
             keyExtractor={(item) => item}
             horizontal
             renderItem={({ item }) => (

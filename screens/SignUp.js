@@ -14,37 +14,34 @@ const SignUp = () => {
     const [password, setPassword] = useState('')
 
 
-    signUpUser = async (username, email, password,) => {
-        await firebase.auth().createUserWithEmailAndPassword(email,password)
-        navigation.navigate("Home",{email})
-        .then(()=> {
-            firebase.auth().currentUser.sendEmailVerification({
+    signUpUser = async (username, email, password) => {
+        try {
+            // Step 1: Create the user account
+            await firebase.auth().createUserWithEmailAndPassword(email, password);
+    
+            // Step 2: Send a verification email
+            await firebase.auth().currentUser.sendEmailVerification({
                 handleCodeInApp: true,
-                url:'https://climatesenseapp.firebaseapp.com',
-            })
-            .then(() => {
-                alert('Verification email sent')
-            }) .catch((error) => {
-                alert(error.message)
-            })
-            .then(() => {
-                firebase.firestore().collection('users')
-                .doc(firebase.auth().currentUser.uid)
-                .set({
-                    username,
-                    email,
-                    password,
-                })
-            })
-            .catch((error) => {
-                alert(error.message)
-            })
-        })
-        .catch((error) => {
-            alert(error.message)
-        })
+                url: 'https://climatesenseapp.firebaseapp.com',
+            });
+    
+            // Step 3: Add user details to Firestore
+            await firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid).set({
+                username,
+                email,
+                password,
+            });
+    
+            // Step 4: Navigate to the home screen
+            navigation.navigate("Home", { email });
+    
+            // Step 5: Display a success message
+            alert('Verification email sent and user registered successfully');
+        } catch (error) {
+            // Handle errors
+            alert(error.message);
+        }
     }
-
 
         return (
             <View style={styles.container}>
