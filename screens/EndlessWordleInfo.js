@@ -32,7 +32,7 @@ const EndlessWordleInfo = () => {
             data2Ref.current.scrollToIndex({index: currentIndex + 1});
         } else {
             console.log ('last item')
-            navigation.navigate("EndlessWordle")
+            navigation.navigate("SelectDifficultyEndlessWordle")
         }
     }
   return (
@@ -41,7 +41,7 @@ const EndlessWordleInfo = () => {
 
         <View style={{flex:3}}>
         <TouchableOpacity 
-            onPress={() => navigation.navigate("EndlessWordle")}
+            onPress={() => navigation.navigate("SelectDifficultyEndlessWordle")}
         >
             <Text style={{fontWeight:'500', fontSize: 17, marginTop: 40, paddingHorizontal: 20}}>Skip</Text>
         </TouchableOpacity>

@@ -42,6 +42,7 @@ import GuestCoopInfo from './screens/GuestCoopInfo';
 import GuestEndlessWordle from './screens/GuestEndlessWordle';
 import GuestEndlessEndScreen from './screens/GuestEndlessEndScreen';
 import GuestEndlessInfo from './screens/GuestEndlessInfo';
+import SelectDifficultyEndlessWordle from './screens/SelectDifficultyEndlessWordle';
 
 
 
@@ -127,6 +128,7 @@ function App(){
       <Stack.Screen name="Achievements" component={Achievements}/>
       <Stack.Screen name="CoopWordleInfo" component={CoopWordleInfo}/>
       <Stack.Screen name="EndlessWordleInfo" component={EndlessWordleInfo}/>
+      <Stack.Screen name="SelectDifficultyEndlessWordle" component={SelectDifficultyEndlessWordle}/>
     </Stack.Navigator>
   )
 }

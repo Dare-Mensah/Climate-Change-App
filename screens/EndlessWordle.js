@@ -22,47 +22,6 @@ const copyArray = (arr) => {
 };
 
 
-const getDayOfTheYear = () => {
-  const now = new Date();
-  const start = new Date(now.getFullYear(), 0, 0);
-  const diff = now - start;
-  const oneDay = 1000 * 60 * 60 * 24;
-  const day = Math.floor(diff / oneDay);
-  return day;
-};
-
-const getDayKey = () => {
-  const d = new Date();
-  let year = d.getFullYear();
-  return `day-${getDayOfTheYear()}-${year}`;
-};
-
-const dayOfTheYear = getDayOfTheYear();
-const dayKeyCoop = `${getDayKey()}-endless`;
-
-const getWordForDay = (day) => {
-  return words[day % words.length]; 
-};
-
-
-const getRandomWord = () => {
-    return words[Math.floor(Math.random() * words.length)];
-  };
-
-
-  
-
-  const words = {
-    easy: ["hello", "yesno", "yooo", "noooo", "minex"],
-    medium: ["complex", "wordle", "reactjs", "endless", "mobile"],
-    hard: ["difficulty", "javascript", "persistent", "animation", "challenge"]
-  };
-  
-  // New function to get a word based on difficulty
-  const getWordByDifficulty = (difficulty, index) => {
-    return words[difficulty][index % words[difficulty].length];
-  };
-
 
 const EndlessWordle = () => {
   const navigation = useNavigation();
@@ -70,17 +29,17 @@ const EndlessWordle = () => {
   const [difficulty, setDifficulty] = useState('easy'); // New state for difficulty
   const [wordIndex, setWordIndex] = useState(0); // Existing state
   const [correctWordsCount, setCorrectWordsCount] = useState(0);
-  const [timer, setTimer] = useState(60); // Initialize timer with 60 seconds
-  // ... [other state initializations]
-
-  // Define 'word' after state initializations
-  const word = getWordByDifficulty(difficulty, wordIndex); // Correct placement
+  const [timer, setTimer] = useState(150); // Initialize timer with 60 seconds
+  const [words, setWords] = useState([]); // State for storing the fetched words
+  const [word, setWord] = useState(''); // State for the current word
+  // Define 'word' after state initialization
   const letters = word.split(""); // Now 'word' is defined before use
 
   // Initialize 'rows' state with correct length based on 'letters'
   const [rows, setRows] = useState(
     new Array(Number_Of_Tries).fill(new Array(letters.length).fill(""))
   );
+
 
   
     //const rows = new Array(Number_Of_Tries).fill(new Array(letters.length).fill(''))
@@ -129,31 +88,57 @@ const EndlessWordle = () => {
     }, [timer, curRow]);
 
 
+
+    useEffect(() => {
+      const fetchWords = async () => {
+        try {
+          const response = await fetch('https://random-word-api.vercel.app/api?words=500&length=4');
+          const fetchedWords = await response.json();
+          setWords(fetchedWords);
+          if (fetchedWords.length > 0) {
+            const randomWord = fetchedWords[Math.floor(Math.random() * fetchedWords.length)];
+            setWord(randomWord);
+            setRows(new Array(Number_Of_Tries).fill(new Array(randomWord.length).fill("")));
+          }
+        } catch (error) {
+          console.error('Error fetching words:', error);
+        }
+      };
   
+      fetchWords();
+    }, []);
+
+
+      // Existing useEffect for updating the word and rows states
+  useEffect(() => {
+    if (word) {
+      console.log("Current word:", word); // Log the current word to the console
+      setRows(new Array(Number_Of_Tries).fill(new Array(word.length).fill("")));
+    }
+  }, [word]);
+
+
+  
+  // Update the word and rows states when a new word is set
+  useEffect(() => {
+    if (word) {
+      setRows(new Array(Number_Of_Tries).fill(new Array(word.length).fill("")));
+    }
+  }, [word]);
+
+  const getRandomWord = () => {
+    return words[Math.floor(Math.random() * words.length)];
+  };
+
   // Modified resetGameForNextWord function
   const resetGameForNextWord = () => {
-    const nextIndex = (wordIndex + 1) % words[difficulty].length;
-    setWordIndex(nextIndex);
-
-    // Update difficulty based on correctWordsCount
-    if (correctWordsCount % 5 === 0 && correctWordsCount > 0) {
-      if (difficulty === 'easy') setDifficulty('medium');
-      else if (difficulty === 'medium') setDifficulty('hard');
-    }
-
-    const nextWord = getWordByDifficulty(difficulty, nextIndex);
-    const nextLetters = nextWord.split("");
-
-    setRows(new Array(Number_Of_Tries).fill(new Array(nextLetters.length).fill("")));
+    const nextWord = getRandomWord();
+    setWord(nextWord);
+    setRows(new Array(Number_Of_Tries).fill(new Array(nextWord.length).fill("")));
     setCurRow(0);
     setCurCol(0);
     setGameState('playing');
-
-    // Adjust timer based on difficulty
-    if (difficulty === 'easy') setTimer(60);
-    else if (difficulty === 'medium') setTimer(120);
-    else if (difficulty === 'hard') setTimer(180);
-  };
+  }
   
   
   
@@ -331,6 +316,11 @@ const EndlessWordle = () => {
   
     if(!loaded) {
       return (<ActivityIndicator/>)
+    }
+
+
+    if (words.length === 0) {
+      return <ActivityIndicator />;
     }
   
   
