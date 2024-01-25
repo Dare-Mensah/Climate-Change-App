@@ -115,6 +115,68 @@ const Home = ({route}) => {
       trigger: { seconds: 1 },
     });
   };
+
+
+  useEffect(() => {
+    const userId = firebase.auth().currentUser.uid;
+    scheduleDailyNotification(userId);
+  }, []);
+  
+const scheduleDailyNotification = async (userId) => {
+  try {
+    // Fetch the latest blog post by the user
+    const latestPostSnapshot = await firebase.firestore().collection('posts')
+      .where('authorId', '==', userId)
+      .orderBy('date', 'desc')
+      .limit(1)
+      .get();
+
+    if (!latestPostSnapshot.empty) {
+      const latestPost = latestPostSnapshot.docs[0].data();
+      const latestPostId = latestPostSnapshot.docs[0].id;
+
+      // Fetch likes and comments for the latest blog post
+      const likesSnapshot = await firebase.firestore().collection('likes')
+        .where('postId', '==', latestPostId)
+        .get();
+      const totalLikes = likesSnapshot.size;
+
+      const commentsSnapshot = await firebase.firestore().collection('comments')
+        .where('postId', '==', latestPostId)
+        .get();
+      const totalComments = commentsSnapshot.size;
+
+      // Prepare the notification message
+      const message = `Your latest blog post "${latestPost.title}" has ${totalLikes} likes and ${totalComments} comments.`;
+
+      // Schedule the notification
+      await Notifications.cancelAllScheduledNotificationsAsync(); // Cancel existing notifications
+
+      const trigger = new Date();
+      trigger.setHours(9, 0, 0); // Set the time to 9:00 AM
+      if (trigger <= new Date()) {
+        // If the time is in the past for today, schedule for the next day
+        trigger.setDate(trigger.getDate() + 1);
+      }
+
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: "Good Morning!",
+          body: message,
+        },
+        trigger: {
+          hour: 9,
+          minute: 0,
+          repeats: true,
+        },
+      });
+    } else {
+      console.log('No latest blog post found.');
+    }
+  } catch (error) {
+    console.error('Error scheduling daily notification:', error);
+  }
+};
   
 
 

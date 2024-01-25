@@ -54,14 +54,31 @@ const EditBlog = ({ route, navigation }) => {
     try {
       // Delete the blog post from Firestore
       await firebase.firestore().collection('posts').doc(postId).delete();
-
       console.log('Blog post deleted successfully!');
+  
+      // Delete associated comments
+      const commentsQuery = firebase.firestore().collection('comments').where('postId', '==', postId);
+      const commentsSnapshot = await commentsQuery.get();
+      commentsSnapshot.forEach(async (doc) => {
+        await doc.ref.delete();
+      });
+      console.log('Associated comments deleted successfully!');
+  
+      // Delete associated likes
+      const likesQuery = firebase.firestore().collection('likes').where('postId', '==', postId);
+      const likesSnapshot = await likesQuery.get();
+      likesSnapshot.forEach(async (doc) => {
+        await doc.ref.delete();
+      });
+      console.log('Associated likes deleted successfully!');
+  
       // Navigate back to the previous screen
       navigation.goBack();
     } catch (error) {
       console.error('Error deleting blog post:', error);
     }
   };
+  
 
   const confirmDelete = () => {
     Alert.alert(

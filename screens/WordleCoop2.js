@@ -21,41 +21,15 @@ const copyArray = (arr) => { // making a copy of this aaray
   return [...arr.map((rows) => [...rows])];
 };
 
-const words = ["hello","yesno"]
-  
-const getDayOfTheYear = () => {
-  const now = new Date();
-  const start = new Date(now.getFullYear(), 0, 0);
-  const diff = now - start;
-  const oneDay = 1000 * 60 * 60 * 24;
-  const day = Math.floor(diff / oneDay);
-  return day;
-}
 
-const getDayKey = () => {
-  const d = new Date();
-  let year = d.getFullYear();
-  return `day-${getDayOfTheYear()}-${year}`;
-}
-
-const dayOfTheYear = getDayOfTheYear(); //add +2 to test for next day
-const dayKey = getDayKey();
-
-const  getWordForDay =(day)=>  {
-  return words[day % words.length];
-}
 
 
 const WordleCoop2 = () => {
-    const navigation = useNavigation();
-    AsyncStorage.removeItem("@game_coop2") //resetting async storage for game
-    const word = getWordForDay(dayOfTheYear);
-  
-  
-    const letters = word.split("");//returns an array of characters.
-  
-    const [rows, setRows] = useState(
-      new Array(Number_Of_Tries).fill(new Array(letters.length).fill("")));
+  const navigation = useNavigation();
+  AsyncStorage.removeItem("@game_coop2"); // Resetting async storage for game
+
+  const Number_Of_Tries = 6;
+
   
     //const rows = new Array(Number_Of_Tries).fill(new Array(letters.length).fill(''))
   
@@ -64,11 +38,59 @@ const WordleCoop2 = () => {
     const [gameSate, setGameState] = useState('playing');
     const [loaded, setloaded] = useState(false)
 
+      // State for storing the words array
+  const [words, setWords] = useState([]);
+  const [word, setWord] = useState(''); // State for the current word
+  const [letters, setLetters] = useState([]); // State for the letters of the current word
+  const [rows, setRows] = useState([]); // Initialize rows as an empty array
+
+
 
     // New state variables for player management
     const [playerTurn, setPlayerTurn] = useState(1); // Player 1 starts
     const [player1State, setPlayer1State] = useState({ curRow: 0, curCol: 0, gameSate: 'playing' });
     const [player2State, setPlayer2State] = useState({ curRow: 0, curCol: 0, gameSate: 'playing' });
+
+
+
+    useEffect(() => {
+      const fetchWords = async () => {
+        try {
+          const response = await fetch('https://random-word-api.vercel.app/api?words=500&length=5');
+          const fetchedWords = await response.json();
+          setWords(fetchedWords);
+      
+          if (fetchedWords.length > 0) {
+            const randomWord = fetchedWords[Math.floor(Math.random() * fetchedWords.length)];
+            setWord(randomWord);
+            setRows(new Array(Number_Of_Tries).fill(new Array(randomWord.length).fill("")));
+            console.log("Selected word:", randomWord); // Log the selected word to the terminal
+          }
+        } catch (error) {
+          console.error('Error fetching words:', error);
+          Alert.alert('Error', 'Failed to fetch words from the API.');
+        }
+      };
+  
+      fetchWords();
+    }, []);
+
+    console.log("Selected word:", word);
+  
+    // Update rows based on the fetched word
+    useEffect(() => {
+      if (letters.length > 0) {
+        setRows(new Array(Number_Of_Tries).fill(new Array(letters.length).fill("")));
+      }
+    }, [letters]);
+
+    useEffect(() => {
+      if (word) {
+        setLetters(word.split(""));
+      }
+    }, [word]);
+
+
   
     useEffect(() => {
       if(curRow > 0)
@@ -137,51 +159,51 @@ const WordleCoop2 = () => {
   
     // New function to check the game state for both players
     const checkGameState = () => {
-        const checkPlayerState = (playerState, setPlayerState) => {
-          if (checkIfWon(playerState) && playerState.gameSate !== 'won') {
+      const checkPlayerState = (playerState, setPlayerState, playerRows) => {
+        if (playerState.gameSate === 'playing') {
+          if (checkIfWon(playerRows, playerState.curRow)) {
             setPlayerState({ ...playerState, gameSate: 'won' });
             Alert.alert(`Player ${playerTurn} Wins!`, "Congratulations!", [{
               text: "OK", onPress: () => navigation.navigate('Home')
             }]);
             return;
           }
-          if (playerState.curRow === rows.length && playerState.gameSate !== 'lost') {
+          if (playerState.curRow === Number_Of_Tries) {
             setPlayerState({ ...playerState, gameSate: 'lost' });
+            // Check if this is the last player to lose
+            if (playerTurn === 2 && player1State.gameSate === 'lost') {
+              Alert.alert("Game Over", "Both players have lost!", [{
+                text: "OK", onPress: () => navigation.navigate('Home')
+              }]);
+            }
+            return;
           }
-        };
-    
-        checkPlayerState(player1State, setPlayer1State);
-        checkPlayerState(player2State, setPlayer2State);
-    
-        // Check if both players have lost and show the alert
-        if (player1State.gameSate === 'lost' && player2State.gameSate == 'lost') {
-          Alert.alert("Game Over", "Both players have lost!", [{
+        }
+
+        if (checkIfWon(rows, curRow)) {
+          const winningPlayerState = playerTurn === 1 ? player1State : player2State;
+          const setWinningPlayerState = playerTurn === 1 ? setPlayer1State : setPlayer2State;
+          setWinningPlayerState({ ...winningPlayerState, gameSate: 'won' });
+          Alert.alert(`Player ${playerTurn} Wins!`, "Congratulations!", [{
             text: "OK", onPress: () => navigation.navigate('Home')
           }]);
         }
       };
-
-
-
-
-
-    useEffect(() => {
-        if (loaded) {
-            checkGameState();
-        }
-    }, [player1State, player2State, loaded]);
-
-
-  
-  
-    const checkIfWon = () => {
-        const row = rows[curRow - 1]; // This might be undefined if curRow is 0 or out of array bounds
-        if (!row) {
-            return false; // If row is undefined, then the player hasn't won
-        }
-        return row.every((letter, i) => letter === letters[i]);
+    
+      checkPlayerState(player1State, setPlayer1State, rows.slice(0, Number_Of_Tries / 2));
+      checkPlayerState(player2State, setPlayer2State, rows.slice(Number_Of_Tries / 2));
     };
-  
+    
+    const checkIfWon = (playerRows, curRow) => {
+      if (curRow > 0) {
+        const row = playerRows[curRow - 1];
+        if (row) {
+          return row.every((letter, i) => letter === letters[i]);
+        }
+      }
+      return false;
+    };
+
     const checkIfLose = () => { //lose state
       return !checkIfWon() && curRow == rows.length;
     }
@@ -208,7 +230,10 @@ const WordleCoop2 = () => {
         return;
       }
 
-  
+      if (key === ENTER) {
+        // Existing logic to change player turn and update rows...
+        checkGameState(); // Check if the current player has won after making a guess
+      }
     
   
       if (key == ENTER)
@@ -236,22 +261,22 @@ const WordleCoop2 = () => {
   
   
   
-    const getCellBGColor= (row, col) =>
-    {
+    const getCellBGColor = (row, col) => {
       const letter = rows[row][col];
       if (row >= curRow) {
-        return COLORS.grey
+        return COLORS.grey;
       }
-      if(letter  == letters[col])
-      {
-        return COLORS.primary; // checking if the letter is in the correct collumn change it to green
+      if (letter === letters[col]) {
+        return COLORS.primary; // Green for correct letter in correct position
       }
-      if (letters.includes(letter))
-      {
-        return COLORS.secondary; //if the letter is included in the word change it to yellow
+      if (letters.includes(letter)) {
+        return COLORS.secondary; // Yellow for correct letter in wrong position
       }
-      return COLORS.darkgrey;
-    }
+      return COLORS.darkgrey; // Grey for absent letter
+    };
+
+
+
   
     const getAllLettersWithColor = (color) => {
       return rows.flatMap((row, i) =>
@@ -268,6 +293,12 @@ const WordleCoop2 = () => {
     if(!loaded) {
       return (<ActivityIndicator/>)
     }
+
+          // Ensure words and rows are loaded
+  if (words.length === 0 || rows.length === 0) {
+    return <ActivityIndicator />;
+  }
+
   
   
     if (gameSate != 'playing') {
