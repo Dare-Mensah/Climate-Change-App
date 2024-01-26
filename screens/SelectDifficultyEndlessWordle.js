@@ -56,7 +56,7 @@ const SelectDifficultyEndlessWordle = () => {
 
 
       <View style={styles.achievementBox}>
-        <TouchableOpacity  onPress={() => navigation.navigate("EndlessWordle")}>
+        <TouchableOpacity  onPress={() => navigation.navigate("EndlessWordleMedium")}>
           <View style={styles.achievementContainer}>
             <Image
               source={require('../assets/ranking2.png')}
@@ -75,7 +75,7 @@ const SelectDifficultyEndlessWordle = () => {
 
 
       <View style={styles.achievementBox}>
-        <TouchableOpacity  onPress={() => navigation.navigate("EndlessWordle")}>
+        <TouchableOpacity  onPress={() => navigation.navigate("EndlessWordleHard")}>
           <View style={styles.achievementContainer}>
             <Image
               source={require('../assets/ranking3.png')}
@@ -146,5 +146,6 @@ const styles = StyleSheet.create({
           marginVertical: 10,
           width: '90%',
           alignSelf: 'center',
+          marginTop: 20,
         },
 })

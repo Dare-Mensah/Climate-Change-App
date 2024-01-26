@@ -29,7 +29,7 @@ const EndlessWordle = () => {
   const [difficulty, setDifficulty] = useState('easy'); // New state for difficulty
   const [wordIndex, setWordIndex] = useState(0); // Existing state
   const [correctWordsCount, setCorrectWordsCount] = useState(0);
-  const [timer, setTimer] = useState(150); // Initialize timer with 60 seconds
+  const [timer, setTimer] = useState(250); // Initialize timer with 60 seconds
   const [words, setWords] = useState([]); // State for storing the fetched words
   const [word, setWord] = useState(''); // State for the current word
   // Define 'word' after state initialization
@@ -373,7 +373,8 @@ const EndlessWordle = () => {
 
 export default EndlessWordle
 
-const styles = StyleSheet.create({    container: {
+const styles = StyleSheet.create({    
+  container: {
     flex: 1,
     alignItems: 'center',
 
@@ -430,4 +431,6 @@ multiplayerButtonText: {
   color: COLORS.white,
   fontSize: 18,
   fontWeight: 'bold',
-},})
+},
+
+})

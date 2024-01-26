@@ -422,67 +422,6 @@ const CarbonFootPrintCalc = ({ navigation }) => {
   }
 
 
-<Text style={styles.sectionTitle}>Electricity Comparison</Text>
-
-<BarChart
-  data={prepareGraphDataElec()}
-  width={Dimensions.get("window").width - 40}
-  height={220}
-  chartConfig={{
-    backgroundColor: "#e26a00",
-    backgroundGradientFrom: "#fb8c00",
-    backgroundGradientTo: "#ffa726",
-    decimalPlaces: 2,
-    color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-    labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-  }}
-  bezier
-  style={{
-    paddingHorizontal: 20,
-    alignItems: 'center',
-    marginTop: 10,
-    marginBottom: 20,
-    borderRadius: 16,
-  }}
-/>
-
-{parseFloat(electricityUsage) <= (leastElectricityUsageData?.electricityUsage || Infinity) &&
-    <Text style={styles.congratulatoryMessage}>
-      Congratulations! You have the lowest electricity usage!
-    </Text>
-  }
-
-
-
-<Text style={styles.sectionTitle}>Gas Usage Comparison</Text>
-
-<BarChart
-  data={prepareGraphDataGas()}
-  width={Dimensions.get("window").width - 40}
-  height={220}
-  chartConfig={{
-    backgroundColor: "#e26a00",
-    backgroundGradientFrom: "#fb8c00",
-    backgroundGradientTo: "#ffa726",
-    decimalPlaces: 2,
-    color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-    labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-  }}
-  bezier
-  style={{
-    paddingHorizontal: 20,
-    alignItems: 'center',
-    marginTop: 10,
-    marginBottom: 20,
-    borderRadius: 16,
-  }}
-/>
-
-{parseFloat(gasUsage) <= (leastGasUsageData?.gasUsage || Infinity) &&
-    <Text style={styles.congratulatoryMessage}>
-      Congratulations! You have the lowest gas usage!
-    </Text>
-  }
 
       
 
