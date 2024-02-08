@@ -24,6 +24,14 @@ const CarbonFootPrintCalc = ({ navigation }) => {
 
 
   const calculateCarbonFootprint = () => {
+      // Check if any of the input fields are empty
+  if (!electricityUsage || !gasUsage || !transportationMiles) {
+    // Show an alert if any field is empty
+    Alert.alert('Missing Information', 'Please fill in all fields to calculate your carbon footprint.', [
+      { text: 'OK' },
+    ]);
+    return; // Exit the function early if validation fails
+  }
     // Perform your carbon footprint calculation based on the input values
     // For simplicity, let's assume each unit is equivalent to a specific carbon footprint value
     const electricityFootprint = parseFloat(electricityUsage) * 0.5;
@@ -35,8 +43,11 @@ const CarbonFootPrintCalc = ({ navigation }) => {
 
     setCarbonFootprint(totalCarbonFootprint.toFixed(2));
 
+    
+
     // Save the data to Firebase
     saveDataToFirebase(totalCarbonFootprint);
+    
   };
 
   const CarbonFootprintCard = ({ carbonFootprintData }) => {

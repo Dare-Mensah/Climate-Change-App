@@ -13,83 +13,31 @@ import Constants from 'expo-constants';
 
 
 
-const Profile = ({route}) => {
-
-    const navigation = useNavigation();
-
-
+const Accessibility = () => {
   return (
     <LinearGradient style={{flex: 1}} colors={['#B7F1B5','#EAEAEA']}>
     <View style={styles.container}>
-        <View style={styles.header1}>
-        <Text style={styles.Title1}>Settings</Text>
+            <View style={styles.header2}>
+            <Text style={styles.Title1}>Accessibility</Text>
         </View>
-
-
         <Animatable.View 
         animation={"fadeInUpBig"}
         style={styles.footer}>
-        <View style={styles.menuWrapper}>
 
-            <TouchableRipple onPress={() => navigation.navigate("EditProfile")}>
-                <View style={styles.menuItem}>
-                    <Image source={require('../assets/edit.png')} style={{height: 30, width: 30}}/>
-                    <Text style={styles.menuItemText}>Edit Profile</Text>
-                </View>
-            </TouchableRipple>
-
-            <TouchableRipple onPress={() => navigation.navigate("Achievements")}>
-                <View style={styles.menuItem}>
-                    <Image source={require('../assets/trophy.png')} style={{height: 30, width: 30}}/>
-                    <Text style={styles.menuItemText}>Achievements</Text>
-                </View>
-            </TouchableRipple>
-
-            <TouchableOpacity onPress={() => navigation.navigate("Notifications")}>
-                <View style={styles.menuItem}>
-                    <Image source={require('../assets/bell.png')} style={{height: 30, width: 30}}/>
-                    <Text style={styles.menuItemText}>Notifications</Text>
-                </View>
-            </TouchableOpacity>
-
-            <TouchableRipple onPress={() => navigation.navigate("Privacy")}>
-                <View style={styles.menuItem}>
-                    <Image source={require('../assets/lock.png')} style={{height: 28, width: 28}}/>
-                    <Text style={styles.menuItemText}>Privacy and Security</Text>
-                </View>
-            </TouchableRipple>
-
-            {/** 
-            <TouchableRipple onPress={() => navigation.navigate("Accessibility")}>
-                <View style={styles.menuItem}>
-                    <Image source={require('../assets/lock.png')} style={{height: 28, width: 28}}/>
-                    <Text style={styles.menuItemText}>Accessibility</Text>
-                </View>
-            </TouchableRipple>
-            */}
-
-            <TouchableRipple onPress={() => navigation.navigate("About")}>
-                <View style={styles.menuItem}>
-                    <Image source={require('../assets/help.png')} style={{height: 30, width: 30}}/>
-                    <Text style={styles.menuItemText}>About</Text>
-                </View>
-            </TouchableRipple>
-
-        </View>
         </Animatable.View>
     </View>
     </LinearGradient>
   )
 }
 
-export default Profile
+export default Accessibility
 
 const styles = StyleSheet.create({
     header1:{
-        flex: 0.8,
-        justifyContent:'flex-end',
-        paddingHorizontal: 20,
-        paddingBottom: 50,
+        marginTop: 40,
+        flexDirection:'row',
+        justifyContent:'space-between',
+        paddingHorizontal:20,
     },
 
     header:{
@@ -161,18 +109,20 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     header2:{
-        flex: 1,
+        flex: 0.7,
         justifyContent:'flex-end',
         paddingHorizontal: 20,
         paddingBottom: 50,
     },
-    text_header:{
-        color: '#fff',
+    Title1:{
+        fontSize: 34,
+        marginTop: 20,
+        //fontFamily: 'Montserrat',
         fontWeight: 'bold',
-        fontSize: 30
+
     },
     footer:{
-        flex: 3,
+        flex: 3.3,
         backgroundColor: '#fff',
         borderTopLeftRadius: 30,
         borderTopRightRadius: 30,
@@ -207,13 +157,4 @@ const styles = StyleSheet.create({
         position:'absolute',
         bottom:30
     },
-
-    Title1:{
-        fontSize: 39,
-        marginTop: 20,
-        //fontFamily: 'Montserrat',
-        fontWeight: 'bold',
-  
-    },
-
 })

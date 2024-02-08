@@ -56,7 +56,7 @@ const WordleCoop2 = () => {
     useEffect(() => {
       const fetchWords = async () => {
         try {
-          const response = await fetch('https://random-word-api.vercel.app/api?words=500&length=5');
+          const response = await fetch('https://random-word-api.vercel.app/api?words=500&length=4');
           const fetchedWords = await response.json();
           setWords(fetchedWords);
       

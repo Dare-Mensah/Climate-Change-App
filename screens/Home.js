@@ -23,6 +23,7 @@ const topicBackgroundImages = {
   Transport: require('../assets/TransportImage2.jpg'),
   Finance: require('../assets/FinanceImage2.jpg'),
   Wordle: require('../assets/Worlde.png'),
+  General: require('../assets/Worlde.png'),
   // Add more mappings for other topics
 };
 
@@ -188,14 +189,36 @@ const Home = ({route}) => {
 
 
   const NewsArticleCard = ({ article }) => {
-    return (
-      <TouchableOpacity onPress={() => Linking.openURL(article.link)} style={styles.newsArticleCardContainer}>
-        <View style={styles.newsArticleCardDetailBox}>
-          <Text style={styles.newsArticleTitle}>{article.title}</Text>
-          <Text style={styles.newsArticleDescription}>{article.description}</Text>
-        </View>
-      </TouchableOpacity>
-    );
+    // Function to truncate the description
+    const truncateDescription = (description, maxLength = 100) => {
+      if (description.length > maxLength) {
+        return description.substring(0, maxLength) + '...';
+      }
+      return description;
+    };
+
+    // Function to truncate text
+    const truncateText = (text, maxLength = 100) => {
+    if (text.length > maxLength) {
+      return text.substring(0, maxLength) + '...';
+    }
+    return text;
+  };
+
+    
+  
+  return (
+    <TouchableOpacity onPress={() => Linking.openURL(article.link)} style={styles.newsArticleCardContainer}>
+      <View style={styles.newsArticleCardDetailBox}>
+        <Text style={styles.newsArticleTitle}>
+          {truncateText(article.title, 80)} {/* Truncate title with a max length of 50 */}
+        </Text>
+        <Text style={styles.newsArticleDescription}>
+          {truncateDescription(article.description, 150)} {/* Truncate description with a max length of 100 */}
+        </Text>
+      </View>
+    </TouchableOpacity>
+  );
   };
   
   
@@ -346,9 +369,9 @@ const Home = ({route}) => {
 
 
   const wordleOptions = [
-    { id: '1', title: 'SinglePlayer Mode', navigateTo: 'Wordle' },
-    { id: '2', title: 'Co-op Mode', navigateTo: 'CoopWordleInfo' },
-    { id: '3', title: 'Endless Mode', navigateTo: 'EndlessWordleInfo' },
+    { id: '1', title: 'SinglePlayer Mode', navigateTo: 'Wordle', bgImage: require('../assets/pic1.jpg'), iconImage: require('../assets/single-player.png') },
+    { id: '2', title: 'Co-op Mode', navigateTo: 'CoopWordleInfo', bgImage: require('../assets/pic2.jpg'), iconImage: require('../assets/coop.png') },
+    { id: '3', title: 'Endless Mode', navigateTo: 'EndlessWordleInfo', bgImage: require('../assets/pic4.jpg'), iconImage: require('../assets/puzzle-game.png') },
   ];
 
 
@@ -357,13 +380,15 @@ const Home = ({route}) => {
   const WordleOption = ({ item }) => {
     return (
       <Pressable onPress={() => navigation.navigate(item.navigateTo)} style={styles.wordleOption}>
-        <View style={styles.wordleOptionView}>
-          <Text style={styles.wordleOptionText}>{item.title}</Text>
-        </View>
+        <ImageBackground source={item.bgImage} style={styles.wordleOptionBackground}>
+          <View style={styles.wordleOptionView}>
+            <Image source={item.iconImage} style={styles.wordleOptionIcon} />
+            <Text style={styles.wordleOptionText}>{item.title}</Text>
+          </View>
+        </ImageBackground>
       </Pressable>
     );
   };
-
 
 
   const handleTopicChange = (topic) => {
@@ -589,7 +614,7 @@ const Home = ({route}) => {
             No carbon footprint data found. Please input your details.
           </Text>
           <TouchableOpacity onPress={() => navigation.navigate("CarbonFootPrintCalc")}>
-            <Text style={styles.inputDetailsLink}>Input Details</Text>
+            <Text style={[styles.inputDetailsLink, {fontWeight:'bold'}]}>Input Details</Text>
           </TouchableOpacity>
         </View>
   )}
@@ -598,7 +623,7 @@ const Home = ({route}) => {
     <View style={{flexDirection:'row'}}>
     <Text style={[styles.sectionTitle, {marginTop:50}]}>Filter Blogs by Topic</Text>
     <TouchableOpacity onPress={() => navigation.navigate("BlogScreen")}>
-        <Text style={[styles.environmentLink, {marginTop:55}]}> Create One!</Text>
+        <Text style={[styles.createBlogLink, {marginTop:55, fontWeight:'bold'}]}>Create One!</Text>
     </TouchableOpacity>
     </View>
 
@@ -606,7 +631,7 @@ const Home = ({route}) => {
     contentContainerStyle={{ paddingLeft: 20 }}
     horizontal
     showsHorizontalScrollIndicator={false}
-    data={['Latest', 'Wordle','Technology', 'Food', 'Transport', 'Finance']}
+    data={['Latest', 'General','Wordle','Technology', 'Food', 'Transport', 'Finance']}
     keyExtractor={(item) => item}
     renderItem={({ item }) => (
       <Pressable
@@ -648,7 +673,7 @@ const Home = ({route}) => {
         There are no blogs in this category.
       </Text>
       <TouchableOpacity onPress={createBlogButtonPressed}>
-        <Text style={styles.createBlogLink}>Create one!</Text>
+        <Text style={[styles.createBlogLink, {fontWeight:'bold'}]}>Create one!</Text>
       </TouchableOpacity>
     </View>
   )}
@@ -671,7 +696,7 @@ const Home = ({route}) => {
     <View style={{flexDirection:'row'}}>
     <Text style={[styles.sectionTitle, {marginTop:50}]}>Environment News</Text>
     <TouchableOpacity onPress={() => navigation.navigate("News")}>
-        <Text style={[styles.environmentLink, {marginTop:55}]}> See More!</Text>
+        <Text style={[styles.createBlogLink, {marginTop:55, fontWeight:'bold'}]}>See More!</Text>
     </TouchableOpacity>
     </View>
 
@@ -695,6 +720,7 @@ const Home = ({route}) => {
           renderItem={({item}) => <Card Tips={item}/>}
           />
         </View>
+
         </ScrollView>
       </LinearGradient>
     )
@@ -799,7 +825,7 @@ const styles = StyleSheet.create({
     },
     
     wordleOptionText: {
-      color: COLORS.black, // Changed to black for better visibility
+      color: '#FFFFFF', // Changed to black for better visibility
       fontSize: 18,
       fontWeight: '800',
       textAlign:'center',
@@ -903,6 +929,7 @@ const styles = StyleSheet.create({
       fontSize: 14,
       color: COLORS.black,
       textAlign: 'center',
+      fontWeight:'200',
     },
   
     createBlogLink: {
@@ -919,10 +946,6 @@ const styles = StyleSheet.create({
       textDecorationLine: 'underline',
     },
 
-
-
-
-
     noDataContainer: {
       flex: 1,
       alignItems: 'center',
@@ -935,6 +958,8 @@ const styles = StyleSheet.create({
       fontSize: 14,
       color: COLORS.black,
       textAlign: 'center',
+      paddingHorizontal:20,
+      fontWeight:'200'
     },
   
     inputDetailsLink: {
@@ -997,6 +1022,43 @@ const styles = StyleSheet.create({
     newsArticleDescription: {
       fontSize: 14,
       color: COLORS.darkgrey,
+    },
+
+    wordleOption: {
+      height: 160,
+      width: width / 2.4,
+      marginRight: 20,
+      borderRadius: 40,
+      overflow: 'hidden',
+      backgroundColor: '#FFFFFF',
+      elevation: 10,
+      marginBottom: 20,
+    },
+  
+    wordleOptionBackground: {
+      flex: 1,
+      resizeMode: 'cover',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+  
+    wordleOptionIcon: {
+      height: 40,
+      width: 40,
+      marginBottom: 10, // Adjust as needed
+    },
+  
+    wordleOptionView: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+  
+    wordleOptionText: {
+      color: COLORS.black,
+      fontSize: 18,
+      fontWeight: '800',
+      textAlign: 'center',
     },
 
 })

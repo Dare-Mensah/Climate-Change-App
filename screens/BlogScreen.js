@@ -18,6 +18,12 @@ const BlogScreen = () => {
   const navigation = useNavigation();
 
   const handleSavePost = async () => {
+    // Check if all fields are filled and a topic is selected
+    if (!title.trim() || !author.trim() || !content.trim() || !selectedTopic) {
+      Alert.alert("Missing Fields", "Please fill in all fields and select a topic.");
+      return;
+    }
+  
     try {
       // Create a new post object
       const post = {
@@ -25,41 +31,31 @@ const BlogScreen = () => {
         author,
         content,
         timestamp: new Date(),
-        topic: selectedTopic, // Add the selected topic to the post object
+        topic: selectedTopic,
       };
-
+  
       // Get the current user's ID from Firebase Auth
       const userId = firebase.auth().currentUser.uid;
-
+  
       // Add the post to the 'posts' collection in Firestore
       await firebase.firestore().collection('posts').add({
         userId,
         ...post,
       });
-
-
+  
       // Reset the form fields after successful submission
       setTitle('');
       setAuthor('');
       setContent('');
-      setSelectedTopic(null); // Reset the selected topic
-      
-      Alert.alert(
-        "Post Shared",
-        "Your post has been shared successfully",
-        [
-          { 
-            text: "OK", 
-            onPress: () => navigation.navigate('Home') // Navigate back to Home screen
-          }
-        ]
-      );
-
-          // Update the user's profile to indicate they've posted a blog
-    await firebase.firestore().collection('users').doc(userId).update({
-      hasPostedBlog: true,
-    });
-
+      setSelectedTopic(null);
+  
+      Alert.alert("Post Shared", "Your post has been shared successfully", [
+        {
+          text: "OK",
+          onPress: () => navigation.navigate('Home'), // Navigate back to Home screen
+        },
+      ]);
+  
       console.log('Post saved successfully!');
     } catch (error) {
       console.error('Error saving post:', error);
@@ -121,7 +117,7 @@ const BlogScreen = () => {
           {/* Add the topic selection FlatList */}
           <Text style={[styles.text_footer, { marginTop: 35, marginBottom: 20 }]}>Select Topic</Text>
           <FlatList
-            data={['Wordle','Technology', 'Food', 'Transport', 'Finance' ]} // Add more topics as needed
+            data={['General','Wordle','Technology', 'Food', 'Transport', 'Finance' ]} // Add more topics as needed
             keyExtractor={(item) => item}
             horizontal
             renderItem={({ item }) => (

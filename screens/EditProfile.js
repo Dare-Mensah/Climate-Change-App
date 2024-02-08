@@ -1,12 +1,13 @@
 import { ImageBackground, Platform, StyleSheet, Text, TouchableOpacity, View, TextInput, Pressable, Image, Alert, ScrollView } from 'react-native'
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { firebase } from '../config';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Avatar, Title, Caption, TouchableRipple } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import COLORS from '../data/colors';
-import ImagePicker from 'react-native-image-picker';
+import * as ImagePicker from 'expo-image-picker'
 import storage from '@react-native-firebase/storage';
+import * as Animatable from 'react-native-animatable';
 
 const EditProfile = ({route}) => {
 
@@ -16,10 +17,43 @@ const EditProfile = ({route}) => {
     const navigation = useNavigation();
 
     const [hasGalleryPermission, setHasGalleryPermission] = useState(null);
+    const [image, setImage] = useState(null);
+
+
+    useEffect(() =>{
+      (async () =>{
+        const galleryStatus = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        setHasGalleryPermission(galleryStatus.status === 'granted');
+      })();
+    }, [])
+
+
+    const pickImage = async () => {
+      let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4,3],
+        quality: 1,
+      })
+
+      console.log(result);
+
+      if(!result.canceled){
+        setImage(result.uri)
+      }
+    };
+
+    if(hasGalleryPermission === false){
+      return <Text>No access to Internal Storage</Text>
+    }
+
+
+
+
 
     const { uid } = firebase.auth().currentUser; // Get user UID
     //const {username} = route.params;
-  
+
     const updateProfile = () => {
         const user = firebase.auth().currentUser;
       
@@ -154,43 +188,16 @@ const EditProfile = ({route}) => {
 
       
   return (
-    <LinearGradient style={{flex: 1}} colors={['#B7F1B5', '#EAEAEA']}>
+    <LinearGradient style={{flex: 1}} colors={['#B7F1B5','#EAEAEA']}>
     <View style={styles.container}>
-        <View style={styles.header1}>
-            <Pressable onPress={() => navigation.navigate("Home")}>
-                <Image style={{width:40, height:40}} source={require("../assets/back.png")}></Image>
-            </Pressable>
+            <View style={styles.header2}>
+            <Text style={styles.Title1}>Edit Profile</Text>
         </View>
+        <Animatable.View 
+        animation={"fadeInUpBig"}
+        style={styles.footer}>
 
-        <ScrollView showsVerticalScrollIndicator={false}>
-        <View style={{margin:20}}>
-            <View style={{alignItems:'center'}}>
-                <TouchableOpacity>
-                    <View style={{
-                        height:100,
-                        width:100, 
-                        borderRadius:15,
-                        marginTop:30,
-                        justifyContent:'center',
-                        alignItems:'center'
-                        }}>
-
-                        <Avatar.Image
-                        source={require('../assets/profileUser.png')}
-                        size={120}
-                        >
-                            <View style={{
-                                flex:1,
-                                justifyContent:'center',
-                                alignItems:'center'
-                            }}>          
-                            </View> 
-                        </Avatar.Image>
-                    </View>
-                </TouchableOpacity>
-            </View>
-            <View style={{marginTop: 40}}>
-        <Text style={[styles.text_footer, {marginTop: 35}]}>Username</Text>
+<Text style={[styles.text_footer, {marginTop: 35}]}>Username</Text>
             <View style={styles.action}>
                 <Image
                     style={{height: 20, width: 20}} 
@@ -227,13 +234,10 @@ const EditProfile = ({route}) => {
         </TouchableOpacity>
 
         <TouchableOpacity onPress={deleteProfile} style={styles.DeletecommandButton}>
-          <Text style={{ color: 'white' }}>Delete Profile</Text>
+          <Text style={{ color: 'white' }}>Delete Account</Text>
         </TouchableOpacity>
-        </View>
-        </View>
-        </ScrollView>
-        
-        
+
+        </Animatable.View>
     </View>
     </LinearGradient>
   )
@@ -351,4 +355,51 @@ const styles = StyleSheet.create({
         paddingLeft: 10,
         color: COLORS.darkgrey,
     },
+
+        imageContainer: {
+        height: 100,
+        width: 100,
+        borderRadius: 15,
+        marginTop: 30,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    profileImage: {
+        height: '100%',
+        width: '100%',
+        resizeMode: 'cover',
+    },
+
+    header2:{
+      flex: 1.5,
+      justifyContent:'flex-end',
+      paddingHorizontal: 20,
+      paddingBottom: 50,
+  },
+  Title1:{
+      fontSize: 34,
+      marginTop: 20,
+      //fontFamily: 'Montserrat',
+      fontWeight: 'bold',
+
+  },
+  footer:{
+    flex: 2.5,
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    paddingHorizontal: 20,
+    paddingVertical: 30,
+},
+text_footer:{
+    color: '#05375a',
+    fontSize: 18,
+},
+
+header2:{
+  flex: 0.7,
+  justifyContent:'flex-end',
+  paddingHorizontal: 20,
+  paddingBottom: 50,
+},
 })

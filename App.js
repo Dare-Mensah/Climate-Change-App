@@ -45,6 +45,10 @@ import GuestEndlessInfo from './screens/GuestEndlessInfo';
 import SelectDifficultyEndlessWordle from './screens/SelectDifficultyEndlessWordle';
 import EndlessWordleMedium from './screens/EndlessWordleMedium';
 import EndlessWordleHard from './screens/EndlessWordleHard';
+import About from './screens/About';
+import Privacy from './screens/Privacy';
+import Accessibility from './screens/Accessibility';
+import Notifications from './screens/Notifications';
 
 
 
@@ -133,6 +137,10 @@ function App(){
       <Stack.Screen name="SelectDifficultyEndlessWordle" component={SelectDifficultyEndlessWordle}/>
       <Stack.Screen name="EndlessWordleMedium" component={EndlessWordleMedium}/>
       <Stack.Screen name="EndlessWordleHard" component={EndlessWordleHard}/>
+      <Stack.Screen name="About" component={About}/>
+      <Stack.Screen name="Privacy" component={Privacy}/>
+      <Stack.Screen name="Accessibility" component={Accessibility}/>
+      <Stack.Screen name="Notifications" component={Notifications}/>
     </Stack.Navigator>
   )
 }
