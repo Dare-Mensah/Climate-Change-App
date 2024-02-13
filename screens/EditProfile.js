@@ -54,66 +54,75 @@ const EditProfile = ({route}) => {
     const { uid } = firebase.auth().currentUser; // Get user UID
     //const {username} = route.params;
 
-    const updateProfile = () => {
+    const updateProfile = async () => {
         const user = firebase.auth().currentUser;
       
-        if (newUsername) {
-          // Update username
-          user.updateProfile({
-            displayName: newUsername,
-          })
-          .then(() => {
-            console.log('Username updated successfully');
-          })
-          .catch(error => {
-            console.error('Error updating username:', error.message);
-          });
-        }
+        try {
+          // Update Firebase Auth user profile
+          if (newUsername) {
+              await user.updateProfile({
+                  displayName: newUsername,
+              });
+              console.log('Username updated in Auth successfully');
+              
+              // Update username in Firestore database
+              await firebase.firestore().collection('users').doc(user.uid).update({
+                  username: newUsername, // Assuming 'username' is the field name in your Firestore collection
+              });
+              console.log('Username updated in Firestore successfully');
+          }
       
-        if (newEmail) {
-          // Update email
-          user.updateEmail(newEmail)
-          .then(() => {
-            console.log('Email updated successfully');
-            // Send email verification
-            sendEmailVerification();
+          if (newEmail) {
+            await user.updateEmail(newEmail);
+            console.log('Email updated successfully in Auth');
+            
+            // Optionally, update email in Firestore database if you're storing it there
+            await firebase.firestore().collection('users').doc(user.uid).update({
+                email: newEmail,
+            });
+            console.log('Email updated in Firestore successfully');
+            
+            // Send email verification if necessary
+            await sendEmailVerification();
+            
             // Show success alert
             showAlert('Profile Updated', 'Your profile has been updated successfully.');
-          })
-          .catch(error => {
-            console.error('Error updating email:', error.message);
-            showAlert('Error', `Failed to update email: ${error.message}`);
-          });
         }
       
         // Clear input fields after updating
         setNewUsername('');
         setNewEmail('');
-      };
+    } catch (error) {
+        console.error('Error updating profile:', error.message);
+        showAlert('Error', `Failed to update profile: ${error.message}`);
+    }
+};
+
+const showAlert = (title, message) => {
+    Alert.alert(
+        title,
+        message,
+        [{ text: 'OK', onPress: () => console.log('OK Pressed') }],
+        { cancelable: false }
+    );
+};
       
-      const showAlert = (title, message) => {
-        Alert.alert(
-          title,
-          message,
-          [{ text: 'OK', onPress: () => console.log('OK Pressed') }],
-          { cancelable: false }
-        );
-      };
-  
-    const sendEmailVerification = () => {
+
+
+    const sendEmailVerification = async () => {
       const user = firebase.auth().currentUser;
-  
-      user.sendEmailVerification({
-        handleCodeInApp: true,
-        url: 'https://climatesenseapp.firebaseapp.com', // Replace with your app's URL
-      })
-      .then(() => {
-        console.log('Verification email sent');
-      })
-      .catch(error => {
-        console.error('Error sending verification email:', error.message);
-      });
+
+      try {
+          await user.sendEmailVerification({
+              handleCodeInApp: true,
+              url: 'https://climatesenseapp.firebaseapp.com', // Replace with your app's URL
+          });
+          console.log('Verification email sent');
+      } catch (error) {
+          console.error('Error sending verification email:', error.message);
+      }
     };
+
 
     const deleteUserProfile = async () => {
       const uid = firebase.auth().currentUser.uid;
@@ -212,14 +221,14 @@ const EditProfile = ({route}) => {
 
             </View>
 
-        <Text style={[styles.text_footer, {marginTop: 25}]}>Email</Text>
+        <Text style={[styles.text_footer, {marginTop: 25}]}>Verify Email</Text>
             <View style={styles.action}>
                 <Image
                     style={{height: 20, width: 20}} 
                     source={require('../assets/envelope.png')}/>
         
                     <TextInput
-                        placeholder='Your Email'
+                        placeholder='Type in your current email address'
                         style={styles.textInput}
                         autoCapitalize='none'
                         onChangeText={(email) => setNewEmail(email)}

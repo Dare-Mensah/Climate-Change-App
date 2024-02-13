@@ -48,7 +48,7 @@ import EndlessWordleHard from './screens/EndlessWordleHard';
 import About from './screens/About';
 import Privacy from './screens/Privacy';
 import Accessibility from './screens/Accessibility';
-import Notifications from './screens/Notifications';
+import AppNotify from './screens/AppNotify';
 
 
 
@@ -140,7 +140,7 @@ function App(){
       <Stack.Screen name="About" component={About}/>
       <Stack.Screen name="Privacy" component={Privacy}/>
       <Stack.Screen name="Accessibility" component={Accessibility}/>
-      <Stack.Screen name="Notifications" component={Notifications}/>
+      <Stack.Screen name="AppNotify" component={AppNotify}/>
     </Stack.Navigator>
   )
 }

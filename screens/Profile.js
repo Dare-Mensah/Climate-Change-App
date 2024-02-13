@@ -45,12 +45,14 @@ const Profile = ({route}) => {
                 </View>
             </TouchableRipple>
 
-            <TouchableOpacity onPress={() => navigation.navigate("Notifications")}>
+            {/** 
+            <TouchableOpacity onPress={() => navigation.navigate("AppNotify")}>
                 <View style={styles.menuItem}>
                     <Image source={require('../assets/bell.png')} style={{height: 30, width: 30}}/>
                     <Text style={styles.menuItemText}>Notifications</Text>
                 </View>
             </TouchableOpacity>
+            */}
 
             <TouchableRipple onPress={() => navigation.navigate("Privacy")}>
                 <View style={styles.menuItem}>
@@ -72,6 +74,13 @@ const Profile = ({route}) => {
                 <View style={styles.menuItem}>
                     <Image source={require('../assets/help.png')} style={{height: 30, width: 30}}/>
                     <Text style={styles.menuItemText}>About</Text>
+                </View>
+            </TouchableRipple>
+
+
+            <TouchableRipple onPress={() => firebase.auth().signOut()}>
+                <View style={styles.menuItem1}>
+                    <Text style={[styles.menuItemText, {color:'red'}]}>Logout</Text>
                 </View>
             </TouchableRipple>
 
@@ -147,6 +156,12 @@ const styles = StyleSheet.create({
         flexDirection:'row',
         paddingVertical:15,
         paddingHorizontal: 10,
+    },
+
+
+    menuItem1:{
+        flexDirection:'row',
+        paddingVertical:15,
     },
 
     menuItemText:{

@@ -18,12 +18,12 @@ import * as Notifications from 'expo-notifications';
 const {width} = Dimensions.get('screen')
 
 const topicBackgroundImages = {
-  Technology: require('../assets/TechImage2.jpg'),
+  Technology: require('../assets/TechImage3.jpg'),
   Food: require('../assets/Food4Image.jpg'),
   Transport: require('../assets/TransportImage2.jpg'),
   Finance: require('../assets/FinanceImage2.jpg'),
   Wordle: require('../assets/Worlde.png'),
-  General: require('../assets/Worlde.png'),
+  General: require('../assets/General.jpg'),
   // Add more mappings for other topics
 };
 
@@ -83,6 +83,19 @@ const Home = ({route}) => {
   const [carbonFootprintData, setCarbonFootprintData] = useState(null);
   const [leastCarbonFootprintData, setLeastCarbonFootprintData] = useState(null);
   const [newsArticles, setNewsArticles] = useState([]);
+  const [username, setUsername] = useState('');
+
+  useEffect(() => {
+      const user = firebase.auth().currentUser;
+      if (user !== null) {
+          // The displayName property might not be immediately available if it was recently updated.
+          // Ensure your app handles this gracefully.
+          const name = user.displayName ? user.displayName : 'User'; // Fallback to 'User' if displayName is null
+          setUsername(name);
+      }
+  }, []);
+
+
 
   useEffect(() => {
     const userId = firebase.auth().currentUser.uid;
@@ -102,6 +115,9 @@ const Home = ({route}) => {
     // Cleanup the listener when the component unmounts
     return () => unsubscribe();
   }, []);
+
+
+  
   
   // Function to send a notification when the user's blog post is liked
   const sendLikeNotification = async (likeData) => {
@@ -123,6 +139,8 @@ const Home = ({route}) => {
     const userId = firebase.auth().currentUser.uid;
     scheduleDailyNotification(userId);
   }, []);
+
+
   
   const scheduleDailyNotification = async (userId) => {
     try {
@@ -447,12 +465,12 @@ const Home = ({route}) => {
 
         <View style={{marginTop: 20, flexDirection:'row'}}>
           <TouchableOpacity onPress={() => navigation.navigate("Profile", {username: name.username, email})}>
-            <Image style={{height: 40, width:40, paddingTop: 5, marginLeft: 18}} source={require('../assets/circle-user.png')}/>
+            <Image style={{height: 35, width:35, paddingTop: 5, marginLeft: 18}} source={require('../assets/circle-user.png')}/>
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity onPress={() => firebase.auth().signOut()}>
-            <Image style={{height: 40, width:40, marginTop: 20, marginRight: 20}} source={require('../assets/SignOut.png')}/>
+        <TouchableOpacity>
+            <Image style={{height: 40, width:40, marginTop: 20, marginRight: 20}} source={require('../assets/notification.png')}/>
           </TouchableOpacity>
 
         </View>
@@ -465,7 +483,10 @@ const Home = ({route}) => {
         <View>
           <Animatable.Text 
           animation={"fadeInUpBig"}
-          style={[styles.Title1, style={paddingHorizontal:20, paddingTop:10}]}>Dashboard </Animatable.Text>
+          style={[styles.Title1, style={paddingHorizontal:20, paddingTop:10}]}>Dashboard</Animatable.Text>
+        </View>
+        <View>
+            <Text style={[styles.Title2, style={paddingHorizontal:20}]}>Welcome, {username}</Text>
         </View>
 
 
@@ -736,6 +757,13 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
 
     },
+
+    Title2:{
+      fontSize: 19,
+      //fontFamily: 'Montserrat',
+      fontWeight: '200',
+
+  },
     blogPostTopic: {
       fontSize:15,
       fontWeight:'500'
