@@ -1,4 +1,4 @@
-import { Pressable, ScrollView, StyleSheet, Text, View, Image, Dimensions, SafeAreaView, StatusBar, FlatList, ImageBackground, TouchableOpacity,RefreshControl,backgroundImage } from 'react-native'
+import { Pressable, ScrollView, StyleSheet, Text, View, Image, Dimensions, SafeAreaView, StatusBar, FlatList, ImageBackground, TouchableOpacity,RefreshControl,backgroundImage, Alert } from 'react-native'
 import React, {useState, useEffect} from 'react'
 import COLORS from '../data/colors'
 import DATA from '../data/data1'
@@ -84,6 +84,7 @@ const Home = ({route}) => {
   const [leastCarbonFootprintData, setLeastCarbonFootprintData] = useState(null);
   const [newsArticles, setNewsArticles] = useState([]);
   const [username, setUsername] = useState('');
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
 
   useEffect(() => {
       const user = firebase.auth().currentUser;
@@ -117,11 +118,41 @@ const Home = ({route}) => {
   }, []);
 
 
+  const toggleNotifications = async () => {
+    const newSetting = !notificationsEnabled;
+    setNotificationsEnabled(newSetting);
+    await AsyncStorage.setItem('notificationsEnabled', JSON.stringify(newSetting));
+    
+    // Log the new setting to the console
+    console.log(`Notifications are now ${newSetting ? "enabled" : "disabled"}.`);
+    
+    // Show an alert to the user
+    Alert.alert(
+      "Notifications " + (newSetting ? "Enabled" : "Disabled"),
+      "You have " + (newSetting ? "enabled" : "disabled") + " notifications.",
+      [
+        { text: "OK" }
+      ]
+    );
+  };
+
+  useEffect(() => {
+    const loadPreferences = async () => {
+      const notifEnabled = await AsyncStorage.getItem('notificationsEnabled');
+      if (notifEnabled !== null) {
+        setNotificationsEnabled(JSON.parse(notifEnabled));
+      }
+    };
+  
+    loadPreferences();
+  }, []);
+
+
   
   
   // Function to send a notification when the user's blog post is liked
   const sendLikeNotification = async (likeData) => {
-    // You can customize this message based on likeData
+    if (!notificationsEnabled) return;
     const message = `Your blog post "${likeData.postTitle}" got a new like!`;
   
     await Notifications.scheduleNotificationAsync({
@@ -143,6 +174,8 @@ const Home = ({route}) => {
 
   
   const scheduleDailyNotification = async (userId) => {
+    if (!notificationsEnabled) return;
+
     try {
       // Fetch total likes
       const likesSnapshot = await firebase.firestore().collection('likes')
@@ -469,10 +502,12 @@ const Home = ({route}) => {
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity>
-            <Image style={{height: 40, width:40, marginTop: 20, marginRight: 20}} source={require('../assets/notification.png')}/>
-          </TouchableOpacity>
-
+        <TouchableOpacity onPress={toggleNotifications}>
+          <Image
+            style={{ height: 40, width: 40, marginTop: 20, marginRight: 20 }}
+            source={notificationsEnabled ? require('../assets/notification.png') : require('../assets/notification_disable.png')}
+          />
+        </TouchableOpacity>
         </View>
 
         <ScrollView showsVerticalScrollIndicator={false}
