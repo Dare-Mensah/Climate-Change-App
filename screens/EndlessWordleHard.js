@@ -135,6 +135,7 @@ const EndlessWordleHard = () => {
       setCurRow(0);
       setCurCol(0);
       setGameState('playing');
+      setTimer(200);
     }
     
     

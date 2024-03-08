@@ -46,13 +46,9 @@ const  getWordForDay =(day)=>  {
 }
 
 
-
-
-
-
 const Wordle = () => {
   const navigation = useNavigation();
-  //AsyncStorage.removeItem("@game") //resetting async storage for game
+  AsyncStorage.removeItem("@game") //resetting async storage for game
   const word = getWordForDay(dayOfTheYear);
 
 

@@ -75,7 +75,16 @@ const BlogDetails = ({ route, navigation }) => {
   }, [postId, currentUser]);
 
   const handleLikePress = async () => {
-    if (!currentUser || hasLiked) return;
+    if (!currentUser) {
+      // Show an alert or handle the case when there is no user logged in.
+      Alert.alert('Not Logged In', 'You must be logged in to like a blog.');
+      return;
+    }
+    if (hasLiked) {
+      // If the user has already liked the blog, show an alert.
+      Alert.alert('Already Liked', 'You have already liked this blog.');
+      return;
+    }
     try {
       await firebase.firestore().collection('posts').doc(postId).update({
         likes: firebase.firestore.FieldValue.increment(1),
@@ -90,6 +99,7 @@ const BlogDetails = ({ route, navigation }) => {
       console.error('Error updating likes:', error);
     }
   };
+  
 
   const handleAddComment = async () => {
     if (!currentUser) return;

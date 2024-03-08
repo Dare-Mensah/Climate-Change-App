@@ -14,6 +14,7 @@ import { useNavigation } from '@react-navigation/native';
 import EndScreenCoop from './EndScreenCoop';
 import EndlessEndScreen from './EndlessEndScreen';
 import GuestEndlessEndScreen from './GuestEndlessEndScreen';
+import GuestHome from './GuestHome';
 LogBox.ignoreAllLogs();
 
 const Number_Of_Tries = 6;
@@ -325,7 +326,7 @@ const GuestEndlessWordle = () => {
       <Text style={{fontWeight:'500', fontSize:20}}>
           Time Remaining: {Math.floor(timer / 60)}:{String(timer % 60).padStart(2, '0')}
         </Text>
-        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Home")}>
+        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("GuestHome")}>
           <Text style={{fontSize:20, fontWeight:'bold'}}>  Go Home</Text>
         </TouchableOpacity>
       </View>

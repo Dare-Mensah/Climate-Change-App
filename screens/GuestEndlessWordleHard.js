@@ -12,7 +12,7 @@ import * as Clipboard from 'expo-clipboard';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import EndScreenCoop from './EndScreenCoop';
-import EndlessEndScreen from './EndlessEndScreen';
+import GuestEndlessEndScreen from './GuestEndlessEndScreen';
 LogBox.ignoreAllLogs();
 
 const Number_Of_Tries = 6;
@@ -21,12 +21,9 @@ const copyArray = (arr) => {
   return [...arr.map((rows) => [...rows])];
 };
 
-
-const EndlessWordleMedium = () => {
+const GuestEndlessWordleHard = () => {
     const navigation = useNavigation();
 
-    const [difficulty, setDifficulty] = useState('easy'); // New state for difficulty
-    const [wordIndex, setWordIndex] = useState(0); // Existing state
     const [correctWordsCount, setCorrectWordsCount] = useState(0);
     const [timer, setTimer] = useState(200); // Initialize timer with 60 seconds
     const [words, setWords] = useState([]); // State for storing the fetched words
@@ -91,7 +88,7 @@ const EndlessWordleMedium = () => {
       useEffect(() => {
         const fetchWords = async () => {
           try {
-            const response = await fetch('https://random-word-api.vercel.app/api?words=500&length=5');
+            const response = await fetch('https://random-word-api.vercel.app/api?words=500&length=6');
             const fetchedWords = await response.json();
             setWords(fetchedWords);
             if (fetchedWords.length > 0) {
@@ -137,7 +134,6 @@ const EndlessWordleMedium = () => {
       setCurRow(0);
       setCurCol(0);
       setGameState('playing');
-      setTimer(200);
     }
     
     
@@ -162,7 +158,7 @@ const EndlessWordleMedium = () => {
     
         try{
           //firstly reading the data
-          const existingStateString = await AsyncStorage.getItem("@game_endless")
+          const existingStateString = await AsyncStorage.getItem("@game_endless_Hard_Guest")
           const existingState = existingStateString ?  JSON.parse(existingStateString) : {};
           if(!existingState) { //then updating the data
             existingState = {}
@@ -171,7 +167,7 @@ const EndlessWordleMedium = () => {
           //writing the data back to async
           const dataString =JSON.stringify(existingState); //parsing from JSON object to string
           console.log("Saving", dataString)
-          await AsyncStorage.setItem("@game_endless", dataString); 
+          await AsyncStorage.setItem("@game_endless_Hard_Guest", dataString); 
         } catch (e){
           console.log("Could not save data to async storage", e)
         }
@@ -180,7 +176,7 @@ const EndlessWordleMedium = () => {
     
       const readState = async () =>
       {
-        const dataString = await AsyncStorage.getItem("@game_endless")
+        const dataString = await AsyncStorage.getItem("@game_endless_Hard_Guest")
         try{
           const data = JSON.parse(dataString)
           const day = data[dayKey]
@@ -326,7 +322,7 @@ const EndlessWordleMedium = () => {
     
       if (gameSate != 'playing') {
         const averageDuration = calculateAverageDuration();
-        return (<EndlessEndScreen won={gameSate == 'won'} correctWordsCount={correctWordsCount} rows={rows} getCellBGColor={getCellBGColor} navigation={navigation} averageDuration={averageDuration}/>)
+        return (<GuestEndlessEndScreen won={gameSate == 'won'} correctWordsCount={correctWordsCount} rows={rows} getCellBGColor={getCellBGColor} navigation={navigation} averageDuration={averageDuration}/>)
       }
   
   
@@ -338,7 +334,7 @@ const EndlessWordleMedium = () => {
         <Text style={{fontWeight:'500', fontSize:20}}>
             Time Remaining: {Math.floor(timer / 60)}:{String(timer % 60).padStart(2, '0')}
           </Text>
-          <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Home")}>
+          <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("GuestHome")}>
             <Text style={{fontSize:20, fontWeight:'bold'}}>  Go Home</Text>
           </TouchableOpacity>
         </View>
@@ -370,7 +366,7 @@ const EndlessWordleMedium = () => {
     )
 }
 
-export default EndlessWordleMedium
+export default GuestEndlessWordleHard
 
 const styles = StyleSheet.create({
     container: {

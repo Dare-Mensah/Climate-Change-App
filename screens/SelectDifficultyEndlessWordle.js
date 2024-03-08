@@ -4,7 +4,6 @@ import COLORS from '../data/colors'
 import DATA from '../data/data1'
 import * as Animatable from 'react-native-animatable';
 import {firebase} from '../config'
-import Profile from './Profile';
 import { Divider } from 'react-native-paper';
 import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -20,7 +19,7 @@ const {width} = Dimensions.get('screen')
 
 const SelectDifficultyEndlessWordle = () => {
 
-    const navigation = useNavigation(); 
+  const navigation = useNavigation(); 
   const [showEasyDescription, setShowEasyDescription] = useState(false);
 
   const toggleDescriptionVisibility = () => {

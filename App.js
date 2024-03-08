@@ -13,7 +13,7 @@ import StartUp from './screens/StartUp';
 import News from './screens/News';
 import Tips from './screens/Tips';
 import ForgotPassword from './screens/ForgotPassword';
-import Profile from './screens/Profile';
+import Settings from './screens/Settings';
 import EditProfile from './screens/EditProfile';
 import Onboarding from './screens/Onboarding';
 import SignUpComplete from './screens/SignUpComplete';
@@ -28,7 +28,6 @@ import BlogDetails from './screens/BlogDetails';
 import EditBlog from './screens/EditBlog';
 import EditComment from './screens/EditComment';
 import CarbonFootPrintCalc from './screens/CarbonFootPrintCalc';
-import WordleCoop from './screens/WordleCoop';
 import EndScreenCoop from './screens/EndScreenCoop';
 import EndlessWordle from './screens/EndlessWordle';
 import EndlessEndScreen from './screens/EndlessEndScreen';
@@ -48,7 +47,10 @@ import EndlessWordleHard from './screens/EndlessWordleHard';
 import About from './screens/About';
 import Privacy from './screens/Privacy';
 import Accessibility from './screens/Accessibility';
-import AppNotify from './screens/AppNotify';
+import GuestSelectDiffWordle from './screens/GuestSelectDiffWordle';
+import GuestEndlessWordleMedium from './screens/GuestEndlessWordleMedium';
+import GuestEndlessWordleHard from './screens/GuestEndlessWordleHard';
+import WordleLeaderboards from './screens/WordleLeaderboards';
 
 
 
@@ -103,6 +105,9 @@ function App(){
         <Stack.Screen name="ForgotPassword" component={ForgotPassword}/>
         <Stack.Screen name="EndlessWordleInfo" component={EndlessWordleInfo}/>
         <Stack.Screen name="EndlessWordle" component={EndlessWordle}/>
+        <Stack.Screen name="GuestSelectDiffWordle" component={GuestSelectDiffWordle}/>
+        <Stack.Screen name="GuestEndlessWordleMedium" component={GuestEndlessWordleMedium}/>
+        <Stack.Screen name="GuestEndlessWordleHard" component={GuestEndlessWordleHard}/>
         
         
         
@@ -117,7 +122,7 @@ function App(){
       <Stack.Screen name="SignUpComplete" component={SignUpComplete}/>
       <Stack.Screen name="News" component={News}/>
       <Stack.Screen name="Tips" component={Tips}/>
-      <Stack.Screen name="Profile" component={Profile}/>
+      <Stack.Screen name="Settings" component={Settings}/>
       <Stack.Screen name="EditProfile" component={EditProfile}/>
       <Stack.Screen name="Wordle" component={Wordle}/>
       <Stack.Screen name="EndScreen" component={EndScreen}/>
@@ -126,7 +131,6 @@ function App(){
       <Stack.Screen name="EditBlog" component={EditBlog}/>
       <Stack.Screen name="EditComment" component={EditComment}/>
       <Stack.Screen name="CarbonFootPrintCalc" component={CarbonFootPrintCalc}/>
-      <Stack.Screen name="WordleCoop" component={WordleCoop}/>
       <Stack.Screen name="EndScreenCoop" component={EndScreenCoop}/>
       <Stack.Screen name="EndlessWordle" component={EndlessWordle}/>
       <Stack.Screen name="EndlessEndScreen" component={EndlessEndScreen}/>
@@ -140,7 +144,7 @@ function App(){
       <Stack.Screen name="About" component={About}/>
       <Stack.Screen name="Privacy" component={Privacy}/>
       <Stack.Screen name="Accessibility" component={Accessibility}/>
-      <Stack.Screen name="AppNotify" component={AppNotify}/>
+      <Stack.Screen name="WordleLeaderboards" component={WordleLeaderboards}/>
     </Stack.Navigator>
   )
 }

@@ -138,7 +138,8 @@ const EndlessWordle = () => {
     setCurRow(0);
     setCurCol(0);
     setGameState('playing');
-  }
+    setTimer(250); // Reset timer to initial value (or whatever value you prefer)
+  };
   
   
   
@@ -229,6 +230,8 @@ const EndlessWordle = () => {
       const total = guessDurations.reduce((acc, duration) => acc + duration, 0);
       return (total / guessDurations.length).toFixed(2);
     };
+
+
 
   
     const onKeyPressed = (key) => {

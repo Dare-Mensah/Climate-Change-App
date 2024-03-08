@@ -48,10 +48,37 @@ const EndlessEndScreen = ({ won = false, rows, getCellBGColor, navigation, corre
     };
 
 
+  
+    const saveGameResultToFirestore = async (gameResult) => {
+      const db = firebase.firestore();
+      const user = firebase.auth().currentUser; // Ensure you have authenticated the user
+    
+      if (user) {
+        const gameResultsRef = db.collection('gameResults').doc(user.uid);
+        try {
+          await gameResultsRef.set(gameResult, { merge: true });
+          console.log('Game result saved successfully');
+        } catch (error) {
+          console.error('Error saving game result: ', error);
+        }
+      } else {
+        console.log('No authenticated user found');
+      }
+    };
+    
+    // Example game result data
+    const gameResult = {
+      won: true,
+      correctWordsCount: correctWordsCount, // Assuming this is a variable you have
+      averageDuration: averageDuration, // Assuming this is a variable you have
+      timestamp: firebase.firestore.FieldValue.serverTimestamp(), // Adds a timestamp
+    };
+
 
     useEffect(() => {
       readState();
       saveStatsToAsyncStorage(); // Save stats to AsyncStorage
+      saveGameResultToFirestore(gameResult);
     }, []);
 
     // Assuming correctWordsCount is the total number of words guessed correctly

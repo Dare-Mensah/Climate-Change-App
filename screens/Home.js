@@ -4,7 +4,7 @@ import COLORS from '../data/colors'
 import DATA from '../data/data1'
 import * as Animatable from 'react-native-animatable';
 import {firebase} from '../config'
-import Profile from './Profile';
+import Profile from './Settings';
 import { Divider } from 'react-native-paper';
 import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -497,8 +497,8 @@ const Home = ({route}) => {
         <View style={styles.header}>
 
         <View style={{marginTop: 20, flexDirection:'row'}}>
-          <TouchableOpacity onPress={() => navigation.navigate("Profile", {username: name.username, email})}>
-            <Image style={{height: 35, width:35, paddingTop: 5, marginLeft: 18}} source={require('../assets/circle-user.png')}/>
+          <TouchableOpacity onPress={() => navigation.navigate("Settings", {username: name.username, email})}>
+            <Image style={{height: 35, width:35, paddingTop: 5, marginLeft: 18}} source={require('../assets/settings.png')}/>
           </TouchableOpacity>
         </View>
 
@@ -734,8 +734,12 @@ const Home = ({route}) => {
     </View>
   )}
 
-
+  <View style={{flexDirection:'row'}}>
   <Text style={styles.sectionTitle}>Wordle</Text>
+  <TouchableOpacity onPress={() => navigation.navigate("WordleLeaderboards")}>
+        <Text style={[styles.createBlogLink, {marginTop:30, fontWeight:'bold'}]}>Leaderboards!</Text>
+    </TouchableOpacity>
+  </View>
 
 <FlatList
   contentContainerStyle={{ paddingLeft: 20 }}

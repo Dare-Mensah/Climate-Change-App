@@ -13,7 +13,7 @@ import Constants from 'expo-constants';
 
 
 
-const Profile = ({route}) => {
+const Settings = ({route}) => {
 
     const navigation = useNavigation();
 
@@ -77,12 +77,26 @@ const Profile = ({route}) => {
                 </View>
             </TouchableRipple>
 
-
-            <TouchableRipple onPress={() => firebase.auth().signOut()}>
+            <TouchableRipple onPress={() => {
+                Alert.alert(
+                "Logout", // Title of the alert
+                "Are you sure you want to logout?", // Message of the alert
+                [
+                    {
+                    text: "Cancel",
+                    onPress: () => console.log("Cancel Pressed"),
+                    style: "cancel"
+                    },
+                    { text: "Logout", onPress: () => firebase.auth().signOut() }
+                ],
+                { cancelable: false } // This prevents the alert from being dismissed by tapping outside of the alert dialog.
+                );
+            }}>
                 <View style={styles.menuItem1}>
                     <Text style={[styles.menuItemText, {color:'red'}]}>Logout</Text>
                 </View>
             </TouchableRipple>
+
 
         </View>
         </Animatable.View>
@@ -91,7 +105,7 @@ const Profile = ({route}) => {
   )
 }
 
-export default Profile
+export default Settings
 
 const styles = StyleSheet.create({
     header1:{

@@ -179,28 +179,6 @@ const Achievements = () => {
         </View>
 
 
-        <View style={styles.achievementBox}>
-        <TouchableOpacity onPress={() => setShowWordleGameMasterDescription(!showWordleGameMasterDescription)}>
-          <View style={styles.achievementContainer}>
-            <Image
-              source={hasPlayedOver10WordleGames ? require('../assets/padlockunlock.png') : require('../assets/padlock.png')}
-              style={styles.achievementImage}
-            />
-            <Text style={styles.achievementText}>
-              {hasPlayedOver10WordleGames ? "  Wordle Enthusiast Unlocked!  " : "  Wordle Enthusiast Locked  "}
-            </Text>
-            <Image
-              source={showWordleGameMasterDescription ? require('../assets/arrowUp.png') : require('../assets/arrowDown.png')}
-              style={styles.arrowImage}
-            />
-          </View>
-          {showWordleGameMasterDescription && (
-            <Text style={styles.descriptionText}>
-              You've played over 10 Wordle games! You're a true 'Wordle Enthusiast'!
-            </Text>
-          )}
-        </TouchableOpacity>
-      </View>
       </ScrollView>
     </LinearGradient>
   )

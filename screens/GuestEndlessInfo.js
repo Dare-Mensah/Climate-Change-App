@@ -32,7 +32,7 @@ const GuestEndlessInfo = () => {
             data2Ref.current.scrollToIndex({index: currentIndex + 1});
         } else {
             console.log ('last item')
-            navigation.navigate("GuestEndlessWordle")
+            navigation.navigate("GuestSelectDiffWordle")
         }
     }
   return (
@@ -41,7 +41,7 @@ const GuestEndlessInfo = () => {
 
         <View style={{flex:3}}>
         <TouchableOpacity 
-            onPress={() => navigation.navigate("GuestEndlessWordle")}
+            onPress={() => navigation.navigate("GuestSelectDiffWordle")}
         >
             <Text style={{fontWeight:'500', fontSize: 17, marginTop: 40, paddingHorizontal: 20}}>Skip</Text>
         </TouchableOpacity>

@@ -1,10 +1,9 @@
-import { Pressable, ScrollView, StyleSheet, Text, View, Image, Dimensions, SafeAreaView, StatusBar, FlatList, ImageBackground, TouchableOpacity } from 'react-native'
+import { Pressable, ScrollView, StyleSheet, Text, View, Image, Dimensions, SafeAreaView, StatusBar, FlatList, ImageBackground, TouchableOpacity,RefreshControl,backgroundImage, Alert } from 'react-native'
 import React, {useState, useEffect} from 'react'
 import COLORS from '../data/colors'
 import DATA from '../data/data1'
 import * as Animatable from 'react-native-animatable';
 import {firebase} from '../config'
-import Profile from './Profile';
 import { Divider } from 'react-native-paper';
 import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -63,21 +62,24 @@ const GuestHome = ({route}) => {
 
 
 
+
     const wordleOptions = [
-      { id: '1', title: 'SinglePlayer Mode', navigateTo: 'GuestWordle' },
-      { id: '2', title: 'Co-op Mode', navigateTo: 'GuestCoopInfo' },
-      { id: '3', title: 'Endless Mode', navigateTo: 'GuestEndlessInfo' },
+      { id: '1', title: 'SinglePlayer Mode', navigateTo: 'GuestWordle', bgImage: require('../assets/pic1.jpg'), iconImage: require('../assets/single-player.png') },
+      { id: '2', title: 'Co-op Mode', navigateTo: 'GuestCoopInfo', bgImage: require('../assets/pic2.jpg'), iconImage: require('../assets/coop.png') },
+      { id: '3', title: 'Endless Mode', navigateTo: 'GuestEndlessInfo', bgImage: require('../assets/pic4.jpg'), iconImage: require('../assets/puzzle-game.png') },
     ];
-  
   
   
   
     const WordleOption = ({ item }) => {
       return (
         <Pressable onPress={() => navigation.navigate(item.navigateTo)} style={styles.wordleOption}>
-          <View style={styles.wordleOptionView}>
-            <Text style={styles.wordleOptionText}>{item.title}</Text>
-          </View>
+          <ImageBackground source={item.bgImage} style={styles.wordleOptionBackground}>
+            <View style={styles.wordleOptionView}>
+              <Image source={item.iconImage} style={styles.wordleOptionIcon} />
+              <Text style={styles.wordleOptionText}>{item.title}</Text>
+            </View>
+          </ImageBackground>
         </Pressable>
       );
     };
@@ -120,7 +122,7 @@ const GuestHome = ({route}) => {
           style={[styles.Title1, style={paddingHorizontal:20, paddingTop:10}]}>Dashboard </Animatable.Text>
         </View>
 
-<Text style={styles.sectionTitle}>Wordle</Text>
+        <Text style={styles.sectionTitle}>Wordle</Text>
 
 <FlatList
   contentContainerStyle={{ paddingLeft: 20 }}
@@ -221,14 +223,25 @@ wordleOption: {
   height: 160,
   width: width / 2.4,
   marginRight: 20,
-  padding: 20,
-  overflow: "hidden",
   borderRadius: 40,
-  backgroundColor: '#FFFFFF', // or any other color you prefer
+  overflow: 'hidden',
+  backgroundColor: '#FFFFFF',
   elevation: 10,
-  marginBottom:20,
+  marginBottom: 20,
 },
 
+wordleOptionBackground: {
+  flex: 1,
+  resizeMode: 'cover',
+  justifyContent: 'center',
+  alignItems: 'center',
+},
+
+wordleOptionIcon: {
+  height: 40,
+  width: 40,
+  marginBottom: 10, // Adjust as needed
+},
 
 wordleOptionView: {
   flex: 1,
@@ -237,9 +250,21 @@ wordleOptionView: {
 },
 
 wordleOptionText: {
-  color: COLORS.black, // Changed to black for better visibility
+  color: COLORS.black,
   fontSize: 18,
   fontWeight: '800',
-  textAlign:'center',
+  textAlign: 'center',
 },
+
+
+wordleOptionBackground: {
+  flex: 1,
+  resizeMode: 'cover',
+  justifyContent: 'center',
+  alignItems: 'center',
+},
+
+
+
+
 })
