@@ -12,6 +12,27 @@ import { LinearGradient } from 'expo-linear-gradient';
 import Constants from 'expo-constants';
 
 const Privacy = () => {
+
+    const [data, setData] = useState({});
+
+    useEffect(() => {
+      // Update fetch URL to match your Flask server's IP address and port
+      fetch("http://192.168.1.38:3000/", {
+        method: 'GET',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(response => response.json())
+      .then(json => {
+        setData(json);
+      })
+      .catch(error => {
+        console.error(error);
+      });
+    }, []);
+
   return (
     <LinearGradient style={{flex: 1}} colors={['#B7F1B5','#EAEAEA']}>
     <View style={styles.container}>
@@ -21,7 +42,7 @@ const Privacy = () => {
         <Animatable.View 
         animation={"fadeInUpBig"}
         style={styles.footer}>
-
+            <Text>{data.Hello}</Text>
         </Animatable.View>
     </View>
     </LinearGradient>
