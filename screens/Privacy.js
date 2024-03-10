@@ -13,24 +13,19 @@ import Constants from 'expo-constants';
 
 const Privacy = () => {
 
-    const [data, setData] = useState({});
+    const [topKeywords, setTopKeywords] = useState([]);
 
     useEffect(() => {
-      // Update fetch URL to match your Flask server's IP address and port
-      fetch("http://192.168.1.38:3000/", {
-        method: 'GET',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json'
-        }
-      })
-      .then(response => response.json())
-      .then(json => {
-        setData(json);
-      })
-      .catch(error => {
-        console.error(error);
-      });
+      fetch('http://192.168.1.38:3000/climate-news')
+        .then((response) => response.json())
+        .then((json) => {
+          // Filter the top_keywords array for words with exactly 5 letters
+          const fiveLetterKeywords = json.top_keywords.filter(word => word.length === 5);
+          setTopKeywords(fiveLetterKeywords);
+        })
+        .catch((error) => {
+          console.error(error);
+        });
     }, []);
 
   return (
@@ -42,7 +37,9 @@ const Privacy = () => {
         <Animatable.View 
         animation={"fadeInUpBig"}
         style={styles.footer}>
-            <Text>{data.Hello}</Text>
+        {topKeywords.map((keyword, index) => (
+            <Text key={index} style={styles.text}>{keyword}</Text>
+        ))}
         </Animatable.View>
     </View>
     </LinearGradient>

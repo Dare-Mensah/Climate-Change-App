@@ -12,6 +12,7 @@ import * as Clipboard from 'expo-clipboard';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import EndScreen from './EndScreen';
+import useDailyWord from '../data/useDailyWord';
 LogBox.ignoreAllLogs();
 
 const Number_Of_Tries = 6;
@@ -21,7 +22,6 @@ const copyArray = (arr) => { // making a copy of this aaray
   return [...arr.map((rows) => [...rows])];
 };
 
-const words = ["hello","yesno"]
   
 const getDayOfTheYear = () => {
   const now = new Date();
@@ -41,18 +41,16 @@ const getDayKey = () => {
 const dayOfTheYear = getDayOfTheYear(); //add +2 to test for next day
 const dayKey = getDayKey();
 
-const  getWordForDay =(day)=>  {
-  return words[day % words.length];
-}
+
 
 
 const Wordle = () => {
   const navigation = useNavigation();
   AsyncStorage.removeItem("@game") //resetting async storage for game
-  const word = getWordForDay(dayOfTheYear);
 
-
-  const letters = word.split("");//returns an array of characters.
+  const { dailyWord, isLoading } = useDailyWord();
+  const [letters, setLetters] = useState([]);
+  //const letters = word.split("");//returns an array of characters.
 
   const [rows, setRows] = useState(
     new Array(Number_Of_Tries).fill(new Array(letters.length).fill("")));
@@ -63,6 +61,19 @@ const Wordle = () => {
   const [curCol, setCurCol] = useState(0);
   const [gameSate, setGameState] = useState('playing');
   const [loaded, setloaded] = useState(false)
+
+  useEffect(() => {
+    if (!isLoading && dailyWord) {
+      setLetters(dailyWord.split(""));
+      const initializedRows = new Array(Number_Of_Tries).fill(new Array(dailyWord.length).fill(''));
+      setRows(initializedRows);
+      setCurRow(0);
+      setCurCol(0);
+      setGameState('playing');
+    }
+  }, [dailyWord, isLoading]);
+
+
 
   useEffect(() => {
     if(curRow > 0)
@@ -235,6 +246,10 @@ const Wordle = () => {
 
   if (gameSate != 'playing') {
     return (<EndScreen won={gameSate == 'won'} rows={rows} getCellBGColor={getCellBGColor} navigation={navigation}/>)
+  }
+
+  if (isLoading) {
+    return <ActivityIndicator size="large" color={COLORS.primary} style={{alignItems:'center', flex:1, justifyContent:'center'}} />;
   }
 
 
