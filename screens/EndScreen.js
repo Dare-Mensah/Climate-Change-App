@@ -73,41 +73,6 @@ const EndScreen = ({ won = false, rows, getCellBGColor, navigation }) => {
       
     };
 
-    const saveCurStreakToFirebase = async () => {
-      try {
-        // Retrieve curStreak from AsyncStorage
-        const statsString = await AsyncStorage.getItem('@game_stats');
-        const stats = statsString ? JSON.parse(statsString) : null;
-    
-        if (stats && stats.curStreak !== undefined) {
-          const curStreak = stats.curStreak;
-          
-          // Get the current user from Firebase Authentication
-          const currentUser = firebase.auth().currentUser;
-          
-          if (currentUser) {
-            // Update curStreak in Firebase Firestore
-            const userRef = firebase.firestore().collection('users').doc(currentUser.uid);
-            await userRef.update({ curStreak });
-            console.log("curStreak updated successfully in Firebase");
-          } else {
-            console.log("User not logged in");
-          }
-        } else {
-          console.log("curStreak not found in AsyncStorage");
-        }
-      } catch (error) {
-        console.error("Error updating curStreak in Firebase:", error);
-      }
-    };
-    
-    // Call this function to update curStreak in Firebase
-    saveCurStreakToFirebase();
-
-
-
-
-
 
 
 
@@ -243,13 +208,15 @@ const EndScreen = ({ won = false, rows, getCellBGColor, navigation }) => {
 
   return (
     <LinearGradient style={{flex: 1}} colors={['#EAEAEA', '#B7F1B5']}>
-        <ScrollView showsVerticalScrollIndicator={false}>
-        <SafeAreaView style={{width:'100%', alignContent:'center'}}>
-        <View>
+      <SafeAreaView style={styles.container}>
+        <ScrollView contentContainerStyle={styles.scrollViewContent} showsVerticalScrollIndicator={false}>
+          <View style={styles.titleContainer}>
             <Text style={styles.title}>WORDLE</Text>
-            <Text style ={{fontSize: 30, color:"black", fontWeight: 400, textAlign: 'center',}}>{won ? 'You Won!' : 'Try again tomorrow'}</Text>
-        </View>
+            <Text style={styles.winMessage}>{won ? 'You Won!' : 'Try again tomorrow'}</Text>
+          </View>
 
+
+        
         <Text style ={{fontSize: 30, color:"black", fontWeight: 200, marginVertical: 20, textAlign: 'center',}}>Your Statisitics</Text>
         <View>
             <Number number={played} label ={"Played"}/>
@@ -262,6 +229,8 @@ const EndScreen = ({ won = false, rows, getCellBGColor, navigation }) => {
 
         <GuessDistribution distribution={distribution}/>
 
+        
+
         <View>
             
             <View>
@@ -269,30 +238,26 @@ const EndScreen = ({ won = false, rows, getCellBGColor, navigation }) => {
                 <Text style ={{fontSize: 30, color:"black", fontWeight: 'bold',marginTop:10, textAlign: 'center',}}>{calculateTimeTillNextGame()}</Text>
             </View>
             
-            <TouchableOpacity onPress={share}
-                style={[styles.box1, {marginTop:40, backgroundColor:COLORS.third}]}
-            >
-                <Text style={[styles.text1,{color:COLORS.white}]}>Share</Text>
+            
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity onPress={share} style={[styles.button, {backgroundColor: COLORS.third}]}>
+              <Text style={styles.buttonText}>Share</Text>
             </TouchableOpacity>
-
-
 
             <TouchableOpacity onPress={() => {
               navigation.navigate("Home", {
                 currentStreak: curStreak,
                 winPercentage: winRate,
                 playedState: played,
-              })
-            }}
-                style={[styles.box1, {marginTop:40, backgroundColor:COLORS.third}]}
-            >
-                <Text style={[styles.text1,{color:COLORS.white}]}>Return Home</Text>
+              });
+            }} 
+            style={[styles.button, {backgroundColor: COLORS.third, marginLeft: 10}]}>
+              <Text style={styles.buttonText}>Return Home</Text>
             </TouchableOpacity>
-
+            </View>
         </View>
-
-        </SafeAreaView>
         </ScrollView>
+        </SafeAreaView>
 
     </LinearGradient>
   )
@@ -307,11 +272,18 @@ const styles = StyleSheet.create({
     },
 
     title: {   
-        fontSize: 40,
-        fontWeight: 'bold',
-        letterSpacing: 4,
-        marginTop: 20,
-        textAlign: 'center',
+      fontSize: 40,
+      fontWeight: 'bold',
+      letterSpacing: 4,
+      marginTop: 20,
+      textAlign: 'center',
+    },
+    winMessage: {
+      fontSize: 30,
+      fontWeight: '200',
+      color: "black",
+      marginTop: 20,
+      textAlign: 'center',
     },
 
     box1:{
@@ -338,6 +310,36 @@ const styles = StyleSheet.create({
         fontWeight:'bold',
         fontSize: 20,
       
+      },
+
+      scrollViewContent: {
+        flexGrow: 1,
+        justifyContent: 'center', // This centers content vertically in the scroll view
+      },
+      titleContainer: {
+        alignItems: 'center', // This centers content horizontally
+      },
+
+      buttonContainer: {
+        flexDirection: 'row',
+        justifyContent: 'center', // Center buttons horizontally in the container
+        marginTop: 20,
+      },
+      button: {
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 20,
+        elevation: 2,
+        shadowColor: '#000000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.09,
+        shadowRadius: 10,
+      },
+      buttonText: {
+        color: COLORS.white,
+        fontSize: 16,
+        fontWeight: 'bold',
+        textAlign: 'center',
       },
 
 

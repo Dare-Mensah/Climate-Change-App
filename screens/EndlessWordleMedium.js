@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View, SafeAreaView,ScrollView, LogBox, Alert, ActivityIndicator, TouchableOpacity} from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import { LinearGradient } from 'expo-linear-gradient';
 import Keyboard from '../src/components/Keyboard'
 import colors from '../src/constants'
@@ -13,6 +13,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import EndScreenCoop from './EndScreenCoop';
 import EndlessEndScreen from './EndlessEndScreen';
+import useDailyWord from '../data/useDailyWord';
+import { useFocusEffect } from '@react-navigation/native';
 LogBox.ignoreAllLogs();
 
 const Number_Of_Tries = 6;
@@ -24,6 +26,7 @@ const copyArray = (arr) => {
 
 const EndlessWordleMedium = () => {
     const navigation = useNavigation();
+    const { dailyWord, isLoading } = useDailyWord();
 
     const [difficulty, setDifficulty] = useState('easy'); // New state for difficulty
     const [wordIndex, setWordIndex] = useState(0); // Existing state
@@ -51,6 +54,52 @@ const EndlessWordleMedium = () => {
   
       const [startTime, setStartTime] = useState(null);
       const [guessDurations, setGuessDurations] = useState([]);
+
+
+      useFocusEffect(
+        useCallback(() => {
+          let currentNavigation = navigation;
+          while (currentNavigation.getParent()) {
+            currentNavigation = currentNavigation.getParent();
+          }
+          currentNavigation.setOptions({
+            tabBarStyle: { display: 'none' },
+          });
+      
+          return () =>
+            currentNavigation.setOptions({
+              tabBarStyle: { ...defaultTabBarStyle },
+            });
+        }, [navigation])
+      );
+      const defaultTabBarStyle = {
+        backgroundColor: '#fff',
+        height: 60,
+        position: 'absolute',
+        bottom: 15,
+        left: 20,
+        right: 20,
+        elevation: 0,
+        borderRadius: 15,
+        shadowColor: '#7F5DF0',
+        shadowOffset: {
+          width: 0,
+          height: 10,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.5,
+        elevation: 5,
+      };
+
+      useEffect(() => {
+        if (!isLoading && dailyWord) {
+            // Once the word is fetched and loading is complete, initialize your game state with the fetched word
+            setWord(dailyWord);
+            setRows(new Array(Number_Of_Tries).fill(new Array(dailyWord.length).fill('')));
+            // Reset other parts of the game state as necessary
+        }
+    }, [dailyWord, isLoading]);
+    
   
   
       useEffect(() => {
@@ -88,52 +137,32 @@ const EndlessWordleMedium = () => {
   
   
   
-      useEffect(() => {
-        const fetchWords = async () => {
-          try {
-            const response = await fetch('https://random-word-api.vercel.app/api?words=500&length=5');
-            const fetchedWords = await response.json();
-            setWords(fetchedWords);
-            if (fetchedWords.length > 0) {
-              const randomWord = fetchedWords[Math.floor(Math.random() * fetchedWords.length)];
-              setWord(randomWord);
-              setRows(new Array(Number_Of_Tries).fill(new Array(randomWord.length).fill("")));
-            }
-          } catch (error) {
-            console.error('Error fetching words:', error);
-          }
-        };
-    
-        fetchWords();
-      }, []);
-  
-  
         // Existing useEffect for updating the word and rows states
     useEffect(() => {
-      if (word) {
-        console.log("Current word:", word); // Log the current word to the console
-        setRows(new Array(Number_Of_Tries).fill(new Array(word.length).fill("")));
+      if (dailyWord) {
+        console.log("Current word:", dailyWord); // Log the current word to the console
+        setRows(new Array(Number_Of_Tries).fill(new Array(dailyWord.length).fill("")));
       }
-    }, [word]);
+    }, [dailyWord]);
   
   
     
     // Update the word and rows states when a new word is set
     useEffect(() => {
-      if (word) {
-        setRows(new Array(Number_Of_Tries).fill(new Array(word.length).fill("")));
+      if (dailyWord) {
+        setRows(new Array(Number_Of_Tries).fill(new Array(dailyWord.length).fill("")));
       }
-    }, [word]);
+    }, [dailyWord]);
   
     const getRandomWord = () => {
-      return words[Math.floor(Math.random() * words.length)];
+      return dailyWord[Math.floor(Math.random() * dailyWord.length)];
     };
   
     // Modified resetGameForNextWord function
     const resetGameForNextWord = () => {
-      const nextWord = getRandomWord();
-      setWord(nextWord);
-      setRows(new Array(Number_Of_Tries).fill(new Array(nextWord.length).fill("")));
+      const dailyWord = getRandomWord();
+      setWord(dailyWord);
+      setRows(new Array(Number_Of_Tries).fill(new Array(dailyWord.length).fill("")));
       setCurRow(0);
       setCurCol(0);
       setGameState('playing');
@@ -312,6 +341,34 @@ const EndlessWordleMedium = () => {
       const yellowCaps = getAllLettersWithColor(COLORS.secondary)
       const greyCaps = getAllLettersWithColor(COLORS.darkgrey)
      //for each of the keyboards caps on the virtual keyboard
+
+
+     if (isLoading && !dailyWord) {
+      return (
+          <View style={styles.centeredContainer}>
+              <ActivityIndicator size="large" color={COLORS.primary} />
+              <Text style={styles.loadingText}>Generating Word...</Text>
+          </View>
+      );
+    }
+    
+    // If the game is not loading but no word has been set, display an error message
+    if (!isLoading && !dailyWord) {
+      return (
+        <View style={styles.container1}>
+                <TouchableOpacity 
+                onPress={() => navigation.navigate("Home")}
+            >
+                <Text style={{fontWeight:'800', fontSize: 17, marginTop: 30, paddingHorizontal: 20}}>Home</Text>
+            </TouchableOpacity>
+          <View style={styles.centeredContainer}>
+          <Image style={{height: 60, width:60,marginLeft: 4, marginBottom:20}} source={require('../assets/warning.png')}/>
+              <Text style={styles.errorText}>Cannot generate a word.</Text>
+              <Text style={styles.errorText}>Please try again later.</Text>
+          </View>
+        </View>
+      );
+    }
       
     
       if(!loaded) {
@@ -319,7 +376,7 @@ const EndlessWordleMedium = () => {
       }
   
   
-      if (words.length === 0) {
+      if (dailyWord.length === 0) {
         return <ActivityIndicator />;
       }
     
@@ -431,4 +488,22 @@ const styles = StyleSheet.create({
       fontSize: 18,
       fontWeight: 'bold',
     },
+
+    centeredContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 20,
+  },
+  loadingText: {
+      marginTop: 23,
+      fontSize: 18,
+      color: COLORS.darkgrey,
+      fontWeight:'700',
+  },
+  errorText: {
+      fontSize: 17,
+      textAlign:'center',
+      fontWeight:'700',
+  },
 })

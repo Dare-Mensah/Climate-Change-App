@@ -1,5 +1,6 @@
-import { StyleSheet, Text, View, SafeAreaView,ScrollView, LogBox, Alert, ActivityIndicator, TouchableOpacity} from 'react-native'
-import React, { useEffect, useState } from 'react'
+import { StyleSheet, Text, View, SafeAreaView,ScrollView, LogBox, Alert, ActivityIndicator, TouchableOpacity,Image} from 'react-native'
+import React, { useEffect, useState, useCallback} from 'react'
+import { useFocusEffect } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Keyboard from '../src/components/Keyboard'
 import colors from '../src/constants'
@@ -21,6 +22,7 @@ const Number_Of_Tries = 6;
 const copyArray = (arr) => { // making a copy of this aaray 
   return [...arr.map((rows) => [...rows])];
 };
+
 
   
 const getDayOfTheYear = () => {
@@ -44,7 +46,35 @@ const dayKey = getDayKey();
 
 
 
+
 const Wordle = () => {
+  useFocusEffect(
+    React.useCallback(() => {
+      const hideTabBar = navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' } });
+
+      return () => navigation.getParent()?.setOptions({ tabBarStyle: { display: 'flex', height: 60, ...defaultTabBarStyle } });
+    }, [navigation])
+  );
+
+  const defaultTabBarStyle = {
+    backgroundColor: '#fff',
+    height: 60,
+    position: 'absolute',
+    bottom: 15,
+    left: 20,
+    right: 20,
+    elevation: 0,
+    borderRadius: 15,
+    shadowColor: '#7F5DF0',
+    shadowOffset: {
+      width: 0,
+      height: 10,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.5,
+    elevation: 5,
+  };
+  
   const navigation = useNavigation();
   AsyncStorage.removeItem("@game") //resetting async storage for game
 
@@ -59,8 +89,38 @@ const Wordle = () => {
 
   const [curRow, setCurRow] = useState(0);
   const [curCol, setCurCol] = useState(0);
-  const [gameSate, setGameState] = useState('playing');
+  const [gameState, setGameState] = useState('playing');
   const [loaded, setloaded] = useState(false)
+  const [gamePlayedToday, setGamePlayedToday] = useState(false);
+
+  useEffect(() => {
+    const checkGamePlayed = async () => {
+      const result = await AsyncStorage.getItem(`@GamePlayed:${dayKey}`);
+      if (result !== null) {
+        setGamePlayedToday(true);
+      }
+    };
+    checkGamePlayed();
+  }, []);
+
+  const checkAndNavigateIfGameEnded = useCallback(async () => {
+    const storedGameState = await AsyncStorage.getItem('@gameState');
+    if (storedGameState === 'won' || storedGameState === 'lost') {
+      navigation.navigate('EndScreen', { gameResult: storedGameState });
+    } else {
+      // Initialize or reset your game setup here
+    }
+  }, [navigation]);
+
+  // Check game state on component mount
+  useEffect(() => {
+    checkAndNavigateIfGameEnded();
+  }, [checkAndNavigateIfGameEnded]);
+
+  // Also check when the component gains focus
+  useFocusEffect(checkAndNavigateIfGameEnded);
+
+
 
   useEffect(() => {
     if (!isLoading && dailyWord) {
@@ -76,11 +136,11 @@ const Wordle = () => {
 
 
   useEffect(() => {
-    if(curRow > 0)
-    {
+    if (curRow > 0) {
       checkGameState();
     }
-  }, [curRow])
+  }, [curRow, gameState]);
+
 
 
 
@@ -88,7 +148,7 @@ const Wordle = () => {
     if(loaded) {
       persistState()
     }
-  }, [rows,curRow,curCol, gameSate])
+  }, [rows,curRow,curCol, gameState])
 
 
   useEffect(() => {
@@ -96,29 +156,14 @@ const Wordle = () => {
   },[])
 
   const persistState = async () => {
-    //saving all the game state varibales in async storage
-    
-    const dataForToday = {
-      rows, curCol,curRow, gameSate
-    };
-
-    try{
-      //firstly reading the data
-      const existingStateString = await AsyncStorage.getItem("@game")
-      const existingState = existingStateString ?  JSON.parse(existingStateString) : {};
-      if(!existingState) { //then updating the data
-        existingState = {}
-      }
-      existingState[dayKey] =dataForToday
-      //writing the data back to async
-      const dataString =JSON.stringify(existingState); //parsing from JSON object to string
-      console.log("Saving", dataString)
-      await AsyncStorage.setItem("@game", dataString); 
-    } catch (e){
-      console.log("Could not save data to async storage", e)
+    const dataForToday = { rows, curCol, curRow, gameState };
+    try {
+      await AsyncStorage.setItem("@game", JSON.stringify(dataForToday));
+      await AsyncStorage.setItem(`@GamePlayed:${dayKey}`, "true");
+    } catch (e) {
+      console.log("Could not save game data", e);
     }
-
-  }
+  };
 
   const readState = async () =>
   {
@@ -129,7 +174,7 @@ const Wordle = () => {
       setRows(day.rows)
       setCurCol(day.curCol)
       setCurRow(day.curRow)
-      setGameState(day.gameSate)
+      setGameState(day.gameState)
     } catch(e){
       console.log("Could not parse the state")
     }
@@ -141,13 +186,12 @@ const Wordle = () => {
 
 
   const checkGameState = () => {
-    if(checkIfWon() && gameSate != 'won')
-    {
+    if (checkIfWon() && gameState !== 'won') {
       setGameState('won');
-    }
-    else if(checkIfLose() && gameSate != 'lost')
-    {
+      persistState();
+    } else if (checkIfLose() && gameState !== 'lost') {
       setGameState('lost');
+      persistState();
     }
   };
 
@@ -164,7 +208,7 @@ const Wordle = () => {
   }
 
   const onKeyPressed = (key) => {
-    if(gameSate != 'playing')
+    if(gameState != 'playing')
     {
       return;
     }
@@ -239,13 +283,38 @@ const Wordle = () => {
  //for each of the keyboards caps on the virtual keyboard
   
 
-  if(!loaded) {
-    return (<ActivityIndicator/>)
+ if (isLoading && !dailyWord) {
+  return (
+      <View style={styles.centeredContainer}>
+          <ActivityIndicator size="large" color={COLORS.primary} />
+          <Text style={styles.loadingText}>Generating Word...</Text>
+      </View>
+  );
+}
+
+// If the game is not loading but no word has been set, display an error message
+if (!isLoading && !dailyWord) {
+  return (
+    <View style={styles.container1}>
+            <TouchableOpacity 
+            onPress={() => navigation.navigate("Home")}
+        >
+            <Text style={{fontWeight:'800', fontSize: 17, marginTop: 30, paddingHorizontal: 20}}>Home</Text>
+        </TouchableOpacity>
+      <View style={styles.centeredContainer}>
+      <Image style={{height: 60, width:60,marginLeft: 4, marginBottom:20}} source={require('../assets/warning.png')}/>
+          <Text style={styles.errorText}>Cannot generate a word.</Text>
+          <Text style={styles.errorText}>Please try again later.</Text>
+      </View>
+    </View>
+  );
+}
+
+  if (gameState != 'playing') {
+    return (<EndScreen won={gameState == 'won'} rows={rows} getCellBGColor={getCellBGColor} navigation={navigation}/>)
   }
-
-
-  if (gameSate != 'playing') {
-    return (<EndScreen won={gameSate == 'won'} rows={rows} getCellBGColor={getCellBGColor} navigation={navigation}/>)
+  if (gamePlayedToday) {
+    return <EndScreen won={gameState === 'won'} rows={rows} getCellBGColor={(row, col) => COLORS.primary} navigation={navigation} />;
   }
 
   if (isLoading) {
@@ -258,14 +327,13 @@ const Wordle = () => {
     <LinearGradient style={{flex: 1}} colors={['#EAEAEA', '#B7F1B5']}>
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>WORDLE</Text>
-
       <View style={[styles.map]}>
         {rows.map((row, i) =>(
           <View key={'row-${i}'} style={styles.row}>
             {row.map((letter, j) => (
               <View key ={'cell-${i}-${j}'} style={[styles.cell, 
               {borderColor: isCellActive(i,j) ? COLORS.white : COLORS.darkgrey,
-              backgroundColor: getCellBGColor(i, j),
+              backgroundColor: getCellBGColor(i, j), marginBottom:100
                }]}>
                 <Text style={styles.cellText}>{letter.toUpperCase()}</Text>
               </View>
@@ -295,6 +363,10 @@ const styles = StyleSheet.create({
         alignItems: 'center',
 
     },
+    container1: {
+      flex: 1,
+
+  },
     title: {  
         fontSize: 32,
         fontWeight: 'bold',
@@ -348,4 +420,21 @@ const styles = StyleSheet.create({
       fontSize: 18,
       fontWeight: 'bold',
     },
+    centeredContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 20,
+  },
+  loadingText: {
+      marginTop: 23,
+      fontSize: 18,
+      color: COLORS.darkgrey,
+      fontWeight:'700',
+  },
+  errorText: {
+      fontSize: 17,
+      textAlign:'center',
+      fontWeight:'700',
+  },
 })

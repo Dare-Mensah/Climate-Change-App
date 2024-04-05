@@ -421,8 +421,9 @@ const Home = ({route}) => {
 
   const wordleOptions = [
     { id: '1', title: 'SinglePlayer Mode', navigateTo: 'Wordle', bgImage: require('../assets/pic1.jpg'), iconImage: require('../assets/single-player.png') },
-    { id: '2', title: 'Co-op Mode', navigateTo: 'CoopWordleInfo', bgImage: require('../assets/pic2.jpg'), iconImage: require('../assets/coop.png') },
-    { id: '3', title: 'Endless Mode', navigateTo: 'EndlessWordleInfo', bgImage: require('../assets/pic4.jpg'), iconImage: require('../assets/puzzle-game.png') },
+    { id: '2', title: 'Co-op Mode', navigateTo: 'WordleCoop2', bgImage: require('../assets/pic2.jpg'), iconImage: require('../assets/coop.png') },
+    { id: '3', title: 'Wordle Reversed', navigateTo: 'ReversedWordle', bgImage: require('../assets/pic4.jpg'), iconImage: require('../assets/puzzle-game.png') },
+    { id: '4', title: 'Wordle Multiplayer', navigateTo: 'MultiPlayerWordle', bgImage: require('../assets/pic5.jpg'), iconImage: require('../assets/puzzle-game.png') },
   ];
 
 
@@ -461,6 +462,26 @@ const Home = ({route}) => {
 
     const [email] = useState('');
 
+    const defaultTabBarStyle = {
+      backgroundColor: '#fff',
+      height: 60,
+      position: 'absolute',
+      bottom: 15,
+      left: 20,
+      right: 20,
+      elevation: 0,
+      borderRadius: 15,
+      shadowColor: '#7F5DF0',
+      shadowOffset: {
+        width: 0,
+        height: 10,
+      },
+      shadowOpacity: 0.25,
+      shadowRadius: 3.5,
+      elevation: 5,
+    };
+    
+
 
 
 
@@ -494,13 +515,9 @@ const Home = ({route}) => {
       <LinearGradient style={{flex: 1}} colors={['#EAEAEA', '#B7F1B5']}>
         <StatusBar translucent={false} style={"light"} color = "white"/>
 
+        {/** 
         <View style={styles.header}>
 
-        <View style={{marginTop: 20, flexDirection:'row'}}>
-          <TouchableOpacity onPress={() => navigation.navigate("Settings", {username: name.username, email})}>
-            <Image style={{height: 35, width:35, paddingTop: 5, marginLeft: 18}} source={require('../assets/settings.png')}/>
-          </TouchableOpacity>
-        </View>
 
         <TouchableOpacity onPress={toggleNotifications}>
           <Image
@@ -509,6 +526,7 @@ const Home = ({route}) => {
           />
         </TouchableOpacity>
         </View>
+      */}
 
         <ScrollView showsVerticalScrollIndicator={false}
                 refreshControl={
@@ -677,10 +695,7 @@ const Home = ({route}) => {
 
 
     <View style={{flexDirection:'row'}}>
-    <Text style={[styles.sectionTitle, {marginTop:50}]}>Filter Blogs by Topic</Text>
-    <TouchableOpacity onPress={() => navigation.navigate("BlogScreen")}>
-        <Text style={[styles.createBlogLink, {marginTop:55, fontWeight:'bold'}]}>Create One!</Text>
-    </TouchableOpacity>
+    <Text style={[styles.sectionTitle, {marginTop:50}]}>Blogs</Text>
     </View>
 
     <FlatList
@@ -728,17 +743,16 @@ const Home = ({route}) => {
       <Text style={styles.noBlogsText}>
         There are no blogs in this category.
       </Text>
+      {/** 
       <TouchableOpacity onPress={createBlogButtonPressed}>
         <Text style={[styles.createBlogLink, {fontWeight:'bold'}]}>Create one!</Text>
       </TouchableOpacity>
+    */}
     </View>
   )}
 
   <View style={{flexDirection:'row'}}>
   <Text style={styles.sectionTitle}>Wordle</Text>
-  <TouchableOpacity onPress={() => navigation.navigate("WordleLeaderboards")}>
-        <Text style={[styles.createBlogLink, {marginTop:30, fontWeight:'bold'}]}>Leaderboards!</Text>
-    </TouchableOpacity>
   </View>
 
 <FlatList
@@ -755,13 +769,10 @@ const Home = ({route}) => {
 
     <View style={{flexDirection:'row'}}>
     <Text style={[styles.sectionTitle, {marginTop:50}]}>Environment News</Text>
-    <TouchableOpacity onPress={() => navigation.navigate("News")}>
-        <Text style={[styles.createBlogLink, {marginTop:55, fontWeight:'bold'}]}>See More!</Text>
-    </TouchableOpacity>
     </View>
 
     <FlatList
-  contentContainerStyle={{ paddingLeft: 20 }}
+  contentContainerStyle={{ paddingLeft: 20,marginBottom:100 }}
   horizontal
   showsHorizontalScrollIndicator={false}
   data={newsArticles}
@@ -769,17 +780,20 @@ const Home = ({route}) => {
   renderItem={({ item }) => <NewsArticleCard article={item} />}
 />
 
+{/** 
+
       <Text style={styles.sectionTitle}>Tips</Text>
       
         <View>
           <FlatList 
-          contentContainerStyle={{paddingLeft:20}}
+          contentContainerStyle={{paddingLeft:20, marginBottom:100}}
           horizontal
           showsHorizontalScrollIndicator={false}
           data={DATA} 
           renderItem={({item}) => <Card Tips={item}/>}
           />
         </View>
+  */}
 
         </ScrollView>
       </LinearGradient>
@@ -790,7 +804,7 @@ export default Home
 
 const styles = StyleSheet.create({
     Title1:{
-        fontSize: 34,
+        fontSize: 44,
         marginTop: 20,
         //fontFamily: 'Montserrat',
         fontWeight: 'bold',
@@ -798,7 +812,7 @@ const styles = StyleSheet.create({
     },
 
     Title2:{
-      fontSize: 19,
+      fontSize: 23,
       //fontFamily: 'Montserrat',
       fontWeight: '200',
 

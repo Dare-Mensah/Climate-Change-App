@@ -66,7 +66,7 @@ const BlogScreen = () => {
     <LinearGradient style={{ flex: 1, padding: 16 }} colors={['#EAEAEA', '#B7F1B5']}>
       <Animatable.Text
         animation={"fadeInUpBig"}
-        style={[styles.Title1, { paddingHorizontal: 10, paddingTop: 10, marginBottom: 40 }]}>
+        style={[styles.Title1, { paddingHorizontal: 10, paddingTop: 10, marginBottom: 20 }]}>
         Create A New Blog
       </Animatable.Text>
 
@@ -132,10 +132,10 @@ const BlogScreen = () => {
 
           <Pressable
             onPress={handleSavePost}
-            style={[styles.box1, { marginTop: 50, backgroundColor: COLORS.third }]}
+            style={[styles.box1, { marginTop: 50, backgroundColor: COLORS.third, marginBottom:100 }]}
           >
           
-            <Text style={[styles.text1, { color: COLORS.white }]}>Share Post</Text>
+            <Text style={[styles.text1, { color: COLORS.white, }]}>Share Post</Text>
           </Pressable>
         </View>
       </ScrollView>

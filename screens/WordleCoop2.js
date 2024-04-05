@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View, SafeAreaView,ScrollView, LogBox, Alert, ActivityIndicator, TouchableOpacity, Pressable, Image} from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import { LinearGradient } from 'expo-linear-gradient';
 import Keyboard from '../src/components/Keyboard'
 import colors from '../src/constants'
@@ -12,6 +12,8 @@ import * as Clipboard from 'expo-clipboard';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import EndScreen from './EndScreen';
+import useDailyWord from '../data/useDailyWord';
+import { useFocusEffect } from '@react-navigation/native';
 LogBox.ignoreAllLogs();
 
 const Number_Of_Tries = 6;
@@ -25,24 +27,23 @@ const copyArray = (arr) => { // making a copy of this aaray
 
 
 const WordleCoop2 = () => {
+
   const navigation = useNavigation();
   AsyncStorage.removeItem("@game_coop2"); // Resetting async storage for game
 
+  const { dailyWord, isLoading } = useDailyWord();
+  const [letters, setLetters] = useState([]);
+  const [rows, setRows] = useState([]);
   const Number_Of_Tries = 6;
 
   
-    //const rows = new Array(Number_Of_Tries).fill(new Array(letters.length).fill(''))
+  //const rows = new Array(Number_Of_Tries).fill(new Array(letters.length).fill(''))
   
     const [curRow, setCurRow] = useState(0);
     const [curCol, setCurCol] = useState(0);
     const [gameSate, setGameState] = useState('playing');
     const [loaded, setloaded] = useState(false)
 
-      // State for storing the words array
-  const [words, setWords] = useState([]);
-  const [word, setWord] = useState(''); // State for the current word
-  const [letters, setLetters] = useState([]); // State for the letters of the current word
-  const [rows, setRows] = useState([]); // Initialize rows as an empty array
 
 
 
@@ -52,30 +53,50 @@ const WordleCoop2 = () => {
     const [player2State, setPlayer2State] = useState({ curRow: 0, curCol: 0, gameSate: 'playing' });
 
 
-
-    useEffect(() => {
-      const fetchWords = async () => {
-        try {
-          const response = await fetch('https://random-word-api.vercel.app/api?words=500&length=4');
-          const fetchedWords = await response.json();
-          setWords(fetchedWords);
-      
-          if (fetchedWords.length > 0) {
-            const randomWord = fetchedWords[Math.floor(Math.random() * fetchedWords.length)];
-            setWord(randomWord);
-            setRows(new Array(Number_Of_Tries).fill(new Array(randomWord.length).fill("")));
-            console.log("Selected word:", randomWord); // Log the selected word to the terminal
-          }
-        } catch (error) {
-          console.error('Error fetching words:', error);
-          Alert.alert('Error', 'Failed to fetch words from the API.');
-        }
-      };
+  useFocusEffect(
+    useCallback(() => {
+      let currentNavigation = navigation;
+      while (currentNavigation.getParent()) {
+        currentNavigation = currentNavigation.getParent();
+      }
+      currentNavigation.setOptions({
+        tabBarStyle: { display: 'none' },
+      });
   
-      fetchWords();
-    }, []);
+      return () =>
+        currentNavigation.setOptions({
+          tabBarStyle: { ...defaultTabBarStyle },
+        });
+    }, [navigation])
+  );
+  const defaultTabBarStyle = {
+    backgroundColor: '#fff',
+    height: 60,
+    position: 'absolute',
+    bottom: 15,
+    left: 20,
+    right: 20,
+    elevation: 0,
+    borderRadius: 15,
+    shadowColor: '#7F5DF0',
+    shadowOffset: {
+      width: 0,
+      height: 10,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.5,
+    elevation: 5,
+  };
 
-    console.log("Selected word:", word);
+  
+  useEffect(() => {
+    if (!isLoading && dailyWord) {
+      setLetters(dailyWord.split(""));
+      setRows(new Array(Number_Of_Tries).fill(new Array(dailyWord.length).fill('')));
+      // Any other state setup needed for the game...
+    }
+  }, [dailyWord, isLoading]);
+
   
     // Update rows based on the fetched word
     useEffect(() => {
@@ -85,10 +106,10 @@ const WordleCoop2 = () => {
     }, [letters]);
 
     useEffect(() => {
-      if (word) {
-        setLetters(word.split(""));
+      if (dailyWord) {
+        setLetters(dailyWord.split(""));
       }
-    }, [word]);
+    }, [dailyWord]);
 
 
   
@@ -288,6 +309,33 @@ const WordleCoop2 = () => {
     const yellowCaps = getAllLettersWithColor(COLORS.secondary)
     const greyCaps = getAllLettersWithColor(COLORS.darkgrey)
    //for each of the keyboards caps on the virtual keyboard
+
+   if (isLoading && !dailyWord) {
+    return (
+        <View style={styles.centeredContainer}>
+            <ActivityIndicator size="large" color={COLORS.primary} />
+            <Text style={styles.loadingText}>Generating Word...</Text>
+        </View>
+    );
+  }
+  
+  // If the game is not loading but no word has been set, display an error message
+  if (!isLoading && !dailyWord) {
+    return (
+      <View style={styles.container1}>
+              <TouchableOpacity 
+              onPress={() => navigation.navigate("Home")}
+          >
+              <Text style={{fontWeight:'800', fontSize: 17, marginTop: 30, paddingHorizontal: 20}}>Home</Text>
+          </TouchableOpacity>
+        <View style={styles.centeredContainer}>
+        <Image style={{height: 60, width:60,marginLeft: 4, marginBottom:20}} source={require('../assets/warning.png')}/>
+            <Text style={styles.errorText}>Cannot generate a word.</Text>
+            <Text style={styles.errorText}>Please try again later.</Text>
+        </View>
+      </View>
+    );
+  }
     
   
     if(!loaded) {
@@ -295,7 +343,7 @@ const WordleCoop2 = () => {
     }
 
           // Ensure words and rows are loaded
-  if (words.length === 0 || rows.length === 0) {
+  if (dailyWord.length === 0 || rows.length === 0) {
     return <ActivityIndicator />;
   }
 
@@ -357,6 +405,10 @@ const styles = StyleSheet.create({
         alignItems: 'center',
 
     },
+    container1: {
+      flex: 1,
+
+  },
     title: {  
         fontSize: 32,
         fontWeight: 'bold',
@@ -420,5 +472,22 @@ const styles = StyleSheet.create({
       color: COLORS.third,
       textDecorationLine: 'underline',
     },
+    centeredContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 20,
+  },
+  loadingText: {
+      marginTop: 23,
+      fontSize: 18,
+      color: COLORS.darkgrey,
+      fontWeight:'700',
+  },
+  errorText: {
+      fontSize: 17,
+      textAlign:'center',
+      fontWeight:'700',
+  },
 
 })

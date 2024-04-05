@@ -1,9 +1,16 @@
+import { Pressable, ScrollView, StyleSheet, Text, View, Image, Dimensions, SafeAreaView, StatusBar, FlatList, ImageBackground, TouchableOpacity,RefreshControl,backgroundImage, Alert } from 'react-native'
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import React, {useState, useEffect} from 'react';
 import {firebase} from './config'
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Pressable, ScrollView, StyleSheet, Text, View, Image, Dimensions, SafeAreaView, StatusBar, FlatList, ImageBackground, TouchableOpacity } from 'react-native'
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
+
+
+
 
 
 import SignIn from './screens/SignIn';
@@ -51,113 +58,179 @@ import GuestSelectDiffWordle from './screens/GuestSelectDiffWordle';
 import GuestEndlessWordleMedium from './screens/GuestEndlessWordleMedium';
 import GuestEndlessWordleHard from './screens/GuestEndlessWordleHard';
 import WordleLeaderboards from './screens/WordleLeaderboards';
+import ReversedWordle from './screens/ReversedWordle';
+import MultiPlayerWordle from './screens/MultiPlayerWordle';
 
 
 
 const Stack = createStackNavigator();
+const Tab = createBottomTabNavigator();
+const HomeStack = createStackNavigator();
 
 //const navigation = useNavigation();
 
 
+function HomeStackScreen() {
+  return (
+    <HomeStack.Navigator screenOptions={{ headerShown: false }}>
+      <HomeStack.Screen name="Home" component={Home} />
+      <HomeStack.Screen name="CarbonFootPrintCalc" component={CarbonFootPrintCalc} />
+      <HomeStack.Screen name="Tips" component={Tips} />
+      <HomeStack.Screen name="Wordle" component={Wordle} />
+      <HomeStack.Screen name="EndScreen" component={EndScreen} />
+      <HomeStack.Screen name="BlogScreen" component={BlogScreen} />
+      <HomeStack.Screen name="BlogDetails" component={BlogDetails} />
+      <HomeStack.Screen name="EditBlog" component={EditBlog} />
+      <HomeStack.Screen name="EndScreenCoop" component={EndScreenCoop} />
+      <HomeStack.Screen name="EndlessWordle" component={EndlessWordle} />
+      <HomeStack.Screen name="EndlessEndScreen" component={EndlessEndScreen} />
+      <HomeStack.Screen name="WordleCoop2" component={WordleCoop2} />
+      <HomeStack.Screen name="GuestEndlessInfo" component={GuestEndlessInfo} />
+      <HomeStack.Screen name="SelectDifficultyEndlessWordle" component={SelectDifficultyEndlessWordle} />
+      <HomeStack.Screen name="EndlessWordleMedium" component={EndlessWordleMedium} />
+      <HomeStack.Screen name="EndlessWordleHard" component={EndlessWordleHard} />
+      <HomeStack.Screen name="About" component={About} />
+      <HomeStack.Screen name="Privacy" component={Privacy} />
+      <HomeStack.Screen name="WordleLeaderboards" component={WordleLeaderboards} />
+      <HomeStack.Screen name="CoopWordleInfo" component={CoopWordleInfo} />
+      <HomeStack.Screen name="EndlessWordleInfo" component={EndlessWordleInfo} />
+      <HomeStack.Screen name="EditProfile" component={EditProfile} />
+      <HomeStack.Screen name="ReversedWordle" component={ReversedWordle} />
+      <HomeStack.Screen name="MultiPlayerWordle" component={MultiPlayerWordle} />
 
-function App(){
 
+
+      
+
+
+      {/* Add other screens here as needed */}
+    </HomeStack.Navigator>
+  );
+}
+
+// Define a default style for your tab bar
+const defaultTabBarStyle = {
+  backgroundColor: '#fff',
+  height: 60,
+  position: 'absolute',
+  bottom: 15,
+  left: 20,
+  right: 20,
+  elevation: 0,
+  borderRadius: 15,
+  shadowColor: '#7F5DF0',
+  shadowOffset: {
+    width: 0,
+    height: 10,
+  },
+  shadowOpacity: 0.25,
+  shadowRadius: 3.5,
+  elevation: 5,
+};
+
+
+
+
+function HomeTabs() {
+  return (
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        tabBarShowLabel: false,
+        headerShown: false,
+        tabBarIcon: ({ focused, color, size }) => {
+          let iconName;
+
+          if (route.name === 'Home') {
+            iconName = focused ? 'ios-home' : 'ios-home-outline';
+          } else if (route.name === 'Settings') {
+            iconName = focused ? 'ios-settings' : 'ios-settings-outline';
+          } else if (route.name === 'News') {
+            iconName = focused ? 'ios-newspaper' : 'ios-newspaper-outline';
+          } else if (route.name === 'BlogScreen') {
+            iconName = focused ? 'ios-chatbubbles' : 'ios-chatbubbles-outline';
+          } else if (route.name === 'Achievements') {
+            iconName = focused ? 'ios-trophy' : 'ios-trophy-outline';
+          }
+
+
+          return <Ionicons name={iconName} size={size} color={color} />;
+        },
+        tabBarActiveTintColor: 'green',
+        tabBarInactiveTintColor: 'gray',
+        tabBarStyle: defaultTabBarStyle,
+        // Dynamically hide the tab bar for certain screens
+        tabBarVisible: ((route) => {
+          const routeName = getFocusedRouteNameFromRoute(route) ?? '';
+
+          // List of screens where the tab bar will be hidden
+          const hideOnScreens = ['Wordle','Privacy','CoopWordleInfo','WordleCoop2'];
+          if (hideOnScreens.indexOf(routeName) > -1) return false;
+
+          return true;
+        })(route),
+      })}
+    >
+      <Tab.Screen name="Home" component={HomeStackScreen} />
+      <Tab.Screen name="Settings" component={Settings} />
+      <Tab.Screen name="News" component={News} />
+      <Tab.Screen name="BlogScreen" component={BlogScreen} />
+      <Tab.Screen name="Achievements" component={Achievements} />
+      {/* Add more tabs as needed */}
+    </Tab.Navigator>
+  );
+}
+
+
+function AuthStack() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="Onboarding" component={Onboarding} />
+      <Stack.Screen name="SignIn" component={SignIn} />
+      <Stack.Screen name="SignUp" component={SignUp} />
+      <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
+      <Stack.Screen name="GuestSelectDiffWordle" component={GuestSelectDiffWordle} />
+      <Stack.Screen name="GuestEndlessWordleMedium" component={GuestEndlessWordleMedium} />
+      <Stack.Screen name="GuestEndlessWordleHard" component={GuestEndlessWordleHard} />
+      <Stack.Screen name="GuestWordle" component={GuestWordle} />
+      <Stack.Screen name="GuestWordleCoop" component={GuestWordleCoop} />
+      <Stack.Screen name="GuestEndlessWordle" component={GuestEndlessWordle} />
+      <Stack.Screen name="GuestEndlessEndScreen" component={GuestEndlessEndScreen} />
+      <Stack.Screen name="GuestCoopInfo" component={GuestCoopInfo} />
+      <Stack.Screen name="GuestHome" component={GuestHome} />
+      <Stack.Screen name="GuestProfile" component={GuestProfile} />
+    </Stack.Navigator>
+  );
+}
+
+
+
+
+function App() {
   const [initializing, setInitializing] = useState(true);
-  const [user, setUser] = useState();
+  const [user, setUser] = useState(null);
 
-
-
-  //Handle user state chnages
-  function onAuthStateChnaged(user){
+  function onAuthStateChanged(user) {
     setUser(user);
-    if (initializing) setInitializing(false)
+    if (initializing) setInitializing(false);
   }
 
   useEffect(() => {
-    const subscriber = firebase.auth().onAuthStateChanged(onAuthStateChnaged)
-    return subscriber
+    const subscriber = firebase.auth().onAuthStateChanged(onAuthStateChanged);
+    return subscriber; // Unsubscribe on unmount
   }, []);
-
-
-
-  
-
 
   if (initializing) return null;
 
-  if (!user){
-    return (
-      <Stack.Navigator screenOptions={{headerShown:false}}>
-        <Stack.Screen name="Onboarding" component={Onboarding}/>
-        <Stack.Screen name="SignIn" component={SignIn}/>
-        <Stack.Screen name="SignUp" component={SignUp}/>
-        <Stack.Screen name="GuestHome" component={GuestHome}/>
-        <Stack.Screen name="GuestProfile" component={GuestProfile}/>
-        <Stack.Screen name="GuestWordle" component={GuestWordle}/>
-        <Stack.Screen name="EndScreen" component={EndScreen}/>
-        <Stack.Screen name="GuestWordleCoop" component={GuestWordleCoop}/>
-        <Stack.Screen name="GuestCoopInfo" component={GuestCoopInfo}/>
-        <Stack.Screen name="GuestEndlessWordle" component={GuestEndlessWordle}/>
-        <Stack.Screen name="GuestEndlessInfo" component={GuestEndlessInfo}/>
-        <Stack.Screen name="GuestEndlessEndScreen" component={GuestEndlessEndScreen}/>
-        <Stack.Screen name="Tips" component={Tips}/>
-        <Stack.Screen name="SignUpComplete" component={SignUpComplete}/>
-        <Stack.Screen name="ForgotPassword" component={ForgotPassword}/>
-        <Stack.Screen name="EndlessWordleInfo" component={EndlessWordleInfo}/>
-        <Stack.Screen name="EndlessWordle" component={EndlessWordle}/>
-        <Stack.Screen name="GuestSelectDiffWordle" component={GuestSelectDiffWordle}/>
-        <Stack.Screen name="GuestEndlessWordleMedium" component={GuestEndlessWordleMedium}/>
-        <Stack.Screen name="GuestEndlessWordleHard" component={GuestEndlessWordleHard}/>
-        
-        
-        
-      </Stack.Navigator>
-    );
-  }
-
-
-  return(
-    <Stack.Navigator screenOptions={{headerShown:false}}>
-      <Stack.Screen name="Home" component={Home}/>
-      <Stack.Screen name="SignUpComplete" component={SignUpComplete}/>
-      <Stack.Screen name="News" component={News}/>
-      <Stack.Screen name="Tips" component={Tips}/>
-      <Stack.Screen name="Settings" component={Settings}/>
-      <Stack.Screen name="EditProfile" component={EditProfile}/>
-      <Stack.Screen name="Wordle" component={Wordle}/>
-      <Stack.Screen name="EndScreen" component={EndScreen}/>
-      <Stack.Screen name="BlogScreen" component={BlogScreen}/>
-      <Stack.Screen name="BlogDetails" component={BlogDetails}/>
-      <Stack.Screen name="EditBlog" component={EditBlog}/>
-      <Stack.Screen name="EditComment" component={EditComment}/>
-      <Stack.Screen name="CarbonFootPrintCalc" component={CarbonFootPrintCalc}/>
-      <Stack.Screen name="EndScreenCoop" component={EndScreenCoop}/>
-      <Stack.Screen name="EndlessWordle" component={EndlessWordle}/>
-      <Stack.Screen name="EndlessEndScreen" component={EndlessEndScreen}/>
-      <Stack.Screen name="WordleCoop2" component={WordleCoop2}/>
-      <Stack.Screen name="Achievements" component={Achievements}/>
-      <Stack.Screen name="CoopWordleInfo" component={CoopWordleInfo}/>
-      <Stack.Screen name="EndlessWordleInfo" component={EndlessWordleInfo}/>
-      <Stack.Screen name="SelectDifficultyEndlessWordle" component={SelectDifficultyEndlessWordle}/>
-      <Stack.Screen name="EndlessWordleMedium" component={EndlessWordleMedium}/>
-      <Stack.Screen name="EndlessWordleHard" component={EndlessWordleHard}/>
-      <Stack.Screen name="About" component={About}/>
-      <Stack.Screen name="Privacy" component={Privacy}/>
-      <Stack.Screen name="Accessibility" component={Accessibility}/>
-      <Stack.Screen name="WordleLeaderboards" component={WordleLeaderboards}/>
-    </Stack.Navigator>
-  )
-}
-
-
-export default () => {
-  return(
-    <NavigationContainer>
-      <App/>
-    </NavigationContainer>
-  )
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <NavigationContainer>
+        {user ? <HomeTabs /> : <AuthStack />}
+      </NavigationContainer>
+    </GestureHandlerRootView>
+  );
 }
 
 
 
+export default App;
 

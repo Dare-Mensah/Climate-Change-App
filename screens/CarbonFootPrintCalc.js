@@ -427,7 +427,7 @@ const CarbonFootPrintCalc = ({ navigation }) => {
     />
 
 {carbonFootprintData?.totalCarbonFootprint <= leastCarbonFootprintData?.totalCarbonFootprint &&
-    <Text style={styles.congratulatoryMessage}>
+    <Text style={[styles.congratulatoryMessage,{marginBottom:100}]}>
       Congratulations! You have the lowest carbon footprint!
     </Text>
   }

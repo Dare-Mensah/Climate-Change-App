@@ -256,7 +256,7 @@ const BlogDetails = ({ route, navigation }) => {
         value={newComment}
         onChangeText={(text) => setNewComment(text)}
       />
-      <TouchableOpacity onPress={handleAddComment} style={styles.commentButton}>
+      <TouchableOpacity onPress={handleAddComment} style={[styles.commentButton, style={marginBottom:100}]}>
         <Text style={styles.buttonText}>Add Comment</Text>
       </TouchableOpacity>
       </ScrollView>

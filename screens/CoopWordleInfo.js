@@ -1,5 +1,6 @@
 import { StyleSheet, Text, View, FlatList, useWindowDimensions, Animated, TouchableOpacity } from 'react-native'
-import React, {useState, useRef} from 'react'
+import React, {useState, useRef,useCallback} from 'react'
+import { useFocusEffect } from '@react-navigation/native';
 import data2 from '../data/data2'
 import OnboardingItem from './OnboardingItem'
 import COLORS from '../data/colors'
@@ -10,7 +11,35 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useRoute } from '@react-navigation/native';
 import coopwordleData from '../data/coopwordleData'
 
+
 const CoopWordleInfo = () => {
+    useFocusEffect(
+        React.useCallback(() => {
+          const hideTabBar = navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' } });
+    
+          return () => navigation.getParent()?.setOptions({ tabBarStyle: { display: 'flex', height: 60, ...defaultTabBarStyle } });
+        }, [navigation])
+      );
+
+      const defaultTabBarStyle = {
+        backgroundColor: '#fff',
+        height: 60,
+        position: 'absolute',
+        bottom: 15,
+        left: 20,
+        right: 20,
+        elevation: 0,
+        borderRadius: 15,
+        shadowColor: '#7F5DF0',
+        shadowOffset: {
+          width: 0,
+          height: 10,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.5,
+        elevation: 5,
+      };
+
     const route = useRoute();
 
     const navigation = useNavigation();
@@ -33,6 +62,13 @@ const CoopWordleInfo = () => {
             console.log ('last item')
             navigation.navigate("WordleCoop2")
         }
+        let currentNavigation = navigation;
+while (currentNavigation.getParent()) {
+  currentNavigation = currentNavigation.getParent();
+}
+currentNavigation.setOptions({
+  tabBarStyle: { display: 'none' },
+});
     }
   return (
     <View style={styles.container}>

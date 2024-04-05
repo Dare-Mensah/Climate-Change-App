@@ -43,6 +43,7 @@ const News = () => {
         </View>
 
         <FlatList
+        style={{marginBottom:100}}
   data={newsArticles}
   keyExtractor={(item, index) => 'news-' + index}
   renderItem={({ item }) => (

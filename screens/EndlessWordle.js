@@ -26,8 +26,6 @@ const copyArray = (arr) => {
 const EndlessWordle = () => {
   const navigation = useNavigation();
 
-  const [difficulty, setDifficulty] = useState('easy'); // New state for difficulty
-  const [wordIndex, setWordIndex] = useState(0); // Existing state
   const [correctWordsCount, setCorrectWordsCount] = useState(0);
   const [timer, setTimer] = useState(250); // Initialize timer with 60 seconds
   const [words, setWords] = useState([]); // State for storing the fetched words

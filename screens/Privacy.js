@@ -1,7 +1,7 @@
 import { SafeAreaView, StyleSheet, Text, View, Image, Pressable, TextInput, TouchableOpacity, Alert } from 'react-native'
 import React, {useState, useEffect, useRef} from 'react'
 import { Avatar, Title, Caption, TouchableRipple } from 'react-native-paper'
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useIsFocused } from '@react-navigation/native';
 import COLORS from '../data/colors';
 import * as Animatable from 'react-native-animatable';
 import {firebase} from '../config'
@@ -10,23 +10,56 @@ import storage from "@react-native-async-storage/async-storage";
 import { useRoute } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Constants from 'expo-constants';
+import io  from 'socket.io-client';
 
 const Privacy = () => {
-
-    const [topKeywords, setTopKeywords] = useState([]);
+    const [connectedUsers, setConnectedUsers] = useState([]);
+    const navigation = useNavigation();
+    const isFocused = useIsFocused();
+    const socket = useRef(null); // Initialize the socket reference
 
     useEffect(() => {
-      fetch('http://192.168.1.38:3000/climate-news')
-        .then((response) => response.json())
-        .then((json) => {
-          // Filter the top_keywords array for words with exactly 5 letters
-          const fiveLetterKeywords = json.top_keywords.filter(word => word.length === 5);
-          setTopKeywords(fiveLetterKeywords);
-        })
-        .catch((error) => {
-          console.error(error);
-        });
-    }, []);
+        if (isFocused) {
+            // Properly check if a socket connection already exists
+            if (!socket.current) {
+                socket.current = io('http://192.168.1.38:2000/');
+            }
+
+            const user = firebase.auth().currentUser;
+            if (user) {
+                const userId = user.uid;
+                firebase.firestore().collection('users')
+                    .doc(userId).get()
+                    .then((snapshot) => {
+                        if (snapshot.exists) {
+                            const userData = snapshot.data();
+                            // Use socket.current here
+                            socket.current.on('connect', () => {
+                                socket.current.emit('user_connected', { name: userData.username });
+                            });
+                            
+                            socket.current.on('update_users_list', data => {
+                                const uniqueUsers = new Set(data.users);
+                                setConnectedUsers([...uniqueUsers]);
+                            });
+                        } else {
+                            console.log('User does not exist');
+                        }
+                    }).catch(error => {
+                        console.error("Error fetching user data: ", error);
+                    });
+            }
+
+            return () => {
+                // Properly use socket.current for cleanup
+                if (socket.current) {
+                    socket.current.disconnect();
+                    socket.current = null;
+                }
+            };
+        }
+    }, [isFocused]); // Dependency array
+
 
   return (
     <LinearGradient style={{flex: 1}} colors={['#B7F1B5','#EAEAEA']}>
@@ -37,9 +70,10 @@ const Privacy = () => {
         <Animatable.View 
         animation={"fadeInUpBig"}
         style={styles.footer}>
-        {topKeywords.map((keyword, index) => (
-            <Text key={index} style={styles.text}>{keyword}</Text>
-        ))}
+            <Text>Connected Users:</Text>
+            {connectedUsers.map((user, index) => (
+                <Text key={index}>{user}</Text>
+            ))}
         </Animatable.View>
     </View>
     </LinearGradient>

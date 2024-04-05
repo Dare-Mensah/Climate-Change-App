@@ -127,7 +127,7 @@ const EditBlog = ({ route, navigation }) => {
         textAlignVertical="top"
       />
 
-      <View style={styles.buttonsContainer}>
+      <View style={[styles.buttonsContainer,style={marginBottom:100}]}>
         <TouchableOpacity onPress={handleSaveChanges} style={styles.saveButton}>
           <Text style={styles.buttonText}>Save Changes</Text>
         </TouchableOpacity>

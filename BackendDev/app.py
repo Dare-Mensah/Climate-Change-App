@@ -33,15 +33,11 @@ climate_terms = [
     "vegetation cover", "xeriscaping", "yield gap", "zooplankton decline"
 ]
 
-
-
 def preprocess(text):
-    #"""Preprocess text for NLP analysis."""
     doc = nlp(text.lower())
     return " ".join([token.lemma_ for token in doc if token.is_alpha and not token.is_stop])
 
 def fetch_and_scrape_article(url):
-    #"""Fetch the article's webpage and attempt to extract text using various selectors."""
     try:
         response = requests.get(url)
         if response.status_code == 200:
@@ -64,27 +60,41 @@ def fetch_and_scrape_article(url):
                 
                 if elements:
                     article_text = ' '.join([elem.get_text() for elem in elements])
-                    break  # If content found, stop searching.
+                    break
             return article_text
     except requests.exceptions.RequestException as e:
         print(f"Request failed: {e}")
     return ""
 
 def fetch_news_articles(api_key):
-    #"""Fetch news articles from the API without limiting the number of articles."""
-    url = 'https://newsdata.io/api/1/news'
-    params = {
+    # Fetch news articles from the API
+    # Primary API
+    primary_url = 'https://newsdata.io/api/1/news'
+    primary_params = {
         'country': 'gb',
         'category': 'environment',
         'apiKey': api_key
     }
-    response = requests.get(url, params=params)
-    if response.status_code != 200:
+    response = requests.get(primary_url, params=primary_params)
+    if response.status_code == 200:
+        news_data = response.json()
+        if not news_data.get('results', []):
+            # Fallback to secondary API if no results
+            secondary_url = 'https://newsapi.org/v2/everything'
+            secondary_params = {
+                'domains': 'wsj.com',
+                'apiKey': '48ae913417ee44fda9af20eabdd0c5b1'
+            }
+            response = requests.get(secondary_url, params=secondary_params)
+            if response.status_code == 200:
+                news_data = response.json()
+            else:
+                return []
+    else:
         return []
     
-    news_data = response.json()
     filtered_articles_info = []
-    for article in news_data.get('results', []):  # Process all articles
+    for article in news_data.get('results', []):
         link = article.get('link', '')
         if link:
             article_text = fetch_and_scrape_article(link)
@@ -96,20 +106,13 @@ def fetch_news_articles(api_key):
                 })
     return filtered_articles_info
 
-
-
 def extract_single_words(tfidf_matrix, vectorizer, top_n=360):
-    #"""Extract top N terms with the highest TF-IDF scores from the matrix, focusing on single words only."""
     aggregated_scores = np.sum(tfidf_matrix.toarray(), axis=0)
     sorted_indices = np.argsort(aggregated_scores)[-top_n:]
     feature_names = np.array(vectorizer.get_feature_names_out())
-    top_terms = feature_names[sorted_indices][::-1]  # In descending order of importance
-    
-    # Filter out any terms that contain spaces, focusing on single words
+    top_terms = feature_names[sorted_indices][::-1]
     single_words = [term for term in top_terms if ' ' not in term]
     return single_words
-
-
 
 @app.route('/climate-news', methods=['GET'])
 def climate_news():
@@ -117,16 +120,14 @@ def climate_news():
     articles_info = fetch_news_articles(api_key)
     if not articles_info:
         return jsonify({"error": "No articles found or could not fetch/scrape articles."}), 404
-
+    
     preprocessed_texts = [article["preprocessed_text"] for article in articles_info]
     tfidf_vectorizer = TfidfVectorizer(ngram_range=(1, 3), min_df=1, max_df=1.0)
     tfidf_matrix = tfidf_vectorizer.fit_transform(preprocessed_texts)
-
+    
     single_word_keywords = extract_single_words(tfidf_matrix, tfidf_vectorizer, top_n=360)
-
+    
     return jsonify({"top_keywords": single_word_keywords, "articles": [{"link": article["link"], "preprocessed_text": article["preprocessed_text"]} for article in articles_info]})
-
-
 
 if __name__ == "__main__":
     app.run(host='192.168.1.38', port=3000, debug=True)
