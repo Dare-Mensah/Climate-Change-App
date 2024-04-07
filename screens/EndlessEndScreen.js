@@ -12,7 +12,6 @@ import { ENTER } from '../src/constants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import {firebase} from '../config'
-
 import Constants from 'expo-constants';
 
 const Number = ({number, label}) => (
@@ -23,9 +22,34 @@ const Number = ({number, label}) => (
 )
 
 
+const GuessDistribution = ({ distribution }) => {
+  if (!distribution) {
+    return null;
+  }
+  const sum = distribution.reduce((total, dist) => dist + total, 0);
+  return (
+    <View style={{ width: '100%', padding: 20, justifyContent: 'flex-start' }}>
+      {distribution.map((dist, index) => (
+        <GuessDistributionLine key={index} position={index + 1} amount={dist} percentage={sum !== 0 ? (100 * dist) / sum : 0} />
+      ))}
+    </View>
+  );
+};
+
+const GuessDistributionLine = ({ position, amount, percentage }) => {
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'flex-start' }}>
+      <Text style={{ fontSize: 17 }}>{position}</Text>
+      <View style={{ backgroundColor: COLORS.grey, margin: 5, padding: 5, width: `${percentage}%`, minWidth: 20, maxWidth: 290 }}>
+        <Text style={{ fontSize: 17 }}>{amount}</Text>
+      </View>
+    </View>
+  );
+};
 
 
-const EndlessEndScreen = ({ won = false, rows, getCellBGColor, navigation, correctWordsCount, averageDuration }) => {
+const EndlessEndScreen = ({ won = false, rows, getCellBGColor, navigation }) => {
+
     const [secondsTillTmr, setSecondsTillTmr] = useState(0);
     const [played, setPlayed] = useState(0);
     const [winRate, setWinRate] = useState(0);
@@ -34,66 +58,55 @@ const EndlessEndScreen = ({ won = false, rows, getCellBGColor, navigation, corre
     const [distribution, setDistribution] = useState(null)
 
 
+  
     const saveStatsToAsyncStorage = async () => {
         const statsData = {
-            curStreak,
-            winRate,
-            played,
-            distribution,
+          curStreak,
+          winRate,
+          played,
+          distribution,
         };
-
-        // Save to AsyncStorage with a different key
+    
+        // Save to AsyncStorage
         const statsString = JSON.stringify(statsData);
-        await AsyncStorage.setItem('@game_stats_endless', statsString);
+        await AsyncStorage.setItem('@game_stats', statsString);
+      
     };
 
 
-  
-    const saveGameResultToFirestore = async (gameResult) => {
-      const db = firebase.firestore();
-      const user = firebase.auth().currentUser; // Ensure you have authenticated the user
-    
-      if (user) {
-        const gameResultsRef = db.collection('gameResults').doc(user.uid);
-        try {
-          await gameResultsRef.set(gameResult, { merge: true });
-          console.log('Game result saved successfully');
-        } catch (error) {
-          console.error('Error saving game result: ', error);
-        }
-      } else {
-        console.log('No authenticated user found');
-      }
-    };
-    
-    // Example game result data
-    const gameResult = {
-      won: true,
-      correctWordsCount: correctWordsCount, // Assuming this is a variable you have
-      averageDuration: averageDuration, // Assuming this is a variable you have
-      timestamp: firebase.firestore.FieldValue.serverTimestamp(), // Adds a timestamp
-    };
 
 
     useEffect(() => {
       readState();
       saveStatsToAsyncStorage(); // Save stats to AsyncStorage
-      saveGameResultToFirestore(gameResult);
     }, []);
 
-    // Assuming correctWordsCount is the total number of words guessed correctly
-useEffect(() => {
-  const updateAchievementStatus = async () => {
-    const currentUser = firebase.auth().currentUser;
-    if (correctWordsCount > 3) {
-      await firebase.firestore().collection('users').doc(currentUser.uid).update({
-        hasAchievedWordMaster: true,
-      });
-    }
-  };
 
-  updateAchievementStatus();
-}, [correctWordsCount]);
+
+    useEffect(() => {
+      const updateUserGameCount = async () => {
+        const currentUser = firebase.auth().currentUser;
+        const userRef = firebase.firestore().collection('users').doc(currentUser.uid);
+        const userDoc = await userRef.get();
+    
+        if (userDoc.exists) {
+          const userData = userDoc.data();
+          const newGameCount = (userData.wordleGamesPlayed || 0) + 1;
+    
+          await userRef.update({
+            wordleGamesPlayed: newGameCount,
+            hasPlayedOver10WordleGames: newGameCount > 10,
+          });
+        }
+      };
+    
+      updateUserGameCount();
+    }, []);
+
+
+
+
+
   
     const share = () => {
       // Sharing the game result.
@@ -121,7 +134,7 @@ useEffect(() => {
     }, []);
   
     const readState = async () => {
-      const dataString = await AsyncStorage.getItem('@game_endless');
+      const dataString = await AsyncStorage.getItem('@game');
       let data;
       try {
         data = JSON.parse(dataString);
@@ -195,29 +208,58 @@ useEffect(() => {
 
   return (
     <LinearGradient style={{flex: 1}} colors={['#EAEAEA', '#B7F1B5']}>
-        <ScrollView showsVerticalScrollIndicator={false}>
-        <SafeAreaView style={{width:'100%', alignContent:'center'}}>
-        <View>
-            <Text style={styles.title}>WORDLE EndScreen</Text>
-        </View>
+      <SafeAreaView style={styles.container}>
+        <ScrollView contentContainerStyle={styles.scrollViewContent} showsVerticalScrollIndicator={false}>
+          <View style={styles.titleContainer}>
+            <Text style={styles.title}>WORDLE</Text>
+            <Text style={styles.winMessage}>{won ? 'You Won!' : 'Try again tomorrow'}</Text>
+          </View>
 
+
+        {/** 
         <Text style ={{fontSize: 30, color:"black", fontWeight: 200, marginVertical: 20, textAlign: 'center',}}>Your Statisitics</Text>
         <View>
-            <Number number={correctWordsCount} label ={"Words Guessed Correctly"}/>
-            <Number number={averageDuration} label ={"Average Time per Guess"}/>
+            <Number number={played} label ={"Played"}/>
+            <Number number={winRate} label ={"Win %"}/>
+            <Number number={curStreak} label ={"Current Streak"}/>
+            <Number number={maxStreak} label ={"Max Streak"}/> 
         </View>
 
-      <View style={styles.buttonsContainer}>
+        <Text style ={{fontSize: 30, color:"black", fontWeight: 200, marginVertical: 20, textAlign: 'center',}}>Guess Distribution</Text>
 
+        <GuessDistribution distribution={distribution}/>
+        */}
 
-        {/* Home Button */}
-        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Home")}>
-          <Text style={styles.buttonText}>Home</Text>
-        </TouchableOpacity>
-      </View>
+        
+        
+        <View>
+            {/**
+            <View>
+                <Text style ={{fontSize: 30, color:"black", fontWeight: 200, marginTop:20, textAlign: 'center',}}>Next Game</Text>
+                <Text style ={{fontSize: 30, color:"black", fontWeight: 'bold',marginTop:10, textAlign: 'center',}}>{calculateTimeTillNextGame()}</Text>
+            </View>
+          */}
+            
+            
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity onPress={share} style={[styles.button, {backgroundColor: COLORS.third}]}>
+              <Text style={styles.buttonText}>Share</Text>
+            </TouchableOpacity>
 
-        </SafeAreaView>
+            <TouchableOpacity onPress={() => {
+              navigation.navigate("Home", {
+                currentStreak: curStreak,
+                winPercentage: winRate,
+                playedState: played,
+              });
+            }} 
+            style={[styles.button, {backgroundColor: COLORS.third, marginLeft: 10}]}>
+              <Text style={styles.buttonText}>Return Home</Text>
+            </TouchableOpacity>
+            </View>
+        </View>
         </ScrollView>
+        </SafeAreaView>
 
     </LinearGradient>
   )
@@ -232,11 +274,18 @@ const styles = StyleSheet.create({
     },
 
     title: {   
-        fontSize: 40,
-        fontWeight: 'bold',
-        letterSpacing: 4,
-        marginTop: 20,
-        textAlign: 'center',
+      fontSize: 40,
+      fontWeight: 'bold',
+      letterSpacing: 4,
+      marginTop: 20,
+      textAlign: 'center',
+    },
+    winMessage: {
+      fontSize: 30,
+      fontWeight: '200',
+      color: "black",
+      marginTop: 20,
+      textAlign: 'center',
     },
 
     box1:{
@@ -265,41 +314,35 @@ const styles = StyleSheet.create({
       
       },
 
+      scrollViewContent: {
+        flexGrow: 1,
+        justifyContent: 'center', // This centers content vertically in the scroll view
+      },
+      titleContainer: {
+        alignItems: 'center', // This centers content horizontally
+      },
 
-      buttonsContainer: {
+      buttonContainer: {
         flexDirection: 'row',
-        justifyContent: 'space-evenly',
-        alignItems: 'center',
+        justifyContent: 'center', // Center buttons horizontally in the container
+        marginTop: 20,
+      },
+      button: {
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 20,
+        elevation: 2,
         shadowColor: '#000000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
+        shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.09,
         shadowRadius: 10,
-        marginTop:20
-        
-
-        // You can adjust padding, margin, etc. as needed
-      },
-
-
-      button: {
-        backgroundColor: '#4CAF50', // Example color
-        padding: 15, // Increased padding
-        borderRadius: 8, // Slightly larger border radius
-        // Optional: define width and height if you want fixed size buttons
-        width: 120, // Example fixed width
-        height: 50,  // Example fixed height
-        justifyContent: 'center', // Centers text vertically
-        alignItems: 'center', // Centers text horizontally
-        margin: 5, // Add margin if buttons are too close to each other
-        // other styling for the button
       },
       buttonText: {
-        color: '#fff',
-        fontSize: 20, // Larger font size
-        fontWeight: 'bold', // Optional: make text bold
-        // other text styling
+        color: COLORS.white,
+        fontSize: 16,
+        fontWeight: 'bold',
+        textAlign: 'center',
       },
+
+
 })

@@ -15,7 +15,6 @@ import { useNavigation } from '@react-navigation/native';
 import EndScreen from './EndScreen';
 import useDailyWord from '../data/useDailyWord';
 import io from 'socket.io-client';
-import {firebase} from '../config'
 LogBox.ignoreAllLogs();
 
 const Number_Of_Tries = 6;
@@ -46,7 +45,7 @@ const dayOfTheYear = getDayOfTheYear(); //add +2 to test for next day
 const dayKey = getDayKey();
 
 
-const socket = io('http://192.168.1.38:2000');
+const socket = io("http://192.168.1.38:2000");
 
 
 const MultiPlayerWordle = () => {
@@ -91,39 +90,59 @@ const MultiPlayerWordle = () => {
 
   const [curRow, setCurRow] = useState(0);
   const [curCol, setCurCol] = useState(0);
-  const [gameSate, setGameState] = useState('playing');
+  const [gameState, setGameState] = useState('playing');
   const [loaded, setloaded] = useState(false)
-  const REQUIRED_PLAYERS = 2;
-
-  const [playerCount, setPlayerCount] = useState(0);
 
   useEffect(() => {
-    readState();
-    const username = 'User'; // Use actual user identification logic
-    socket.emit('join_game', { username });
-  
+    socket.connect();
+
+    socket.emit('join_game', { username: 'PlayerName' });
+
     socket.on('game_state', (data) => {
-      console.log('Game State:', data.state);
-      setPlayerCount(data.playerCount || 0); // Update player count
-  
-      if (data.state === 'waiting_for_players') {
-        // Handle UI for waiting state
-        setIsLoading(true); // Assuming you have an isLoading state
-      } else if (data.state === 'ready_to_start') {
-        // Proceed to start the game
-        setIsLoading(false);
-        if (data.dailyWord) {
-          // Server has provided the word, initialize game with it
-          setLetters(data.dailyWord.split(""));
-          setGameState('playing');
-        }
-      }
+      setGameState(data.state);
     });
-  
+
     return () => {
-      socket.off('game_state');
+      socket.disconnect();
     };
   }, []);
+
+  // Focus effect for navigation adjustments
+  useFocusEffect(
+    useCallback(() => {
+      const hideTabBar = () => navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' } });
+      hideTabBar();
+      return () => navigation.getParent()?.setOptions({ tabBarStyle: { display: 'flex', height: 60 } });
+    }, [navigation])
+  );
+
+  // Now, handle the loading or error states unconditionally at the top of your render function
+  if (isLoading) {
+    return(
+      <ActivityIndicator size="large" color={COLORS.primary} />
+    ) 
+  }
+
+  if (gameState === 'waiting_for_players') {
+    return (
+      <View style={styles.centeredContainer}>
+        <Text>Waiting for another player...</Text>
+      </View>
+    );
+  }
+
+  if (gameState === 'generating_word' || !dailyWord) {
+    return (
+      <View style={styles.centeredContainer}>
+        <Text>Game is starting...</Text>
+      </View>
+    );
+  }
+
+  // If game is in end state, show the end screen
+  if (gameState === 'won' || gameState === 'lost') {
+    return <EndScreen won={gameState === 'won'} rows={rows} />;
+  }
 
   const checkAndNavigateIfGameEnded = useCallback(async () => {
     const storedGameState = await AsyncStorage.getItem('@gameState');
@@ -170,7 +189,7 @@ const MultiPlayerWordle = () => {
     if(loaded) {
       persistState()
     }
-  }, [rows,curRow,curCol, gameSate])
+  }, [rows,curRow,curCol, gameState])
 
 
   useEffect(() => {
@@ -181,7 +200,7 @@ const MultiPlayerWordle = () => {
     //saving all the game state varibales in async storage
     
     const dataForToday = {
-      rows, curCol,curRow, gameSate
+      rows, curCol,curRow, gameState
     };
 
     try{
@@ -211,7 +230,7 @@ const MultiPlayerWordle = () => {
       setRows(day.rows)
       setCurCol(day.curCol)
       setCurRow(day.curRow)
-      setGameState(day.gameSate)
+      setGameState(day.gameState)
     } catch(e){
       console.log("Could not parse the state")
     }
@@ -223,11 +242,11 @@ const MultiPlayerWordle = () => {
 
 
   const checkGameState = () => {
-    if(checkIfWon() && gameSate != 'won')
+    if(checkIfWon() && gameState != 'won')
     {
       setGameState('won');
     }
-    else if(checkIfLose() && gameSate != 'lost')
+    else if(checkIfLose() && gameState != 'lost')
     {
       setGameState('lost');
     }
@@ -246,7 +265,7 @@ const MultiPlayerWordle = () => {
   }
 
   const onKeyPressed = (key) => {
-    if(gameSate != 'playing')
+    if(gameState != 'playing')
     {
       return;
     }
@@ -348,64 +367,47 @@ if (!isLoading && !dailyWord) {
   );
 }
 
-  if (gameSate != 'playing') {
-    return (<EndScreen won={gameSate == 'won'} rows={rows} getCellBGColor={getCellBGColor} navigation={navigation}/>)
+  if (gameState != 'playing') {
+    return (<EndScreen won={gameState == 'won'} rows={rows} getCellBGColor={getCellBGColor} navigation={navigation}/>)
   }
 
   if (isLoading) {
     return <ActivityIndicator size="large" color={COLORS.primary} style={{alignItems:'center', flex:1, justifyContent:'center'}} />;
   }
 
-  if (isLoading) {
-    return (
-      <View style={styles.centeredContainer}>
-        <ActivityIndicator size="large" color={COLORS.primary} />
-        <Text style={styles.loadingText}>Waiting for more players...</Text>
-      </View>
-    );
-  } else if (playerCount < REQUIRED_PLAYERS) {
-    // Show current player count and required player count
-    return (
-      <View style={styles.centeredContainer}>
-        <Text style={styles.loadingText}>Joined players: {playerCount}/{REQUIRED_PLAYERS}</Text>
-        <Text style={styles.loadingText}>Waiting for more players to join...</Text>
-      </View>
-    );
-  } else {
-    return (
-        <LinearGradient style={{flex: 1}} colors={['#EAEAEA', '#B7F1B5']}>
-        <SafeAreaView style={styles.container}>
-          <Text style={styles.title}>WORDLE</Text>
-          <View style={[styles.map]}>
-            {rows.map((row, i) =>(
-              <View key={'row-${i}'} style={styles.row}>
-                {row.map((letter, j) => (
-                  <View key ={'cell-${i}-${j}'} style={[styles.cell, 
-                  {borderColor: isCellActive(i,j) ? COLORS.white : COLORS.darkgrey,
-                  backgroundColor: getCellBGColor(i, j), marginBottom:100
-                   }]}>
-                    <Text style={styles.cellText}>{letter.toUpperCase()}</Text>
-                  </View>
-                ))}
-        
+
+
+  return (
+    <LinearGradient style={{flex: 1}} colors={['#EAEAEA', '#B7F1B5']}>
+    <SafeAreaView style={styles.container}>
+      <Text style={styles.title}>WORDLE</Text>
+      <View style={[styles.map]}>
+        {rows.map((row, i) =>(
+          <View key={'row-${i}'} style={styles.row}>
+            {row.map((letter, j) => (
+              <View key ={'cell-${i}-${j}'} style={[styles.cell, 
+              {borderColor: isCellActive(i,j) ? COLORS.white : COLORS.darkgrey,
+              backgroundColor: getCellBGColor(i, j), marginBottom:100
+               }]}>
+                <Text style={styles.cellText}>{letter.toUpperCase()}</Text>
               </View>
             ))}
+
           </View>
-          
-          <Keyboard
-          onKeyPressed={onKeyPressed}
-          greenCaps={greenCaps}
-          yellowCaps={yellowCaps}
-          greyCaps={greyCaps}
-          />
-          
-        </SafeAreaView>
-        </LinearGradient>
-    );
-  }
+        ))}
+      </View>
+      
+      <Keyboard
+      onKeyPressed={onKeyPressed}
+      greenCaps={greenCaps}
+      yellowCaps={yellowCaps}
+      greyCaps={greyCaps}
+      />
+      
+    </SafeAreaView>
+    </LinearGradient>
+  )
 }
-
-
 
 export default MultiPlayerWordle
 

@@ -424,6 +424,7 @@ const Home = ({route}) => {
     { id: '2', title: 'Co-op Mode', navigateTo: 'WordleCoop2', bgImage: require('../assets/pic2.jpg'), iconImage: require('../assets/coop.png') },
     { id: '3', title: 'Wordle Reversed', navigateTo: 'ReversedWordle', bgImage: require('../assets/pic4.jpg'), iconImage: require('../assets/puzzle-game.png') },
     { id: '4', title: 'Wordle Multiplayer', navigateTo: 'MultiPlayerWordle', bgImage: require('../assets/pic5.jpg'), iconImage: require('../assets/puzzle-game.png') },
+    { id: '5', title: 'Endless Wordle', navigateTo: 'EndlessWordle', bgImage: require('../assets/pic6.jpg'), iconImage: require('../assets/puzzle-game.png') },
   ];
 
 

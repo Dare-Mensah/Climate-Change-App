@@ -89,19 +89,8 @@ const Wordle = () => {
 
   const [curRow, setCurRow] = useState(0);
   const [curCol, setCurCol] = useState(0);
-  const [gameState, setGameState] = useState('playing');
+  const [gameSate, setGameState] = useState('playing');
   const [loaded, setloaded] = useState(false)
-  const [gamePlayedToday, setGamePlayedToday] = useState(false);
-
-  useEffect(() => {
-    const checkGamePlayed = async () => {
-      const result = await AsyncStorage.getItem(`@GamePlayed:${dayKey}`);
-      if (result !== null) {
-        setGamePlayedToday(true);
-      }
-    };
-    checkGamePlayed();
-  }, []);
 
   const checkAndNavigateIfGameEnded = useCallback(async () => {
     const storedGameState = await AsyncStorage.getItem('@gameState');
@@ -136,11 +125,11 @@ const Wordle = () => {
 
 
   useEffect(() => {
-    if (curRow > 0) {
+    if(curRow > 0)
+    {
       checkGameState();
     }
-  }, [curRow, gameState]);
-
+  }, [curRow])
 
 
 
@@ -148,7 +137,7 @@ const Wordle = () => {
     if(loaded) {
       persistState()
     }
-  }, [rows,curRow,curCol, gameState])
+  }, [rows,curRow,curCol, gameSate])
 
 
   useEffect(() => {
@@ -156,14 +145,29 @@ const Wordle = () => {
   },[])
 
   const persistState = async () => {
-    const dataForToday = { rows, curCol, curRow, gameState };
-    try {
-      await AsyncStorage.setItem("@game", JSON.stringify(dataForToday));
-      await AsyncStorage.setItem(`@GamePlayed:${dayKey}`, "true");
-    } catch (e) {
-      console.log("Could not save game data", e);
+    //saving all the game state varibales in async storage
+    
+    const dataForToday = {
+      rows, curCol,curRow, gameSate
+    };
+
+    try{
+      //firstly reading the data
+      const existingStateString = await AsyncStorage.getItem("@game")
+      const existingState = existingStateString ?  JSON.parse(existingStateString) : {};
+      if(!existingState) { //then updating the data
+        existingState = {}
+      }
+      existingState[dayKey] =dataForToday
+      //writing the data back to async
+      const dataString =JSON.stringify(existingState); //parsing from JSON object to string
+      console.log("Saving", dataString)
+      await AsyncStorage.setItem("@game", dataString); 
+    } catch (e){
+      console.log("Could not save data to async storage", e)
     }
-  };
+
+  }
 
   const readState = async () =>
   {
@@ -174,7 +178,7 @@ const Wordle = () => {
       setRows(day.rows)
       setCurCol(day.curCol)
       setCurRow(day.curRow)
-      setGameState(day.gameState)
+      setGameState(day.gameSate)
     } catch(e){
       console.log("Could not parse the state")
     }
@@ -186,12 +190,13 @@ const Wordle = () => {
 
 
   const checkGameState = () => {
-    if (checkIfWon() && gameState !== 'won') {
+    if(checkIfWon() && gameSate != 'won')
+    {
       setGameState('won');
-      persistState();
-    } else if (checkIfLose() && gameState !== 'lost') {
+    }
+    else if(checkIfLose() && gameSate != 'lost')
+    {
       setGameState('lost');
-      persistState();
     }
   };
 
@@ -208,7 +213,7 @@ const Wordle = () => {
   }
 
   const onKeyPressed = (key) => {
-    if(gameState != 'playing')
+    if(gameSate != 'playing')
     {
       return;
     }
@@ -310,11 +315,8 @@ if (!isLoading && !dailyWord) {
   );
 }
 
-  if (gameState != 'playing') {
-    return (<EndScreen won={gameState == 'won'} rows={rows} getCellBGColor={getCellBGColor} navigation={navigation}/>)
-  }
-  if (gamePlayedToday) {
-    return <EndScreen won={gameState === 'won'} rows={rows} getCellBGColor={(row, col) => COLORS.primary} navigation={navigation} />;
+  if (gameSate != 'playing') {
+    return (<EndScreen won={gameSate == 'won'} rows={rows} getCellBGColor={getCellBGColor} navigation={navigation}/>)
   }
 
   if (isLoading) {

@@ -216,7 +216,7 @@ const EndScreen = ({ won = false, rows, getCellBGColor, navigation }) => {
           </View>
 
 
-        
+        {/** 
         <Text style ={{fontSize: 30, color:"black", fontWeight: 200, marginVertical: 20, textAlign: 'center',}}>Your Statisitics</Text>
         <View>
             <Number number={played} label ={"Played"}/>
@@ -228,15 +228,17 @@ const EndScreen = ({ won = false, rows, getCellBGColor, navigation }) => {
         <Text style ={{fontSize: 30, color:"black", fontWeight: 200, marginVertical: 20, textAlign: 'center',}}>Guess Distribution</Text>
 
         <GuessDistribution distribution={distribution}/>
+        */}
 
         
-
+        
         <View>
-            
+            {/**
             <View>
                 <Text style ={{fontSize: 30, color:"black", fontWeight: 200, marginTop:20, textAlign: 'center',}}>Next Game</Text>
                 <Text style ={{fontSize: 30, color:"black", fontWeight: 'bold',marginTop:10, textAlign: 'center',}}>{calculateTimeTillNextGame()}</Text>
             </View>
+          */}
             
             
           <View style={styles.buttonContainer}>
