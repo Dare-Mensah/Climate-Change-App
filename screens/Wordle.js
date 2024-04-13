@@ -76,7 +76,7 @@ const Wordle = () => {
   };
   
   const navigation = useNavigation();
-  AsyncStorage.removeItem("@game") //resetting async storage for game
+  //AsyncStorage.removeItem("@game") //resetting async storage for game
 
   const { dailyWord, isLoading } = useDailyWord();
   const [letters, setLetters] = useState([]);

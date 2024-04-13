@@ -1,6 +1,5 @@
-import { StyleSheet, Text, View, SafeAreaView,ScrollView, LogBox, Alert, ActivityIndicator, TouchableOpacity,Image} from 'react-native'
-import React, { useEffect, useState, useCallback} from 'react'
-import { useFocusEffect } from '@react-navigation/native';
+import { StyleSheet, Text, View, SafeAreaView,ScrollView, LogBox, Alert, ActivityIndicator, TouchableOpacity, Pressable, Image} from 'react-native'
+import React, { useEffect, useState, useCallback } from 'react'
 import { LinearGradient } from 'expo-linear-gradient';
 import Keyboard from '../src/components/Keyboard'
 import colors from '../src/constants'
@@ -14,9 +13,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import EndScreen from './EndScreen';
 import useDailyWord from '../data/useDailyWord';
-import io from 'socket.io-client';
+import { useFocusEffect } from '@react-navigation/native';
 LogBox.ignoreAllLogs();
-
+import io  from 'socket.io-client';
 const Number_Of_Tries = 6;
 
 
@@ -24,39 +23,47 @@ const copyArray = (arr) => { // making a copy of this aaray
   return [...arr.map((rows) => [...rows])];
 };
 
-
-  
-const getDayOfTheYear = () => {
-  const now = new Date();
-  const start = new Date(now.getFullYear(), 0, 0);
-  const diff = now - start;
-  const oneDay = 1000 * 60 * 60 * 24;
-  const day = Math.floor(diff / oneDay);
-  return day;
-}
-
-const getDayKey = () => {
-  const d = new Date();
-  let year = d.getFullYear();
-  return `day-${getDayOfTheYear()}-${year}`;
-}
-
-const dayOfTheYear = getDayOfTheYear(); //add +2 to test for next day
-const dayKey = getDayKey();
-
-
 const socket = io("http://192.168.1.38:2000");
 
+const WordleCoop2 = () => {
 
-const MultiPlayerWordle = () => {
+  const navigation = useNavigation();
+  //AsyncStorage.removeItem("@game_coop2"); // Resetting async storage for game
+
+  const { dailyWord, isLoading } = useDailyWord();
+  const [letters, setLetters] = useState([]);
+  const [rows, setRows] = useState([]);
+  const Number_Of_Tries = 6;
+
+  //const rows = new Array(Number_Of_Tries).fill(new Array(letters.length).fill(''))
+  const [curRow, setCurRow] = useState(0);
+  const [curCol, setCurCol] = useState(0);
+  const [gameState, setGameState] = useState('playing');
+  const [loaded, setloaded] = useState(false)
+
+  // New state variables for player management
+  const [playerTurn, setPlayerTurn] = useState(1); // Player 1 starts
+  const [player1State, setPlayer1State] = useState({ curRow: 0, curCol: 0, gameState: 'playing' });
+  const [player2State, setPlayer2State] = useState({ curRow: 0, curCol: 0, gameState: 'playing' });
+  const [countdown, setCountdown] = useState(5); // Initial countdown starts from 5 seconds
+
+
   useFocusEffect(
-    React.useCallback(() => {
-      const hideTabBar = navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' } });
-
-      return () => navigation.getParent()?.setOptions({ tabBarStyle: { display: 'flex', height: 60, ...defaultTabBarStyle } });
+    useCallback(() => {
+      let currentNavigation = navigation;
+      while (currentNavigation.getParent()) {
+        currentNavigation = currentNavigation.getParent();
+      }
+      currentNavigation.setOptions({
+        tabBarStyle: { display: 'none' },
+      });
+  
+      return () =>
+        currentNavigation.setOptions({
+          tabBarStyle: { ...defaultTabBarStyle },
+        });
     }, [navigation])
   );
-
   const defaultTabBarStyle = {
     backgroundColor: '#fff',
     height: 60,
@@ -75,341 +82,360 @@ const MultiPlayerWordle = () => {
     shadowRadius: 3.5,
     elevation: 5,
   };
-  
-  const navigation = useNavigation();
-  AsyncStorage.removeItem("@game") //resetting async storage for game
 
-  const { dailyWord, isLoading } = useDailyWord();
-  const [letters, setLetters] = useState([]);
-  //const letters = word.split("");//returns an array of characters.
 
-  const [rows, setRows] = useState(
-    new Array(Number_Of_Tries).fill(new Array(letters.length).fill("")));
-
-  //const rows = new Array(Number_Of_Tries).fill(new Array(letters.length).fill(''))
-
-  const [curRow, setCurRow] = useState(0);
-  const [curCol, setCurCol] = useState(0);
-  const [gameState, setGameState] = useState('playing');
-  const [loaded, setloaded] = useState(false)
 
   useEffect(() => {
     socket.connect();
-
     socket.emit('join_game', { username: 'PlayerName' });
-
     socket.on('game_state', (data) => {
       setGameState(data.state);
     });
-
-    return () => {
-      socket.disconnect();
-    };
+    return () => socket.disconnect();
   }, []);
 
-  // Focus effect for navigation adjustments
-  useFocusEffect(
-    useCallback(() => {
-      const hideTabBar = () => navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' } });
-      hideTabBar();
-      return () => navigation.getParent()?.setOptions({ tabBarStyle: { display: 'flex', height: 60 } });
-    }, [navigation])
-  );
 
-  // Now, handle the loading or error states unconditionally at the top of your render function
-  if (isLoading) {
-    return(
-      <ActivityIndicator size="large" color={COLORS.primary} />
-    ) 
-  }
 
-  if (gameState === 'waiting_for_players') {
-    return (
-      <View style={styles.centeredContainer}>
-        <Text>Waiting for another player...</Text>
-      </View>
-    );
-  }
-
-  if (gameState === 'generating_word' || !dailyWord) {
-    return (
-      <View style={styles.centeredContainer}>
-        <Text>Game is starting...</Text>
-      </View>
-    );
-  }
-
-  // If game is in end state, show the end screen
-  if (gameState === 'won' || gameState === 'lost') {
-    return <EndScreen won={gameState === 'won'} rows={rows} />;
-  }
-
-  const checkAndNavigateIfGameEnded = useCallback(async () => {
-    const storedGameState = await AsyncStorage.getItem('@gameState');
-    if (storedGameState === 'won' || storedGameState === 'lost') {
-      navigation.navigate('EndScreen', { gameResult: storedGameState });
-    } else {
-      // Initialize or reset your game setup here
-    }
-  }, [navigation]);
-
-  // Check game state on component mount
   useEffect(() => {
-    checkAndNavigateIfGameEnded();
-  }, [checkAndNavigateIfGameEnded]);
+    if (gameState === 'generating_word' && dailyWord) {
+      setGameState('countdown');
+      const countdownTimer = setInterval(() => {
+        setCountdown((prevCount) => {
+          if (prevCount <= 1) {
+            clearInterval(countdownTimer);
+            setGameState('playing');
+            return 5; // Reset countdown
+          }
+          return prevCount - 1;
+        });
+      }, 1000);
+      return () => clearInterval(countdownTimer);
+    }
+  }, [gameState, dailyWord]);
 
-  // Also check when the component gains focus
-  useFocusEffect(checkAndNavigateIfGameEnded);
 
 
 
+
+  
   useEffect(() => {
     if (!isLoading && dailyWord) {
       setLetters(dailyWord.split(""));
-      const initializedRows = new Array(Number_Of_Tries).fill(new Array(dailyWord.length).fill(''));
-      setRows(initializedRows);
-      setCurRow(0);
-      setCurCol(0);
-      setGameState('playing');
+      setRows(new Array(Number_Of_Tries).fill(new Array(dailyWord.length).fill('')));
     }
   }, [dailyWord, isLoading]);
 
+  
+    // Update rows based on the fetched word
+    useEffect(() => {
+      if (letters.length > 0) {
+        setRows(new Array(Number_Of_Tries).fill(new Array(letters.length).fill("")));
+      }
+    }, [letters]);
+
+    useEffect(() => {
+      if (dailyWord) {
+        setLetters(dailyWord.split(""));
+      }
+    }, [dailyWord]);
 
 
-  useEffect(() => {
-    if(curRow > 0)
+  
+    useEffect(() => {
+      if(curRow > 0)
+      {
+        checkGameState();
+      }
+    }, [curRow])
+  
+  
+  
+    useEffect(() => {
+      if(loaded) {
+        persistState()
+      }
+    }, [rows,curRow,curCol, gameState])
+  
+  
+    useEffect(() => {
+      readState()
+    },[])
+  
+    const persistState = async () => {
+      //saving all the game state varibales in async storage
+      
+      const dataForToday = {
+        rows, curCol,curRow, gameState
+      };
+  
+      try{
+        //firstly reading the data
+        const existingStateString = await AsyncStorage.getItem("@game_coop2")
+        const existingState = existingStateString ?  JSON.parse(existingStateString) : {};
+        if(!existingState) { //then updating the data
+          existingState = {}
+        }
+        existingState[dayKey] =dataForToday
+        //writing the data back to async
+        const dataString =JSON.stringify(existingState); //parsing from JSON object to string
+        console.log("Saving", dataString)
+        await AsyncStorage.setItem("@game_coop2", dataString); 
+      } catch (e){
+        console.log("Could not save data to async storage", e)
+      }
+  
+    }
+  
+    const readState = async () =>
     {
-      checkGameState();
+      const dataString = await AsyncStorage.getItem("@game_coop2")
+      try{
+        const data = JSON.parse(dataString)
+        const day = data[dayKey]
+        setRows(day.rows)
+        setCurCol(day.curCol)
+        setCurRow(day.curRow)
+        setGameState(day.gameState)
+      } catch(e){
+        console.log("Could not parse the state")
+      }
+      //console.log(dataString) //debugging
+  
+      setloaded(true)
     }
-  }, [curRow])
+  
+  
+  
+    // New function to check the game state for both players
+    const checkGameState = () => {
+      const checkPlayerState = (playerState, setPlayerState, playerRows) => {
+        if (playerState.gameState === 'playing') {
+          if (checkIfWon(playerRows, playerState.curRow)) {
+            setPlayerState({ ...playerState, gameState: 'won' });
+            Alert.alert(`Player ${playerTurn} Wins!`, "Congratulations!", [{
+              text: "OK", onPress: () => navigation.navigate('Home')
+            }]);
+            return;
+          }
+          if (playerState.curRow === Number_Of_Tries) {
+            setPlayerState({ ...playerState, gameState: 'lost' });
+            // Check if this is the last player to lose
+            if (playerTurn === 2 && player1State.gameState === 'lost') {
+              Alert.alert("Game Over", "Both players have lost!", [{
+                text: "OK", onPress: () => navigation.navigate('Home')
+              }]);
+            }
+            return;
+          }
+        }
 
-
-
-  useEffect(() => {
-    if(loaded) {
-      persistState()
-    }
-  }, [rows,curRow,curCol, gameState])
-
-
-  useEffect(() => {
-    readState()
-  },[])
-
-  const persistState = async () => {
-    //saving all the game state varibales in async storage
+        if (checkIfWon(rows, curRow)) {
+          const winningPlayerState = playerTurn === 1 ? player1State : player2State;
+          const setWinningPlayerState = playerTurn === 1 ? setPlayer1State : setPlayer2State;
+          setWinningPlayerState({ ...winningPlayerState, gameState: 'won' });
+          Alert.alert(`Player ${playerTurn} Wins!`, "Congratulations!", [{
+            text: "OK", onPress: () => navigation.navigate('Home')
+          }]);
+        }
+      };
     
-    const dataForToday = {
-      rows, curCol,curRow, gameState
+      checkPlayerState(player1State, setPlayer1State, rows.slice(0, Number_Of_Tries / 2));
+      checkPlayerState(player2State, setPlayer2State, rows.slice(Number_Of_Tries / 2));
+    };
+    
+    const checkIfWon = (playerRows, curRow) => {
+      if (curRow > 0) {
+        const row = playerRows[curRow - 1];
+        if (row) {
+          return row.every((letter, i) => letter === letters[i]);
+        }
+      }
+      return false;
     };
 
-    try{
-      //firstly reading the data
-      const existingStateString = await AsyncStorage.getItem("@game")
-      const existingState = existingStateString ?  JSON.parse(existingStateString) : {};
-      if(!existingState) { //then updating the data
-        existingState = {}
+    const checkIfLose = () => { //lose state
+      return !checkIfWon() && curRow == rows.length;
+    }
+  
+    const onKeyPressed = (key) => {
+        let currentState = playerTurn == 1 ? player1State : player2State;
+        let setCurrentState = playerTurn == 1 ? setPlayer1State : setPlayer2State;
+
+        if (currentState.gameState != 'playing') {
+            return;
+        }
+  
+      const updatedRows = copyArray(rows);
+  
+      if(key == CLEAR){
+        const prevCol = curCol -1; //check if the current col is not less than 0
+        if (prevCol >= 0)
+        {
+          updatedRows[curRow][prevCol] = ""; //remove the word in the currnet row
+          setRows(updatedRows);
+          setCurCol(prevCol);
+  
+        }
+        return;
       }
-      existingState[dayKey] =dataForToday
-      //writing the data back to async
-      const dataString =JSON.stringify(existingState); //parsing from JSON object to string
-      console.log("Saving", dataString)
-      await AsyncStorage.setItem("@game", dataString); 
-    } catch (e){
-      console.log("Could not save data to async storage", e)
-    }
 
-  }
-
-  const readState = async () =>
-  {
-    const dataString = await AsyncStorage.getItem("@game")
-    try{
-      const data = JSON.parse(dataString)
-      const day = data[dayKey]
-      setRows(day.rows)
-      setCurCol(day.curCol)
-      setCurRow(day.curRow)
-      setGameState(day.gameState)
-    } catch(e){
-      console.log("Could not parse the state")
-    }
-    //console.log(dataString) //debugging
-
-    setloaded(true)
-  }
-
-
-
-  const checkGameState = () => {
-    if(checkIfWon() && gameState != 'won')
-    {
-      setGameState('won');
-    }
-    else if(checkIfLose() && gameState != 'lost')
-    {
-      setGameState('lost');
-    }
-  };
-
-
-
-  const checkIfWon = () => { // winning state
-    const row = rows[curRow-1];
-
-    return row.every((letter, i) => letter == letters[i]) //if every letter from a row is equalt to the letter we want to guess then we won
-  }
-
-  const checkIfLose = () => { //lose state
-    return !checkIfWon() && curRow == rows.length;
-  }
-
-  const onKeyPressed = (key) => {
-    if(gameState != 'playing')
-    {
-      return;
-    }
-
-    const updatedRows = copyArray(rows);
-
-    if(key == CLEAR){
-      const prevCol = curCol -1; //check if the current col is not less than 0
-      if (prevCol >= 0)
+      if (key === ENTER) {
+        // Existing logic to change player turn and update rows...
+        checkGameState(); // Check if the current player has won after making a guess
+      }
+    
+  
+      if (key == ENTER)
       {
-        updatedRows[curRow][prevCol] = ""; //remove the word in the currnet row
-        setRows(updatedRows);
-        setCurCol(prevCol);
-
+        setPlayerTurn(playerTurn === 1 ? 2 : 1);
+        if(curCol == rows[0].length)
+        {
+          setCurRow(curRow+1);
+          setCurCol(0);
+        }
+        return
+      } 
+  
+      if(curCol < rows[0].length) { //Checking if the current collumn doesnt extend past the lenght of the word
+        updatedRows[curRow][curCol] = key;
+        setRows(updatedRows) // set it back in state 
+        setCurCol(curCol + 1); //incrementing the collumn after placing a letter in a box
       }
-      return;
+  
+    };
+  
+    const isCellActive =(row, col) => {
+      return row == curRow && col == curCol;
     }
+  
+  
+  
+    const getCellBGColor = (row, col) => {
+      const letter = rows[row][col];
+      if (row >= curRow) {
+        return COLORS.grey;
+      }
+      if (letter === letters[col]) {
+        return COLORS.primary; // Green for correct letter in correct position
+      }
+      if (letters.includes(letter)) {
+        return COLORS.secondary; // Yellow for correct letter in wrong position
+      }
+      return COLORS.darkgrey; // Grey for absent letter
+    };
+
 
 
   
-
-    if (key == ENTER)
-    {
-      if(curCol == rows[0].length)
-      {
-        setCurRow(curRow+1);
-        setCurCol(0);
-      }
-      return
-    } 
-
-    if(curCol < rows[0].length) { //Checking if the current collumn doesnt extend past the lenght of the word
-      updatedRows[curRow][curCol] = key;
-      setRows(updatedRows) // set it back in state 
-      setCurCol(curCol + 1); //incrementing the collumn after placing a letter in a box
+    const getAllLettersWithColor = (color) => {
+      return rows.flatMap((row, i) =>
+        row.filter((cell, j) => getCellBGColor(i,j) == color) 
+      );
     }
+  
+    const greenCaps = getAllLettersWithColor(COLORS.primary)
+    const yellowCaps = getAllLettersWithColor(COLORS.secondary)
+    const greyCaps = getAllLettersWithColor(COLORS.darkgrey)
+   //for each of the keyboards caps on the virtual keyboard
 
-  };
-
-  const isCellActive =(row, col) => {
-    return row == curRow && col == curCol;
-  }
-
-
-
-  const getCellBGColor= (row, col) =>
-  {
-    const letter = rows[row][col];
-    if (row >= curRow) {
-      return COLORS.grey
-    }
-    if(letter  == letters[col])
-    {
-      return COLORS.primary; // checking if the letter is in the correct collumn change it to green
-    }
-    if (letters.includes(letter))
-    {
-      return COLORS.secondary; //if the letter is included in the word change it to yellow
-    }
-    return COLORS.darkgrey;
-  }
-
-  const getAllLettersWithColor = (color) => {
-    return rows.flatMap((row, i) =>
-      row.filter((cell, j) => getCellBGColor(i,j) == color) 
+   if (isLoading && !dailyWord) {
+    return (
+        <View style={styles.centeredContainer}>
+            <ActivityIndicator size="large" color={COLORS.primary} />
+            <Text style={styles.loadingText}>Generating Word...</Text>
+        </View>
     );
   }
-
-  const greenCaps = getAllLettersWithColor(COLORS.primary)
-  const yellowCaps = getAllLettersWithColor(COLORS.secondary)
-  const greyCaps = getAllLettersWithColor(COLORS.darkgrey)
- //for each of the keyboards caps on the virtual keyboard
   
-
- if (isLoading && !dailyWord) {
-  return (
-      <View style={styles.centeredContainer}>
-          <ActivityIndicator size="large" color={COLORS.primary} />
-          <Text style={styles.loadingText}>Generating Word...</Text>
+  // If the game is not loading but no word has been set, display an error message
+  if (!isLoading && !dailyWord) {
+    return (
+      <View style={styles.container1}>
+              <TouchableOpacity 
+              onPress={() => navigation.navigate("Home")}
+          >
+              <Text style={{fontWeight:'800', fontSize: 17, marginTop: 30, paddingHorizontal: 20}}>Home</Text>
+          </TouchableOpacity>
+        <View style={styles.centeredContainer}>
+        <Image style={{height: 60, width:60,marginLeft: 4, marginBottom:20}} source={require('../assets/warning.png')}/>
+            <Text style={styles.errorText}>Cannot generate a word.</Text>
+            <Text style={styles.errorText}>Please try again later.</Text>
+        </View>
       </View>
-  );
-}
+    );
+  }
+    
+  
+    if(!loaded) {
+      return (<ActivityIndicator/>)
+    }
 
-// If the game is not loading but no word has been set, display an error message
-if (!isLoading && !dailyWord) {
-  return (
-    <View style={styles.container1}>
-            <TouchableOpacity 
-            onPress={() => navigation.navigate("Home")}
-        >
-            <Text style={{fontWeight:'800', fontSize: 17, marginTop: 30, paddingHorizontal: 20}}>Home</Text>
+          // Ensure words and rows are loaded
+  if (dailyWord.length === 0 || rows.length === 0) {
+    return <ActivityIndicator />;
+  }
+
+  
+  
+    if (gameState != 'playing') {
+      return (<EndScreen won={gameState == 'won'} rows={rows} getCellBGColor={getCellBGColor} navigation={navigation}/>)
+    }
+
+
+
+
+
+
+
+
+
+    
+  
+  
+  
+    return (
+      <LinearGradient style={{flex: 1}} colors={['#EAEAEA', '#B7F1B5']}>
+      <SafeAreaView style={styles.container}>
+            <Text style={styles.title}>WORDLE Coop</Text>
+
+        <View style={{flexDirection:'row'}}>
+          <Text style={styles.currentPlayerText}>
+              Player {playerTurn}'s Turn
+            </Text>
+            <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("Home")}>
+          <Text style={{fontSize:20, fontWeight:'bold'}}>    Go Home</Text>
         </TouchableOpacity>
-      <View style={styles.centeredContainer}>
-      <Image style={{height: 60, width:60,marginLeft: 4, marginBottom:20}} source={require('../assets/warning.png')}/>
-          <Text style={styles.errorText}>Cannot generate a word.</Text>
-          <Text style={styles.errorText}>Please try again later.</Text>
-      </View>
-    </View>
-  );
+        </View>
+  
+        <View style={[styles.map]}>
+          {rows.map((row, i) =>(
+            <View key={'row-${i}'} style={styles.row}>
+              {row.map((letter, j) => (
+                <View key ={'cell-${i}-${j}'} style={[styles.cell, 
+                {borderColor: isCellActive(i,j) ? COLORS.white : COLORS.darkgrey,
+                backgroundColor: getCellBGColor(i, j),
+                 }]}>
+                  <Text style={styles.cellText}>{letter.toUpperCase()}</Text>
+                </View>
+              ))}
+  
+            </View>
+          ))}
+        </View>
+        
+        <Keyboard
+        onKeyPressed={onKeyPressed}
+        greenCaps={greenCaps}
+        yellowCaps={yellowCaps}
+        greyCaps={greyCaps}
+        />
+        
+      </SafeAreaView>
+      </LinearGradient>
+    )
 }
 
-  if (gameState != 'playing') {
-    return (<EndScreen won={gameState == 'won'} rows={rows} getCellBGColor={getCellBGColor} navigation={navigation}/>)
-  }
-
-  if (isLoading) {
-    return <ActivityIndicator size="large" color={COLORS.primary} style={{alignItems:'center', flex:1, justifyContent:'center'}} />;
-  }
-
-
-
-  return (
-    <LinearGradient style={{flex: 1}} colors={['#EAEAEA', '#B7F1B5']}>
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>WORDLE</Text>
-      <View style={[styles.map]}>
-        {rows.map((row, i) =>(
-          <View key={'row-${i}'} style={styles.row}>
-            {row.map((letter, j) => (
-              <View key ={'cell-${i}-${j}'} style={[styles.cell, 
-              {borderColor: isCellActive(i,j) ? COLORS.white : COLORS.darkgrey,
-              backgroundColor: getCellBGColor(i, j), marginBottom:100
-               }]}>
-                <Text style={styles.cellText}>{letter.toUpperCase()}</Text>
-              </View>
-            ))}
-
-          </View>
-        ))}
-      </View>
-      
-      <Keyboard
-      onKeyPressed={onKeyPressed}
-      greenCaps={greenCaps}
-      yellowCaps={yellowCaps}
-      greyCaps={greyCaps}
-      />
-      
-    </SafeAreaView>
-    </LinearGradient>
-  )
-}
-
-export default MultiPlayerWordle
+export default WordleCoop2
 
 const styles = StyleSheet.create({
     container: {
@@ -474,6 +500,16 @@ const styles = StyleSheet.create({
       fontSize: 18,
       fontWeight: 'bold',
     },
+    currentPlayerText:{
+      fontSize:20,
+      fontWeight:'500'
+    },
+    inputDetailsLink: {
+      fontSize: 14,
+      paddingHorizontal: 7,
+      color: COLORS.third,
+      textDecorationLine: 'underline',
+    },
     centeredContainer: {
       flex: 1,
       justifyContent: 'center',
@@ -491,4 +527,5 @@ const styles = StyleSheet.create({
       textAlign:'center',
       fontWeight:'700',
   },
+
 })
