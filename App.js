@@ -61,6 +61,7 @@ import WordleLeaderboards from './screens/WordleLeaderboards';
 import ReversedWordle from './screens/ReversedWordle';
 import MultiPlayerWordle from './screens/MultiPlayerWordle';
 import WordleMultiplayer from './screens/WordleMultiplayer';
+import MultiplayerEndscreen from './screens/MultiplayerEndscreen';
 
 
 
@@ -99,6 +100,7 @@ function HomeStackScreen() {
       <HomeStack.Screen name="ReversedWordle" component={ReversedWordle} />
       <HomeStack.Screen name="MultiPlayerWordle" component={MultiPlayerWordle} />
       <HomeStack.Screen name="WordleMultiplayer" component={WordleMultiplayer} />
+      <HomeStack.Screen name="MultiplayerEndscreen" component={MultiplayerEndscreen} />
 
 
 
