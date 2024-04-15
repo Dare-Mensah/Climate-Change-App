@@ -27,7 +27,7 @@ const WordleMultiplayer = () => {
     const [message, setMessage] = useState('');
     const [username, setUsername] = useState('');
     const [connectedUsers, setConnectedUsers] = useState([]); // State to store connected users
-    const [timer, setTimer] = useState(10); // Timer set for 3 minutes
+    const [timer, setTimer] = useState(180); // Timer set for 3 minutes
     const [gameResult, setGameResult] = useState(null);
     const [gameEnded, setGameEnded] = useState(false);
 
@@ -157,7 +157,7 @@ const fetchDailyWord = async () => {
         // Attempt to fetch the word from the server first
         let response = await fetch('http://192.168.1.38:3000/climate-news');
         let data = await response.json();
-        let fiveLetterWords = data.top_keywords.filter(word => word.length === 5);
+        let fiveLetterWords = data.top_keywords.filter(word => word.length >= 5);
         if (fiveLetterWords.length > 0) {
             const randomIndex = Math.floor(Math.random() * fiveLetterWords.length);
             return fiveLetterWords[randomIndex];
@@ -189,20 +189,20 @@ const fetchDailyWord = async () => {
     const renderLoadingContent = () => {
         switch (gameState) {
             case 'waiting_for_players':
-                return <Text>Waiting for another player to join...</Text>;
+                return <Text style={styles.loadingText}>Waiting for another player to join...</Text>;
             case 'ready':
-                return <Text>Getting everything ready...</Text>;
+                return <Text style={styles.loadingText}>Getting everything ready...</Text>;
             case 'generating_word':
-                return <Text>Generating the word...</Text>;
+                return <Text style={styles.loadingText}>Generating the word...</Text>;
             default:
-                return <Text>Loading...</Text>;
+                return <Text style={styles.loadingText}>Loading...</Text>;
         }
     };
 
     if (isLoading) {
         return (
             <View style={styles.container}>
-                <ActivityIndicator size="large" color="#0000ff" />
+                <ActivityIndicator size="large" color={COLORS.primary} />
                 {renderLoadingContent()}
             </View>
         );
@@ -325,5 +325,11 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         fontWeight:'300',
         textAlign:'center',
+    },
+    loadingText: {
+        marginTop: 23,
+        fontSize: 18,
+        color: COLORS.darkgrey,
+        fontWeight:'700',
     },
 })
