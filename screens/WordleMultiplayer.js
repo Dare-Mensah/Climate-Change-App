@@ -87,8 +87,30 @@ const WordleMultiplayer = () => {
         } else if (data.state === 'ready') {
             setDailyWord(data.word);
             setIsLoading(false);
+            // Start the timer here when the game state is 'ready'
+            const timerInterval = setInterval(() => {
+                setTimer(prevTimer => {
+                    if (prevTimer <= 1) {
+                        clearInterval(timerInterval);
+                        newSocket.emit('timer_finished');
+                        return 0;
+                    }
+                    return prevTimer - 1;
+                });
+            }, 1000);
         }
     });
+
+
+    newSocket.on('game_state', (data) => {
+        console.log('Game State:', data);
+        if (data.state === 'ended') {
+            setGameResult(data.message);
+            setGameEnded(true);
+            setIsLoading(false);
+        }
+    });
+    
 
     newSocket.on('guess_response', (data) => {
         if (data.correct) {
@@ -103,40 +125,17 @@ const WordleMultiplayer = () => {
         setIsLoading(false);
     });
 
-    newSocket.on('game_state', (data) => {
-        console.log('Game State:', data);
-        if (data.state === 'ended') {
-            setGameResult(data.message);
-            setGameEnded(true);
-            setIsLoading(false);
-        }
-    });
-
     newSocket.on('time_up', () => {
         setGameResult("Time's up! You did not guess the word in time.");
         setGameEnded(true);
         setIsLoading(false);
     });
 
-
-    const timerInterval = setInterval(() => {
-        setTimer(prevTimer => {
-            if (prevTimer <= 1) {
-                clearInterval(timerInterval);
-                newSocket.emit('timer_finished');
-                return 0;
-            }
-            return prevTimer - 1;
-        });
-    }, 1000);
-
     return () => {
         newSocket.close();
-        clearInterval(timerInterval);
     };
 
 }, []);
-
 
 
 const handleGuessSubmit = () => {

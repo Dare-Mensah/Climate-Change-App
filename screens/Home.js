@@ -15,7 +15,9 @@ import axios from 'axios';
 import { Linking } from 'react-native';
 import * as Notifications from 'expo-notifications';
 
-const {width} = Dimensions.get('screen')
+const { width, height } = Dimensions.get('window');
+const isTablet = width >= 768; // A simple way to determine if the device is a tablet
+
 
 const topicBackgroundImages = {
   Technology: require('../assets/TechImage3.jpg'),
@@ -559,22 +561,26 @@ const Home = ({route}) => {
           backgroundColor: '#FFFFFF',
           elevation: 4,
           borderRadius: 25,
-          width:'95%',
-          height: 150,
-          marginTop: 5,
-          marginLeft:20,}}>
+          width: width > 600 ? '150%' : '105%', // Smaller width for larger screens
+          margin: width > 600 ? 20 : 10,
+          padding: width > 600 ? 15 : 10,
+          alignItems: 'center',
+          marginBottom: width > 600 ? 0 : 20, // Add bottom margin for smaller screens
+          height: width > 600 ? 255: 170,
+          
+        }}>
 
           <Text 
           style={{
-          paddingHorizontal: 10,
-          marginTop: 10, 
-          fontWeight: 400}}>
+            fontSize: width > 600 ? 20 : 15,
+            fontWeight: '400',
+            textAlign: 'center',}}>
          Electricity Use:</Text>
 
           <Text 
           style={{
           textAlign: 'center',
-          fontSize: 40,
+          fontSize: width > 600 ? 60 : 40,
           marginTop: 17,
           fontWeight: '600'
           }}>{carbonFootprintData.electricityUsage}</Text>
@@ -582,7 +588,7 @@ const Home = ({route}) => {
           <Text 
           style={{
           textAlign: 'center',
-          fontSize: 18,
+          fontSize: width > 600 ? 32 : 20,
           marginTop: 15,
           fontWeight: '200'
           }}>kWh</Text>
@@ -599,22 +605,24 @@ const Home = ({route}) => {
           backgroundColor: '#FFFFFF',
           elevation: 4,
           borderRadius: 25,
-          width:'95%',
-          height: 150,
-          marginTop: 20,
-          marginLeft:20,}}>
+          width: width > 600 ? '150%' : '105%', // Smaller width for larger screens
+          margin: width > 600 ? 20 : 10,
+          padding: width > 600 ? 15 : 10,
+          height: width > 600 ? 255: 170,
+          alignItems: 'center',
+          marginBottom: width > 600 ? 0 : 20,}}>
 
           <Text 
           style={{
-          paddingHorizontal: 10,
-          marginTop: 10, 
-          fontWeight: 400}}>
+            fontSize: width > 600 ? 20 : 15,
+            fontWeight: '400',
+            textAlign: 'center',}}>
           Gas Usage:</Text>
 
           <Text 
           style={{
           textAlign: 'center',
-          fontSize: 40,
+          fontSize: width > 600 ? 60 : 40,
           marginTop: 17,
           fontWeight: '600'
           }}>{carbonFootprintData.gasUsage}</Text>
@@ -622,7 +630,7 @@ const Home = ({route}) => {
           <Text 
           style={{
           textAlign: 'center',
-          fontSize: 18,
+          fontSize: width > 600 ? 32 : 20,
           marginTop: 15,
           fontWeight: '200'
           }}>gallons</Text>
@@ -640,41 +648,46 @@ const Home = ({route}) => {
           backgroundColor: '#FFFFFF',
           elevation: 4,
           borderRadius: 25,
-          width:'72%',
-          height: 319,
-          marginTop: 5,
-          marginLeft:55,}}>
+          width: width > 600 ? '80%' : '55%', // Smaller width for larger screens
+          margin: width > 600 ? 100 : 10,
+          margin: height > 600 ? 50 : 90,
+          padding: width > 600 ? 15 :10,
+          marginBottom: width > 600 ? 0 : 20,
+          height: width > 600 ? 525 : 370,
+          paddingVertical: width > 600 ? 30 : 20,
+          marginTop: width > 600? 20 : 10,
+          marginLeft: width > 600 ? 170 : 54 }}>
 
           <Text 
           style={{
-          paddingHorizontal: 10,
-          marginTop: 10, 
-          fontWeight: 400}}>
+            fontSize: width > 600 ? 20 : 15,
+            fontWeight: '400',
+            textAlign: 'center',}}>
           Total CarbonFootprint:</Text>
 
           <Text 
           style={{
-          textAlign: 'center',
-          fontSize: 50,
-          marginTop: 37,
-          fontWeight: '600'
+            fontSize: width > 600 ? 75 : 50,
+            marginTop: width > 600 ? 90 : 50,
+            fontWeight: '600',
+            textAlign: 'center',
           }}>{carbonFootprintData.totalCarbonFootprint}</Text>
 
 
           <Text 
           style={{
-          textAlign: 'center',
-          fontSize: 24,
-          marginTop: 12,
-          fontWeight: '200'
+            fontSize: width > 600 ? 24 : 18,
+            fontWeight: '200',
+            textAlign: 'center',
+            marginBottom: height > 600 ? '35%' : '45%',
           }}>CO2e</Text>
 
           <Text 
           style={{
-          textAlign: 'center',
-          fontSize: 18,
-          marginTop: 37,
-          fontWeight: '200'
+            fontSize: width > 600 ? 30 : 15,
+            marginTop: width > 600 ? 50 : 50,
+            fontWeight: '200',
+            textAlign: 'center'
           }}>{carbonFootprintData.timestamp.toDate().toLocaleDateString()}</Text>
 
 
