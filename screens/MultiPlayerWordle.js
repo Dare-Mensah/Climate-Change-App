@@ -383,15 +383,6 @@ const WordleCoop2 = () => {
 
 
 
-
-
-
-
-
-
-    
-  
-  
   
     return (
       <LinearGradient style={{flex: 1}} colors={['#EAEAEA', '#B7F1B5']}>

@@ -102,7 +102,7 @@ const SignUp = () => {
         
                 <TouchableOpacity 
                     onPress={() => signUpUser(username, email, password)}
-                    style={[styles.box1,{marginTop:60,justifyContent:'center',alignItems:'center', backgroundColor:COLORS.third}] }
+                    style={[styles.button,{marginTop:60,justifyContent:'center',alignItems:'center', backgroundColor:COLORS.third}] }
                     >
                         <Text style={[styles.text1,{color:COLORS.white}]}>SignUp</Text>
                 </TouchableOpacity>
@@ -249,6 +249,18 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         fontWeight:'bold',
         fontSize: 20,
+        textAlign:'center',
       
+      },
+      button: {
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 20,
+        elevation: 2,
+        shadowColor: '#000000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.09,
+        shadowRadius: 10,
+        textAlign: 'center',
       },
 })

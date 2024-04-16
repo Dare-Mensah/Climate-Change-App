@@ -390,7 +390,7 @@ const CarbonFootPrintCalc = ({ navigation }) => {
       
           <Pressable
             onPress={calculateCarbonFootprint}
-            style={[styles.box1, { marginTop: 50, backgroundColor: COLORS.third }]}
+            style={[styles.button, { marginTop: 50, backgroundColor: COLORS.third }]}
           >
           
             <Text style={[styles.text1, { color: COLORS.white }]}>Calculate</Text>
@@ -520,6 +520,7 @@ text1:{
   alignItems: 'center',
   fontWeight:'bold',
   fontSize: 20,
+  textAlign:'center'
 
 },
 
@@ -537,6 +538,18 @@ congratulatoryMessage: {
   fontWeight: 'bold',
   marginTop: 20,
   marginBottom: 20,
+},
+
+button: {
+  paddingVertical: 10,
+  paddingHorizontal: 20,
+  borderRadius: 20,
+  elevation: 2,
+  shadowColor: '#000000',
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.09,
+  shadowRadius: 10,
+  textAlign: 'center',
 },
 });
 

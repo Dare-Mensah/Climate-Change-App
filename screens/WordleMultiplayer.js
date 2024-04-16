@@ -30,6 +30,8 @@ const WordleMultiplayer = () => {
     const [timer, setTimer] = useState(180); // Timer set for 3 minutes
     const [gameResult, setGameResult] = useState(null);
     const [gameEnded, setGameEnded] = useState(false);
+    const [isOtherPlayerTyping, setIsOtherPlayerTyping] = useState(false);
+
 
     const navigation = useNavigation();
 
@@ -148,6 +150,46 @@ const handleGuessSubmit = () => {
     }
 };
 
+useEffect(() => {
+    if (socket) {
+        socket.on('player_typing', (data) => {
+            setIsOtherPlayerTyping(data.isTyping);
+        });
+
+        socket.on('game_state', (data) => {
+            console.log('Game State:', data);
+        });
+
+        socket.on('guess_response', (data) => {
+            if (data.correct) {
+                Alert.alert("Correct!", "Your guess was right!");
+            } else {
+                Alert.alert("Incorrect", "Try again!");
+            }
+        });
+
+        return () => {
+            socket.off('player_typing');
+            socket.off('game_state');
+            socket.off('guess_response');
+        };
+    }
+}, [socket]);
+
+const handleInputChange = (text) => {
+    setGuess(text);
+    // Emit typing event whenever the user types
+    socket.emit('typing', { isTyping: text.length > 0 });
+};
+
+// Include typing indication in the UI
+const renderTypingIndicator = () => {
+    if (isOtherPlayerTyping) {
+        return <Text style={styles.typingText}>Another player is typing...</Text>;
+    }
+    return null;
+};
+
 
 
 
@@ -195,7 +237,7 @@ const fetchDailyWord = async () => {
             case 'generating_word':
                 return <Text style={styles.loadingText}>Generating the word...</Text>;
             default:
-                return <Text style={styles.loadingText}>Loading...</Text>;
+                return <Text style={styles.loadingText}>Starting Game...</Text>;
         }
     };
 
@@ -229,14 +271,14 @@ const fetchDailyWord = async () => {
                                 {dailyWord.length > 1 ? `${dailyWord[0]}${'_'.repeat(dailyWord.length - 2)}${dailyWord[dailyWord.length - 1]}` : "Loading word..."}
                             </Text>
                         </View>
+                        {isOtherPlayerTyping && <Text>Another player is typing...</Text>}
                         <TextInput
-                            style={styles.input}
-                            onChangeText={setGuess}
-                            value={guess}
-                            maxLength={5}
-                            autoCapitalize="characters"
-                            onSubmitEditing={handleGuessSubmit}
-                            placeholder="Enter your guess"
+                        style={styles.input}
+                        onChangeText={handleInputChange}
+                        value={guess}
+                        maxLength={5}
+                        autoCapitalize="characters"
+                        placeholder="Enter your guess"
                         />
                         <TouchableOpacity style={[styles.button, {backgroundColor: COLORS.third, marginLeft: 10}]} onPress={handleGuessSubmit}>
                             <Text style={styles.buttonText}>Submit Guess</Text>

@@ -62,6 +62,16 @@ def on_join_game(data):
     
     join_room(session_id)
     emit('game_state', {'state': sessions[session_id]['game_state']}, room=session_id)
+    
+    
+@socketio.on('typing')
+def handle_typing(data):
+    is_typing = data['isTyping']
+    user_id = request.sid
+    session_id = find_player_session(user_id)
+    if session_id:
+        emit('player_typing', {'isTyping': is_typing}, room=session_id, include_self=False)
+
 
 @socketio.on('word_generated')
 def on_word_generated(data):

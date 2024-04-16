@@ -79,7 +79,7 @@ const SignIn = () => {
 
             <TouchableOpacity 
             onPress={() => loginUser(email, password)}
-            style={[styles.box1,{marginTop:50, backgroundColor:COLORS.third}] }
+            style={[styles.button,{marginTop:50, backgroundColor:COLORS.third}] }
             >
                 <Text style={[styles.text1,{color:COLORS.white}]}>Login</Text>
             </TouchableOpacity>
@@ -104,6 +104,8 @@ const SignIn = () => {
                 </TouchableOpacity>
             </View>
 
+            {/** 
+
             <Text style={{fontWeight:'300', textAlign:'center', fontSize: 17}}>Or</Text>
 
 
@@ -115,6 +117,7 @@ const SignIn = () => {
                     <Text style={{fontWeight:'500', textAlign:'center', fontSize: 17}}>Guest Login</Text>
                 </TouchableOpacity>
             </View>
+            */}
 
 
         </Animatable.View>
@@ -249,6 +252,18 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         fontWeight:'bold',
         fontSize: 20,
+        textAlign:'center',
       
+      },
+      button: {
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 20,
+        elevation: 2,
+        shadowColor: '#000000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.09,
+        shadowRadius: 10,
+        textAlign: 'center',
       },
 })

@@ -99,6 +99,8 @@ const Settings = ({route}) => {
                 </View>
             </TouchableRipple>
 
+
+            {/** 
             <View style={styles.menuItem2}>
                 <Image source={require('../assets/notification.png')} style={{height: 30, width: 30}}/>
                 <Text style={styles.menuItemText}>Notifications</Text>
@@ -111,6 +113,7 @@ const Settings = ({route}) => {
                         value={isEnabled}
                     />
             </View>
+            */}
 
             <TouchableRipple onPress={() => {
                 Alert.alert(
