@@ -1,7 +1,7 @@
 import { Image, StyleSheet, Text, TouchableOpacity, View, Animated } from 'react-native'
 import React, {useRef, useEffect} from 'react'
 import Svg, {G, Circle} from 'react-native-svg';
-import data2 from '../data/data2';
+import data2 from '../data/data1';
 
 
 const NextButton = ({percentage, scrollTo}) => {

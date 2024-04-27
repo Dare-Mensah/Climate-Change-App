@@ -1,7 +1,6 @@
 import { Pressable, ScrollView, StyleSheet, Text, View, Image, Dimensions, SafeAreaView, StatusBar, FlatList, ImageBackground, TouchableOpacity,RefreshControl,backgroundImage, Alert } from 'react-native'
 import React, {useState, useEffect} from 'react'
 import COLORS from '../data/colors'
-import DATA from '../data/data1'
 import * as Animatable from 'react-native-animatable';
 import {firebase} from '../config'
 import Profile from './Settings';
@@ -155,7 +154,7 @@ const Home = ({route}) => {
   // Function to send a notification when the user's blog post is liked
   const sendLikeNotification = async (likeData) => {
     if (!notificationsEnabled) return;
-    const message = `Your blog post "${likeData.postTitle}" got a new like!`;
+    const message = `Your blog post got a new like!`;
   
     await Notifications.scheduleNotificationAsync({
       content: {

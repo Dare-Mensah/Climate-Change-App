@@ -1,4 +1,4 @@
-import { SafeAreaView, StyleSheet, Text, View, Image, Pressable, TextInput, TouchableOpacity, Alert } from 'react-native'
+import { SafeAreaView, StyleSheet, Text, View, Image, Pressable, TextInput, TouchableOpacity, Alert, ScrollView } from 'react-native'
 import React, {useState, useEffect, useRef} from 'react'
 import { Avatar, Title, Caption, TouchableRipple } from 'react-native-paper'
 import { useNavigation, useIsFocused } from '@react-navigation/native';
@@ -13,52 +13,7 @@ import Constants from 'expo-constants';
 import io  from 'socket.io-client';
 
 const Privacy = () => {
-    const [connectedUsers, setConnectedUsers] = useState([]);
-    const navigation = useNavigation();
-    const isFocused = useIsFocused();
-    const socket = useRef(null); // Initialize the socket reference
 
-    useEffect(() => {
-        if (isFocused) {
-            // Properly check if a socket connection already exists
-            if (!socket.current) {
-                socket.current = io('http://192.168.1.38:2000/');
-            }
-
-            const user = firebase.auth().currentUser;
-            if (user) {
-                const userId = user.uid;
-                firebase.firestore().collection('users')
-                    .doc(userId).get()
-                    .then((snapshot) => {
-                        if (snapshot.exists) {
-                            const userData = snapshot.data();
-                            // Use socket.current here
-                            socket.current.on('connect', () => {
-                                socket.current.emit('user_connected', { name: userData.username });
-                            });
-                            
-                            socket.current.on('update_users_list', data => {
-                                const uniqueUsers = new Set(data.users);
-                                setConnectedUsers([...uniqueUsers]);
-                            });
-                        } else {
-                            console.log('User does not exist');
-                        }
-                    }).catch(error => {
-                        console.error("Error fetching user data: ", error);
-                    });
-            }
-
-            return () => {
-                // Properly use socket.current for cleanup
-                if (socket.current) {
-                    socket.current.disconnect();
-                    socket.current = null;
-                }
-            };
-        }
-    }, [isFocused]); // Dependency array
 
 
   return (
@@ -70,10 +25,24 @@ const Privacy = () => {
         <Animatable.View 
         animation={"fadeInUpBig"}
         style={styles.footer}>
-            <Text>Connected Users:</Text>
-            {connectedUsers.map((user, index) => (
-                <Text key={index}>{user}</Text>
-            ))}
+        <ScrollView showsVerticalScrollIndicator={false}>
+
+        <Text style={styles.sectionTitle}>Privacy Notice</Text>
+        <Text style={styles.noticeText}>Climate Sense is comitted tonprotecting user data. This notice outlines the practices with the collection and use of your personal data. Uwsing Climate Sense you will agress to the collection and use of data in accordance with this policy.</Text>
+
+        <Text style={styles.sectionTitle}>Data Collection</Text>
+        <Text style={styles.noticeText}>When data is collected provided to us directly such as when you create an account. This information may include but is not limited to:</Text>
+        <Text style={styles.noticeTextOne}> - Username and Password</Text>
+        <Text style={styles.noticeTextOne}> - Email Address</Text>
+        <Text style={styles.noticeTextOne}> - Activity Logs/ Wordle Gameplay Data</Text>
+
+        <Text style={styles.sectionTitle}>Use of Information</Text>
+        <Text style={styles.noticeText}>Data we collect is used to:</Text>
+        <Text style={styles.noticeTextOne}> - Facilitating social features to allow users to interact and share content</Text>
+        <Text style={styles.noticeTextOne}> - Analysing app usage and user behaviour to further enhance the application.</Text>
+
+
+        </ScrollView>
         </Animatable.View>
     </View>
     </LinearGradient>
@@ -178,6 +147,7 @@ const styles = StyleSheet.create({
         borderTopRightRadius: 30,
         paddingHorizontal: 20,
         paddingVertical: 30,
+        
     },
     text_footer:{
         color: '#05375a',
@@ -207,4 +177,20 @@ const styles = StyleSheet.create({
         position:'absolute',
         bottom:30
     },
+    noticeText:{
+        paddingHorizontal:10,
+        fontSize: 20,
+        fontWeight:'300'
+    },
+    noticeTextOne:{
+        fontSize: 20,
+        paddingHorizontal: 20,
+        fontWeight:'300'
+    },
+    sectionTitle:{
+        marginHorizontal: 20,
+        marginVertical:25,
+        fontSize: 20,
+        fontWeight:'600'
+      },
 })

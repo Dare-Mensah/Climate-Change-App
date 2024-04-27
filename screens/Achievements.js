@@ -3,6 +3,8 @@ import React, {useState, useEffect} from 'react'
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Animatable from 'react-native-animatable';
 import { firebase } from '../config';
+import { RefreshControl } from 'react-native';
+
 
 const Achievements = () => {
 
@@ -23,13 +25,16 @@ const Achievements = () => {
   const [hasPlayedOver10WordleGames, setHasPlayedOver10WordleGames] = useState(false);
   const [showWordleGameMasterDescription, setShowWordleGameMasterDescription] = useState(false);
 
+  const [refreshing, setRefreshing] = useState(false);
+
+
 
 
 
   useEffect(() => {
     const userId = firebase.auth().currentUser.uid;
     const userRef = firebase.firestore().collection('users').doc(userId);
-    
+  
     userRef.get().then((doc) => {
       if (doc.exists) {
         setHasPostedBlog(doc.data().hasPostedBlog);
@@ -38,10 +43,38 @@ const Achievements = () => {
         setHasLikedPost(doc.data().hasLikedPost);
         setHasAchievedWordMaster(doc.data().hasAchievedWordMaster);
         setHasPlayedOver10WordleGames(doc.data().hasPlayedOver10WordleGames);
-    
       }
+    }).catch((error) => {
+      console.error("Failed to refresh data:", error);
     });
   }, []);
+
+
+  
+  
+
+
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    const userId = firebase.auth().currentUser.uid;
+    const userRef = firebase.firestore().collection('users').doc(userId);
+  
+    userRef.get().then((doc) => {
+      if (doc.exists) {
+        setHasPostedBlog(doc.data().hasPostedBlog);
+        setHasCalculatedCarbonFootprint(doc.data().hasCalculatedCarbonFootprint);
+        setHasPostedComment(doc.data().hasPostedComment);
+        setHasLikedPost(doc.data().hasLikedPost);
+        setHasAchievedWordMaster(doc.data().hasAchievedWordMaster);
+        setHasPlayedOver10WordleGames(doc.data().hasPlayedOver10WordleGames);
+      }
+      setRefreshing(false);  // Reset the refreshing state
+    }).catch((error) => {
+      console.error("Failed to refresh data:", error);
+      setRefreshing(false);  // Reset the refreshing state if there's an error
+    });
+  }, []);
+  
 
   return (
     <LinearGradient style={{ flex: 1, padding: 16 }} colors={['#EAEAEA', '#B7F1B5']}>
@@ -51,36 +84,13 @@ const Achievements = () => {
         Achievements
       </Animatable.Text>
 
-      <ScrollView showsVerticalScrollIndicator={false}>
-
-
-      <View style={styles.achievementBox}>
-      <TouchableOpacity 
-        onPress={() => setShowBlogDescription(!showBlogDescription)}
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
       >
-        <View style={styles.achievementContainer}>
-          <Image
-            source={hasPostedBlog ? require('../assets/padlockunlock.png') : require('../assets/padlock.png')}
-            style={styles.achievementImage}
-          />
-          <Text style={styles.achievementText}>
-            {hasPostedBlog ? "  Word Weaver Unlocked!  " : "  Word Weaver Locked  "}
-          </Text>
-          <Image
-            source={showBlogDescription ? require('../assets/arrowUp.png') : require('../assets/arrowDown.png')}
-            style={styles.arrowImage}
-          />
-        </View>
-        {showBlogDescription && (
-          <Text style={styles.descriptionText}>
-            Unlock your inner storyteller by sharing your first blog post and earn the 'Word Weaver' badge!
-          </Text>
-        )}
-      </TouchableOpacity>
-      </View>
-
-
-
+      
       <View style={styles.achievementBox}>
       <TouchableOpacity 
         onPress={() => setShowCarbonFootprintDescription(!showCarbonFootprintDescription)}
@@ -153,31 +163,6 @@ const Achievements = () => {
           )}
         </TouchableOpacity>
       </View>
-
-
-      <View style={styles.achievementBox}>
-        <TouchableOpacity onPress={() => setShowWordMasterDescription(!showWordMasterDescription)}>
-          <View style={styles.achievementContainer}>
-            <Image
-              source={hasAchievedWordMaster ? require('../assets/padlockunlock.png') : require('../assets/padlock.png')}
-              style={styles.achievementImage}
-            />
-          <Text style={styles.achievementText}>
-            {hasAchievedWordMaster ? "  Word Master Unlocked!  " : "  Word Master Locked  "}
-          </Text>
-          <Image
-            source={showWordMasterDescription ? require('../assets/arrowUp.png') : require('../assets/arrowDown.png')}
-            style={styles.arrowImage}
-          />
-        </View>
-        {showWordMasterDescription && (
-        <Text style={styles.descriptionText}>
-          Congrats on guessing more than three words correctly in endless mode! You've unlocked the 'Word Master' badge!
-        </Text>
-        )}
-      </TouchableOpacity>
-        </View>
-
 
       </ScrollView>
     </LinearGradient>

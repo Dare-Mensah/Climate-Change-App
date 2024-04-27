@@ -76,51 +76,66 @@ const BlogDetails = ({ route, navigation }) => {
 
   const handleLikePress = async () => {
     if (!currentUser) {
-      // Show an alert or handle the case when there is no user logged in.
       Alert.alert('Not Logged In', 'You must be logged in to like a blog.');
       return;
     }
-    if (hasLiked) {
-      // If the user has already liked the blog, show an alert.
-      Alert.alert('Already Liked', 'You have already liked this blog.');
-      return;
-    }
-    try {
-      await firebase.firestore().collection('posts').doc(postId).update({
-        likes: firebase.firestore.FieldValue.increment(1),
-      });
-      await firebase.firestore().collection('likes').doc(`${currentUser.uid}_${postId}`).set({
-        userId: currentUser.uid,
-        postId,
-      });
-      setLikes(likes + 1);
-      setHasLiked(true);
-    } catch (error) {
+  
+    const likeRef = firebase.firestore().collection('likes').doc(`${currentUser.uid}_${postId}`);
+    const userRef = firebase.firestore().collection('users').doc(currentUser.uid);
+  
+    firebase.firestore().runTransaction(async (transaction) => {
+      const likeDoc = await transaction.get(likeRef);
+      if (!likeDoc.exists) {
+        transaction.set(likeRef, {
+          userId: currentUser.uid,
+          postId,
+        });
+        transaction.update(userRef, {
+          hasLikedPost: true
+        });
+        setHasLiked(true);
+        setLikes(likes + 1); // Assuming likes is a state tracking like count
+      } else {
+        Alert.alert('Already Liked', 'You have already liked this blog.');
+      }
+    }).catch((error) => {
       console.error('Error updating likes:', error);
-    }
+    });
   };
   
 
   const handleAddComment = async () => {
-    if (!currentUser) return;
-    // Check if newComment is empty or contains only whitespace
+    if (!currentUser) {
+      Alert.alert('Not Logged In', 'You must be logged in to comment.');
+      return;
+    }
     if (!newComment.trim()) {
       Alert.alert('Invalid Comment', 'Please enter a comment.');
       return;
     }
+  
     try {
-      await firebase.firestore().collection('comments').add({
-        userId: currentUser.uid,
-        postId,
-        content: newComment,
-        timestamp: new Date(),
+      const newCommentRef = firebase.firestore().collection('comments').doc();
+      const userRef = firebase.firestore().collection('users').doc(currentUser.uid);
+  
+      firebase.firestore().runTransaction(async (transaction) => {
+        transaction.set(newCommentRef, {
+          userId: currentUser.uid,
+          postId,
+          content: newComment,
+          timestamp: new Date(),
+        });
+        transaction.update(userRef, {
+          hasPostedComment: true
+        });
+        setNewComment('');
+        fetchComments();
       });
-      setNewComment('');
-      fetchComments();
     } catch (error) {
       console.error('Error adding comment:', error);
     }
   };
+  
 
   const handleDeleteComment = async (commentId) => {
     try {

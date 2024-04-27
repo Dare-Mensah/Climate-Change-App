@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View, FlatList, useWindowDimensions, Animated, TouchableOpacity } from 'react-native'
 import React, {useState, useRef} from 'react'
-import data2 from '../data/data2'
+import data2 from '../data/data1'
 import OnboardingItem from './OnboardingItem'
 import COLORS from '../data/colors'
 import Pageinator from './Pageinator'

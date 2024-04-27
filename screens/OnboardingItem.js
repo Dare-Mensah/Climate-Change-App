@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View, useWindowDimensions, Image, Pressable } from 'react-native'
 import React from 'react'
-import data2 from '../data/data2'
+import data2 from '../data/data1'
 import COLORS from '../data/colors'
 
 

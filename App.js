@@ -16,48 +16,26 @@ import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import SignIn from './screens/SignIn';
 import SignUp from './screens/SignUp';
 import Home from './screens/Home';
-import StartUp from './screens/StartUp';
 import News from './screens/News';
-import Tips from './screens/Tips';
 import ForgotPassword from './screens/ForgotPassword';
 import Settings from './screens/Settings';
 import EditProfile from './screens/EditProfile';
 import Onboarding from './screens/Onboarding';
-import SignUpComplete from './screens/SignUpComplete';
-import GuestHome from './screens/GuestHome';
 import { ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Wordle from './screens/Wordle';
 import EndScreen from './screens/EndScreen';
-import GuestProfile from './screens/GuestProfile';
 import BlogScreen from './screens/BlogScreen';
 import BlogDetails from './screens/BlogDetails';
 import EditBlog from './screens/EditBlog';
-import EditComment from './screens/EditComment';
 import CarbonFootPrintCalc from './screens/CarbonFootPrintCalc';
 import EndScreenCoop from './screens/EndScreenCoop';
-import EndlessWordle from './screens/EndlessWordle';
 import EndlessEndScreen from './screens/EndlessEndScreen';
 import WordleCoop2 from './screens/WordleCoop2';
 import Achievements from './screens/Achievements';
-import CoopWordleInfo from './screens/CoopWordleInfo';
-import EndlessWordleInfo from './screens/EndlessWordleInfo';
-import GuestWordle from './screens/GuestWordle';
-import GuestWordleCoop from './screens/GuestWordleCoop';
-import GuestCoopInfo from './screens/GuestCoopInfo';
-import GuestEndlessWordle from './screens/GuestEndlessWordle';
-import GuestEndlessEndScreen from './screens/GuestEndlessEndScreen';
-import GuestEndlessInfo from './screens/GuestEndlessInfo';
-import SelectDifficultyEndlessWordle from './screens/SelectDifficultyEndlessWordle';
-import EndlessWordleMedium from './screens/EndlessWordleMedium';
-import EndlessWordleHard from './screens/EndlessWordleHard';
-import About from './screens/About';
+
+import EndlessWordle from './screens/EndlessWordle';
 import Privacy from './screens/Privacy';
-import Accessibility from './screens/Accessibility';
-import GuestSelectDiffWordle from './screens/GuestSelectDiffWordle';
-import GuestEndlessWordleMedium from './screens/GuestEndlessWordleMedium';
-import GuestEndlessWordleHard from './screens/GuestEndlessWordleHard';
-import WordleLeaderboards from './screens/WordleLeaderboards';
 import ReversedWordle from './screens/ReversedWordle';
 import MultiPlayerWordle from './screens/MultiPlayerWordle';
 import WordleMultiplayer from './screens/WordleMultiplayer';
@@ -77,42 +55,27 @@ function HomeStackScreen() {
     <HomeStack.Navigator screenOptions={{ headerShown: false }}>
       <HomeStack.Screen name="Home" component={Home} />
       <HomeStack.Screen name="CarbonFootPrintCalc" component={CarbonFootPrintCalc} />
-      <HomeStack.Screen name="Tips" component={Tips} />
       <HomeStack.Screen name="Wordle" component={Wordle} />
       <HomeStack.Screen name="EndScreen" component={EndScreen} />
       <HomeStack.Screen name="BlogScreen" component={BlogScreen} />
       <HomeStack.Screen name="BlogDetails" component={BlogDetails} />
       <HomeStack.Screen name="EditBlog" component={EditBlog} />
       <HomeStack.Screen name="EndScreenCoop" component={EndScreenCoop} />
-      <HomeStack.Screen name="EndlessWordle" component={EndlessWordle} />
       <HomeStack.Screen name="EndlessEndScreen" component={EndlessEndScreen} />
+      <HomeStack.Screen name="EndlessWordle" component={EndlessWordle} />
       <HomeStack.Screen name="WordleCoop2" component={WordleCoop2} />
-      <HomeStack.Screen name="GuestEndlessInfo" component={GuestEndlessInfo} />
-      <HomeStack.Screen name="SelectDifficultyEndlessWordle" component={SelectDifficultyEndlessWordle} />
-      <HomeStack.Screen name="EndlessWordleMedium" component={EndlessWordleMedium} />
-      <HomeStack.Screen name="EndlessWordleHard" component={EndlessWordleHard} />
-      <HomeStack.Screen name="About" component={About} />
       <HomeStack.Screen name="Privacy" component={Privacy} />
-      <HomeStack.Screen name="WordleLeaderboards" component={WordleLeaderboards} />
-      <HomeStack.Screen name="CoopWordleInfo" component={CoopWordleInfo} />
-      <HomeStack.Screen name="EndlessWordleInfo" component={EndlessWordleInfo} />
       <HomeStack.Screen name="EditProfile" component={EditProfile} />
       <HomeStack.Screen name="ReversedWordle" component={ReversedWordle} />
       <HomeStack.Screen name="MultiPlayerWordle" component={MultiPlayerWordle} />
       <HomeStack.Screen name="WordleMultiplayer" component={WordleMultiplayer} />
       <HomeStack.Screen name="MultiplayerEndscreen" component={MultiplayerEndscreen} />
 
-
-
-      
-
-
-      {/* Add other screens here as needed */}
     </HomeStack.Navigator>
   );
 }
 
-// Define a default style for your tab bar
+// Default style for tab bar
 const defaultTabBarStyle = {
   backgroundColor: '#fff',
   height: 60,
@@ -143,7 +106,7 @@ function HomeTabs() {
         headerShown: false,
         tabBarIcon: ({ focused, color, size }) => {
           let iconName;
-
+          {/** The different options within the tab bar */}
           if (route.name === 'Home') {
             iconName = focused ? 'ios-home' : 'ios-home-outline';
           } else if (route.name === 'Settings') {
@@ -167,7 +130,7 @@ function HomeTabs() {
           const routeName = getFocusedRouteNameFromRoute(route) ?? '';
 
           // List of screens where the tab bar will be hidden
-          const hideOnScreens = ['Wordle','Privacy','CoopWordleInfo','WordleCoop2'];
+          const hideOnScreens = ['Wordle','WordleCoop2'];
           if (hideOnScreens.indexOf(routeName) > -1) return false;
 
           return true;
@@ -179,7 +142,7 @@ function HomeTabs() {
       <Tab.Screen name="News" component={News} />
       <Tab.Screen name="BlogScreen" component={BlogScreen} />
       <Tab.Screen name="Achievements" component={Achievements} />
-      {/* Add more tabs as needed */}
+      
     </Tab.Navigator>
   );
 }
@@ -192,16 +155,6 @@ function AuthStack() {
       <Stack.Screen name="SignIn" component={SignIn} />
       <Stack.Screen name="SignUp" component={SignUp} />
       <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
-      <Stack.Screen name="GuestSelectDiffWordle" component={GuestSelectDiffWordle} />
-      <Stack.Screen name="GuestEndlessWordleMedium" component={GuestEndlessWordleMedium} />
-      <Stack.Screen name="GuestEndlessWordleHard" component={GuestEndlessWordleHard} />
-      <Stack.Screen name="GuestWordle" component={GuestWordle} />
-      <Stack.Screen name="GuestWordleCoop" component={GuestWordleCoop} />
-      <Stack.Screen name="GuestEndlessWordle" component={GuestEndlessWordle} />
-      <Stack.Screen name="GuestEndlessEndScreen" component={GuestEndlessEndScreen} />
-      <Stack.Screen name="GuestCoopInfo" component={GuestCoopInfo} />
-      <Stack.Screen name="GuestHome" component={GuestHome} />
-      <Stack.Screen name="GuestProfile" component={GuestProfile} />
     </Stack.Navigator>
   );
 }

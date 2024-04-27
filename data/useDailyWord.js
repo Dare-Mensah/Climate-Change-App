@@ -21,7 +21,7 @@ const useDailyWord = () => {
       const wordForToday = fiveLetterWords[randomIndex];
       setDailyWord(wordForToday);
     } catch (error) {
-      console.error('Failed to fetch from server, loading from AsyncStorage', error);
+      console.error('Failed to fetch from server, loading from AsyncStorage', error); // error message if words could not be saved to async storage
 
       // If fetching from the Flask server fails, try to load the words from AsyncStorage
       const storedWords = await AsyncStorage.getItem('@FiveLetterWords');
@@ -33,7 +33,7 @@ const useDailyWord = () => {
         const wordForToday = fiveLetterWords[randomIndex];
         setDailyWord(wordForToday);
       } else {
-        console.error('No 5-letter words found in AsyncStorage');
+        console.error('No 5-letter words found in AsyncStorage'); // error message if no words are found
       }
     } finally {
       setIsLoading(false);

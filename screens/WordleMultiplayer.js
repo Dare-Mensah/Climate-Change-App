@@ -199,7 +199,7 @@ const fetchDailyWord = async () => {
         // Attempt to fetch the word from the server first
         let response = await fetch('http://192.168.1.38:3000/climate-news');
         let data = await response.json();
-        let fiveLetterWords = data.top_keywords.filter(word => word.length >= 5);
+        let fiveLetterWords = data.top_keywords.filter(word => word.length == 5);
         if (fiveLetterWords.length > 0) {
             const randomIndex = Math.floor(Math.random() * fiveLetterWords.length);
             return fiveLetterWords[randomIndex];

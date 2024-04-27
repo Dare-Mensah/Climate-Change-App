@@ -50,9 +50,9 @@ const dayKey = getDayKey();
 const Wordle = () => {
   useFocusEffect(
     React.useCallback(() => {
-      const hideTabBar = navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' } });
+      const hideTabBar = navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' } }); // hides the tab bar 
 
-      return () => navigation.getParent()?.setOptions({ tabBarStyle: { display: 'flex', height: 60, ...defaultTabBarStyle } });
+      return () => navigation.getParent()?.setOptions({ tabBarStyle: { display: 'flex', height: 60, ...defaultTabBarStyle } }); // when exiting game UI it enables tab bar
     }, [navigation])
   );
 
