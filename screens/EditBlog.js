@@ -13,7 +13,7 @@ const EditBlog = ({ route, navigation }) => {
   const [content, setContent] = useState('');
 
   useEffect(() => {
-    const fetchBlogDetails = async () => {
+    const fetchBlogDetails = async () => { // fetching blog data from firebase
       try {
         const postDoc = await firebase.firestore().collection('posts').doc(postId).get();
 
@@ -79,7 +79,7 @@ const EditBlog = ({ route, navigation }) => {
     }
   };
   
-
+  //Confirm deletion of blog
   const confirmDelete = () => {
     Alert.alert(
       'Confirm Deletion',

@@ -21,13 +21,13 @@ const Onboarding = () => {
 
     const data2Ref = useRef(null)
 
-    const viewableItemsChanged = useRef(({viewableItems}) => {
+    const viewableItemsChanged = useRef(({viewableItems}) => { //indexing through the vierwable items in onboarding item 
         setCurrentIndex(viewableItems[0].index);
     }).current
 
     const viewConfig =useRef({viewAreaCoveragePercentThreshold: 50}).current;
 
-    const scrollTo = () => {
+    const scrollTo = () => { // scrolling through each of the indexes till it gets to the last one
         if (currentIndex < data2.length-1) {
             data2Ref.current.scrollToIndex({index: currentIndex + 1});
         } else {

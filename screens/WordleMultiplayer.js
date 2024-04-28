@@ -27,7 +27,7 @@ const WordleMultiplayer = () => {
     const [message, setMessage] = useState('');
     const [username, setUsername] = useState('');
     const [connectedUsers, setConnectedUsers] = useState([]); // State to store connected users
-    const [timer, setTimer] = useState(180); // Timer set for 3 minutes
+    const [timer, setTimer] = useState(180); 
     const [gameResult, setGameResult] = useState(null);
     const [gameEnded, setGameEnded] = useState(false);
     const [isOtherPlayerTyping, setIsOtherPlayerTyping] = useState(false);
@@ -38,7 +38,7 @@ const WordleMultiplayer = () => {
 
     useFocusEffect(
     React.useCallback(() => {
-      const hideTabBar = navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' } });
+      const hideTabBar = navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' } }); //hiding tab bar during gameplay 
 
       return () => navigation.getParent()?.setOptions({ tabBarStyle: { display: 'flex', height: 60, ...defaultTabBarStyle } });
     }, [navigation])
@@ -67,10 +67,10 @@ const WordleMultiplayer = () => {
    
 
   useEffect(() => {
-    const newSocket = io('http://192.168.1.38:2000');
+    const newSocket = io('http://192.168.1.38:2000'); // server host url
     setSocket(newSocket);
 
-    newSocket.on('connect', () => {
+    newSocket.on('connect', () => {// new socket when a player joins a session
         console.log('Connected to server');
         newSocket.emit('join_game', { username: 'PlayerUsername' });
     });
@@ -78,7 +78,7 @@ const WordleMultiplayer = () => {
     newSocket.on('game_state', (data) => {
         console.log('Game State:', data.state);
         setGameState(data.state);
-        if (data.state === 'waiting_for_word') {
+        if (data.state === 'waiting_for_word') { //waiting for word to be generated 
             if (!data.word) {
                 fetchDailyWord().then(word => {
                     setDailyWord(word);
@@ -114,7 +114,7 @@ const WordleMultiplayer = () => {
     });
     
 
-    newSocket.on('guess_response', (data) => {
+    newSocket.on('guess_response', (data) => { //handles if player guesses correctly or not
         if (data.correct) {
             Alert.alert("Correct!", "Your guess was right!");
         } else {
@@ -122,12 +122,12 @@ const WordleMultiplayer = () => {
         }
     });
 
-    newSocket.on('player_dropped', (data) => {
+    newSocket.on('player_dropped', (data) => { //creates new socket letting server know a player has dropped 
         Alert.alert("Player Left", data.message);
         setIsLoading(false);
     });
 
-    newSocket.on('time_up', () => {
+    newSocket.on('time_up', () => { // creates a new socket if player run out of time, the gaem will end 
         setGameResult("Time's up! You did not guess the word in time.");
         setGameEnded(true);
         setIsLoading(false);
@@ -140,7 +140,7 @@ const WordleMultiplayer = () => {
 }, []);
 
 
-const handleGuessSubmit = () => {
+const handleGuessSubmit = () => { 
     if (guess.length === 5) {
         // Emit the guess to the server
         socket.emit('submit_guess', { guess });
@@ -152,7 +152,7 @@ const handleGuessSubmit = () => {
 
 useEffect(() => {
     if (socket) {
-        socket.on('player_typing', (data) => {
+        socket.on('player_typing', (data) => { //socket on letting the python server know player is typing
             setIsOtherPlayerTyping(data.isTyping);
         });
 
@@ -160,7 +160,7 @@ useEffect(() => {
             console.log('Game State:', data);
         });
 
-        socket.on('guess_response', (data) => {
+        socket.on('guess_response', (data) => { //shows alerts if user guesses corrent or not 
             if (data.correct) {
                 Alert.alert("Correct!", "Your guess was right!");
             } else {
@@ -220,7 +220,7 @@ const fetchDailyWord = async () => {
             }
         } catch (storageError) {
             console.error('Failed to fetch the daily word from AsyncStorage:', storageError);
-            return 'error'; // Or handle the error in a way that fits the app logic
+            return 'error'; 
         }
     }
 };
@@ -228,7 +228,7 @@ const fetchDailyWord = async () => {
 
 
 
-    const renderLoadingContent = () => {
+    const renderLoadingContent = () => { //multiple rednering depending on the gameState 
         switch (gameState) {
             case 'waiting_for_players':
                 return <Text style={styles.loadingText}>Waiting for another player to join...</Text>;

@@ -106,15 +106,15 @@ const BlogScreen = () => {
 
           <Text style={[styles.text_footer, { marginTop: 35, marginBottom: 20 }]}>Content</Text>
           <TextInput
-            style={[styles.input, styles.largeInput]}  // Adjust the height here
+            style={[styles.input, styles.largeInput]}  
             placeholder="Enter content"
             multiline={true}
             value={content}
             onChangeText={(text) => setContent(text)}
-            textAlignVertical="top"  // Move placeholder to the top
+            textAlignVertical="top"  
           />
 
-          {/* Add the topic selection FlatList */}
+          {/* Topic selection FlatList */}
           <Text style={[styles.text_footer, { marginTop: 35, marginBottom: 20 }]}>Select Topic</Text>
           <FlatList
             data={['General','Wordle','Technology', 'Food', 'Transport', 'Finance' ]} // Add more topics as needed

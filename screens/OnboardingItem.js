@@ -4,7 +4,7 @@ import data2 from '../data/data1'
 import COLORS from '../data/colors'
 
 
-const OnboardingItem = ({item}) => {
+const OnboardingItem = ({item}) => { //resuable layout for onboarding cards 
     const {width} = useWindowDimensions()
   return (
     <View style={[styles.container, {width}]}>

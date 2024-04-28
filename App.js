@@ -29,15 +29,10 @@ import BlogScreen from './screens/BlogScreen';
 import BlogDetails from './screens/BlogDetails';
 import EditBlog from './screens/EditBlog';
 import CarbonFootPrintCalc from './screens/CarbonFootPrintCalc';
-import EndScreenCoop from './screens/EndScreenCoop';
-import EndlessEndScreen from './screens/EndlessEndScreen';
 import WordleCoop2 from './screens/WordleCoop2';
 import Achievements from './screens/Achievements';
-
-import EndlessWordle from './screens/EndlessWordle';
 import Privacy from './screens/Privacy';
 import ReversedWordle from './screens/ReversedWordle';
-import MultiPlayerWordle from './screens/MultiPlayerWordle';
 import WordleMultiplayer from './screens/WordleMultiplayer';
 import MultiplayerEndscreen from './screens/MultiplayerEndscreen';
 
@@ -60,14 +55,10 @@ function HomeStackScreen() {
       <HomeStack.Screen name="BlogScreen" component={BlogScreen} />
       <HomeStack.Screen name="BlogDetails" component={BlogDetails} />
       <HomeStack.Screen name="EditBlog" component={EditBlog} />
-      <HomeStack.Screen name="EndScreenCoop" component={EndScreenCoop} />
-      <HomeStack.Screen name="EndlessEndScreen" component={EndlessEndScreen} />
-      <HomeStack.Screen name="EndlessWordle" component={EndlessWordle} />
       <HomeStack.Screen name="WordleCoop2" component={WordleCoop2} />
       <HomeStack.Screen name="Privacy" component={Privacy} />
       <HomeStack.Screen name="EditProfile" component={EditProfile} />
       <HomeStack.Screen name="ReversedWordle" component={ReversedWordle} />
-      <HomeStack.Screen name="MultiPlayerWordle" component={MultiPlayerWordle} />
       <HomeStack.Screen name="WordleMultiplayer" component={WordleMultiplayer} />
       <HomeStack.Screen name="MultiplayerEndscreen" component={MultiplayerEndscreen} />
 

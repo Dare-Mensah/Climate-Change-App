@@ -4,7 +4,7 @@ import Svg, {G, Circle} from 'react-native-svg';
 import data2 from '../data/data1';
 
 
-const NextButton = ({percentage, scrollTo}) => {
+const NextButton = ({percentage, scrollTo}) => { // for the the onboarding screen providing an additional visual effect 
     const size = 128;
     const strokeWidth = 2;
     const center = size /2;
@@ -15,7 +15,7 @@ const NextButton = ({percentage, scrollTo}) => {
     const progressAnimation = useRef(new Animated.Value(0)).current;
     const progressRef = useRef(null)
 
-    const animation = (toValue) => {
+    const animation = (toValue) => { // animation for the circle 
         return Animated.timing(progressAnimation,{
             toValue,
             duration:250,
@@ -30,7 +30,7 @@ const NextButton = ({percentage, scrollTo}) => {
     }, [percentage])
 
 
-    useEffect(() => {
+    useEffect(() => { //handling progress percentage of the circle 
         progressAnimation.addListener((value) => {
             const strokeDashoffset = circumference - (circumference *value.value) /100;
 

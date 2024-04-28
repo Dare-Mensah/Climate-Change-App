@@ -8,9 +8,7 @@ import { RefreshControl } from 'react-native';
 
 const Achievements = () => {
 
-  const [hasPostedBlog, setHasPostedBlog] = useState(false);
   const [hasCalculatedCarbonFootprint, setHasCalculatedCarbonFootprint] = useState(false);
-  const [showBlogDescription, setShowBlogDescription] = useState(false);
   const [showCarbonFootprintDescription, setShowCarbonFootprintDescription] = useState(false);
 
   const [hasPostedComment, setHasPostedComment] = useState(false);
@@ -19,13 +17,8 @@ const Achievements = () => {
   const [hasLikedPost, setHasLikedPost] = useState(false);
   const [showLikeDescription, setShowLikeDescription] = useState(false);
 
-  const [hasAchievedWordMaster, setHasAchievedWordMaster] = useState(false);
-  const [showWordMasterDescription, setShowWordMasterDescription] = useState(false);
 
-  const [hasPlayedOver10WordleGames, setHasPlayedOver10WordleGames] = useState(false);
-  const [showWordleGameMasterDescription, setShowWordleGameMasterDescription] = useState(false);
-
-  const [refreshing, setRefreshing] = useState(false);
+  const [refreshing, setRefreshing] = useState(false); //allows for the user to refresh the screen 
 
 
 
@@ -33,16 +26,15 @@ const Achievements = () => {
 
   useEffect(() => {
     const userId = firebase.auth().currentUser.uid;
-    const userRef = firebase.firestore().collection('users').doc(userId);
+    const userRef = firebase.firestore().collection('users').doc(userId); 
   
     userRef.get().then((doc) => {
-      if (doc.exists) {
-        setHasPostedBlog(doc.data().hasPostedBlog);
+      if (doc.exists) { // checks if these docs exits
+        //fetching data from the firebase data on these docs 
         setHasCalculatedCarbonFootprint(doc.data().hasCalculatedCarbonFootprint);
         setHasPostedComment(doc.data().hasPostedComment);
         setHasLikedPost(doc.data().hasLikedPost);
-        setHasAchievedWordMaster(doc.data().hasAchievedWordMaster);
-        setHasPlayedOver10WordleGames(doc.data().hasPlayedOver10WordleGames);
+
       }
     }).catch((error) => {
       console.error("Failed to refresh data:", error);
@@ -50,23 +42,18 @@ const Achievements = () => {
   }, []);
 
 
-  
-  
 
 
-  const onRefresh = React.useCallback(() => {
+  const onRefresh = React.useCallback(() => { // when the screen is refreshed then each of firbase docs will be refreshed for the latest data 
     setRefreshing(true);
     const userId = firebase.auth().currentUser.uid;
     const userRef = firebase.firestore().collection('users').doc(userId);
   
     userRef.get().then((doc) => {
       if (doc.exists) {
-        setHasPostedBlog(doc.data().hasPostedBlog);
         setHasCalculatedCarbonFootprint(doc.data().hasCalculatedCarbonFootprint);
         setHasPostedComment(doc.data().hasPostedComment);
         setHasLikedPost(doc.data().hasLikedPost);
-        setHasAchievedWordMaster(doc.data().hasAchievedWordMaster);
-        setHasPlayedOver10WordleGames(doc.data().hasPlayedOver10WordleGames);
       }
       setRefreshing(false);  // Reset the refreshing state
     }).catch((error) => {
@@ -85,7 +72,7 @@ const Achievements = () => {
       </Animatable.Text>
 
       <ScrollView
-        showsVerticalScrollIndicator={false}
+        showsVerticalScrollIndicator={false} 
         refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }

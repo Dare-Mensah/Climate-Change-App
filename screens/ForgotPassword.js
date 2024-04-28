@@ -9,10 +9,10 @@ const ForgotPassword = () => {
 
     const navigation = useNavigation();
 
-    const [email, setEmail] = useState('')
+    const [email, setEmail] = useState('') //state storing email
 
-    const forgotpassword = () => {
-        firebase.auth().sendPasswordResetEmail(email)
+    const forgotpassword = () => { // handles forgot password
+        firebase.auth().sendPasswordResetEmail(email) // sends an email to the user based on the inputted email
         .then(() => {
             alert("Password Reset Email Sent")
             navigation.navigate("SignIn")

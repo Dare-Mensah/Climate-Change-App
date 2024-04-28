@@ -2,7 +2,7 @@ import { StyleSheet, Text, View, Animated, useWindowDimensions } from 'react-nat
 import React from 'react'
 import COLORS from '../data/colors';
 
-const Pageinator = ({data, scrollX}) => {
+const Pageinator = ({data, scrollX}) => { // allows to move between each of the cards in the onboarding screen
     const {width} =useWindowDimensions();
   return (
     <View style={{flexDirection: 'row', height:64}}>
@@ -14,30 +14,6 @@ const Pageinator = ({data, scrollX}) => {
                 outputRange:[10,20,10],
                 extrapolate:'clamp',
             });
-
-
-            /** 
-            const opacity =scrollX.interpolate({
-                inputRange,
-                outputRange: [0.3, 1, 0.3],
-                //extrapolate: 'clamp',
-            });
-            */
-
-           /**  return (
-                <Animated.View
-                    style={[
-                        styles.dot, 
-                        {
-                            width: dotWidth,
-                            opacity
-                        }
-                    ]}
-                    key={i.toString()}
-                />
-            )
-            */
-
 
            return <Animated.View style={[styles.dot, {width:dotWidth}]} key={i.toString}/>
         })}

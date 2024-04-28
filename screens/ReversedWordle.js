@@ -50,7 +50,7 @@ const dayKey = getDayKey();
 const ReversedWordle = () => {
   useFocusEffect(
     React.useCallback(() => {
-      const hideTabBar = navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' } });
+      const hideTabBar = navigation.getParent()?.setOptions({ tabBarStyle: { display: 'none' } }); //hiding the tab bar during gameplay
 
       return () => navigation.getParent()?.setOptions({ tabBarStyle: { display: 'flex', height: 60, ...defaultTabBarStyle } });
     }, [navigation])
@@ -344,9 +344,6 @@ if (!isLoading && !dailyWord) {
     <LinearGradient style={{flex: 1}} colors={['#EAEAEA', '#B7F1B5']}>
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>WORDLE Reversed</Text>
-      {/** 
-      <Text>{dailyWord}</Text>
-      */}
       <View style={[styles.map]}>
         {rows.map((row, i) =>(
           <View key={'row-${i}'} style={styles.row}>

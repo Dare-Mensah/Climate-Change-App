@@ -15,17 +15,15 @@ import { Linking } from 'react-native';
 import * as Notifications from 'expo-notifications';
 
 const { width, height } = Dimensions.get('window');
-const isTablet = width >= 768; // A simple way to determine if the device is a tablet
 
 
-const topicBackgroundImages = {
+const topicBackgroundImages = { //background images for each of the blog topic areas
   Technology: require('../assets/TechImage3.jpg'),
   Food: require('../assets/Food4Image.jpg'),
   Transport: require('../assets/TransportImage2.jpg'),
   Finance: require('../assets/FinanceImage2.jpg'),
   Wordle: require('../assets/Worlde.png'),
   General: require('../assets/General.jpg'),
-  // Add more mappings for other topics
 };
 
 
@@ -87,11 +85,9 @@ const Home = ({route}) => {
   const [username, setUsername] = useState('');
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
 
-  useEffect(() => {
+  useEffect(() => { //displaying user name
       const user = firebase.auth().currentUser;
       if (user !== null) {
-          // The displayName property might not be immediately available if it was recently updated.
-          // Ensure your app handles this gracefully.
           const name = user.displayName ? user.displayName : 'User'; // Fallback to 'User' if displayName is null
           setUsername(name);
       }
@@ -105,7 +101,7 @@ const Home = ({route}) => {
     // Listen for new likes on the user's blog posts
     const unsubscribe = firebase.firestore()
       .collection('likes')
-      .where('userId', '==', userId) // Adjust this condition based on your data model
+      .where('userId', '==', userId) 
       .onSnapshot(snapshot => {
         snapshot.docChanges().forEach(change => {
           if (change.type === 'added') {
@@ -119,23 +115,6 @@ const Home = ({route}) => {
   }, []);
 
 
-  const toggleNotifications = async () => {
-    const newSetting = !notificationsEnabled;
-    setNotificationsEnabled(newSetting);
-    await AsyncStorage.setItem('notificationsEnabled', JSON.stringify(newSetting));
-    
-    // Log the new setting to the console
-    console.log(`Notifications are now ${newSetting ? "enabled" : "disabled"}.`);
-    
-    // Show an alert to the user
-    Alert.alert(
-      "Notifications " + (newSetting ? "Enabled" : "Disabled"),
-      "You have " + (newSetting ? "enabled" : "disabled") + " notifications.",
-      [
-        { text: "OK" }
-      ]
-    );
-  };
 
   useEffect(() => {
     const loadPreferences = async () => {
@@ -191,7 +170,7 @@ const Home = ({route}) => {
       const totalComments = commentsSnapshot.size;
   
       // Prepare the notification message
-      const message = `You have ${totalLikes} likes and ${totalComments} comments on your blogs.`;
+      const message = `You have ${totalLikes} likes and ${totalComments} comments on your latest blog.`;
   
       // Schedule the notification
       await Notifications.cancelAllScheduledNotificationsAsync(); // Cancel existing notifications
@@ -221,12 +200,12 @@ const Home = ({route}) => {
   
 
 
-  const fetchNewsArticles = async () => {
+  const fetchNewsArticles = async () => { //fetching news article 
     try {
       const url = 'https://newsdata.io/api/1/news';
       const params = {
         country: 'gb',
-        category: 'environment',
+        category: 'environment', //selecting category of environment
         apiKey: 'pub_36628886cd9bf05e85630c6f3e42168a0eb32',
       };
       
@@ -263,10 +242,10 @@ const Home = ({route}) => {
     <TouchableOpacity onPress={() => Linking.openURL(article.link)} style={styles.newsArticleCardContainer}>
       <View style={styles.newsArticleCardDetailBox}>
         <Text style={styles.newsArticleTitle}>
-          {truncateText(article.title, 80)} {/* Truncate title with a max length of 50 */}
+          {truncateText(article.title, 80)} {/* Truncate title with a max length of 80 */}
         </Text>
         <Text style={styles.newsArticleDescription}>
-          {truncateDescription(article.description, 150)} {/* Truncate description with a max length of 100 */}
+          {truncateDescription(article.description, 150)} {/* Truncate description with a max length of 150 */}
         </Text>
       </View>
     </TouchableOpacity>
@@ -281,14 +260,14 @@ const Home = ({route}) => {
     fetchLeastCarbonFootprintData().then(leastFootprintData => {
       setLeastCarbonFootprintData(leastFootprintData);
     });
-  }, [refreshing]);
+  }, [refreshing]); //refreshing latest carbon footprint and news article data
 
 
 
 
 
   
-  const fetchCarbonFootprintData = async () => {
+  const fetchCarbonFootprintData = async () => { //fetching user carbon footprint data 
     try {
       const userId = firebase.auth().currentUser.uid;
   
@@ -310,7 +289,7 @@ const Home = ({route}) => {
         console.log('Gas Usage:', data.gasUsage);
       }
       else {
-        // No carbon footprint data found, you can guide the user to input their details
+        // No carbon footprint data found
         console.log('No carbon footprint data found. Please input your details.');
       }
     } catch (error) {
@@ -323,7 +302,6 @@ const Home = ({route}) => {
 
 
   useEffect(() => {
-    // Assuming you store user details under a 'users' collection in Firebase Firestore
     const userId = firebase.auth().currentUser.uid;
     firebase.firestore().collection('users')
       .doc(userId).get()
@@ -344,7 +322,7 @@ const Home = ({route}) => {
   useEffect(() => {
     fetchCarbonFootprintData();
     fetchBlogPosts();
-  }, [refreshing]); // Add refreshing to the dependency array
+  }, [refreshing]); // Adding refreshing to the dependency array
 
   const fetchBlogPosts = async () => {
     try {
@@ -388,24 +366,6 @@ const Home = ({route}) => {
   
 
 
-  const prepareGraphData = () => {
-    const labels = ['My Footprint', 'Least Footprint'];
-    const datasets = [{
-      data: [
-        carbonFootprintData?.totalCarbonFootprint || 0,
-        leastCarbonFootprintData?.totalCarbonFootprint || 0
-      ],
-      color: (opacity = 1) => `rgba(134, 65, 244, ${opacity})`,
-      strokeWidth: 2
-    }];
-  
-    return { labels, datasets };
-  };
-
-
-
-
-
   const filterPostsByTopic = () => {
     if (!selectedTopic || selectedTopic === 'All') {
       // Show all posts or latest posts if 'All' is selected
@@ -420,18 +380,17 @@ const Home = ({route}) => {
   };
 
 
-  const wordleOptions = [
+  const wordleOptions = [ // wordle game options array 
     { id: '1', title: 'SinglePlayer Mode', navigateTo: 'Wordle', bgImage: require('../assets/pic1.jpg'), iconImage: require('../assets/single-player.png') },
     { id: '2', title: 'Co-op Mode', navigateTo: 'WordleCoop2', bgImage: require('../assets/pic2.jpg'), iconImage: require('../assets/coop.png') },
     { id: '3', title: 'Wordle Reversed', navigateTo: 'ReversedWordle', bgImage: require('../assets/pic4.jpg'), iconImage: require('../assets/puzzle-game.png') },
-    { id: '4', title: 'Wordle Multiplayer', navigateTo: 'WordleMultiplayer', bgImage: require('../assets/pic5.jpg'), iconImage: require('../assets/puzzle-game.png') },
-    { id: '5', title: 'Endless Wordle', navigateTo: 'EndlessWordle', bgImage: require('../assets/pic6.jpg'), iconImage: require('../assets/puzzle-game.png') },
+    { id: '4', title: 'Wordle Multiplayer', navigateTo: 'WordleMultiplayer', bgImage: require('../assets/pic6.jpg'), iconImage: require('../assets/puzzle-game.png') },
   ];
 
 
 
 
-  const WordleOption = ({ item }) => {
+  const WordleOption = ({ item }) => { // reusable card for wordle game options
     return (
       <Pressable onPress={() => navigation.navigate(item.navigateTo)} style={styles.wordleOption}>
         <ImageBackground source={item.bgImage} style={styles.wordleOptionBackground}>
@@ -449,40 +408,10 @@ const Home = ({route}) => {
     setSelectedTopic(topic);
   };
 
-  const createBlogButtonPressed = () => {
-    // Navigate to the BlogScreen for creating a new blog
-    navigation.navigate('BlogScreen');
-  };
 
 
     const navigation = useNavigation();
 
-    const {currentStreak, winPercentage, playedState }= route.params || {}
-    const [statsSaved, setStatsSaved] = useState(false);
-
-    const [name, setName] = useState('');
-
-    const [email] = useState('');
-
-    const defaultTabBarStyle = {
-      backgroundColor: '#fff',
-      height: 60,
-      position: 'absolute',
-      bottom: 15,
-      left: 20,
-      right: 20,
-      elevation: 0,
-      borderRadius: 15,
-      shadowColor: '#7F5DF0',
-      shadowOffset: {
-        width: 0,
-        height: 10,
-      },
-      shadowOpacity: 0.25,
-      shadowRadius: 3.5,
-      elevation: 5,
-    };
-    
 
 
 
@@ -501,34 +430,11 @@ const Home = ({route}) => {
     }, [])
   
 
-    const Card =({Tips}) => {
-      return (
-      <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate("Tips", Tips)}>
-      <ImageBackground style={styles.cardImage} source={Tips.image}>
-        <Image style={{height: 30, width:30, }} source={Tips.icon}/>
-        <Text style={{color: COLORS.white, fontSize: 15, fontWeight:'800', marginTop: 40}}>{Tips.name}</Text>
-      </ImageBackground>
-      </TouchableOpacity>
-      )
-    }
   
     return (
   
       <LinearGradient style={{flex: 1}} colors={['#EAEAEA', '#B7F1B5']}>
         <StatusBar translucent={false} style={"light"} color = "white"/>
-
-        {/** 
-        <View style={styles.header}>
-
-
-        <TouchableOpacity onPress={toggleNotifications}>
-          <Image
-            style={{ height: 40, width: 40, marginTop: 20, marginRight: 20 }}
-            source={notificationsEnabled ? require('../assets/notification.png') : require('../assets/notification_disable.png')}
-          />
-        </TouchableOpacity>
-        </View>
-      */}
 
         <ScrollView showsVerticalScrollIndicator={false}
                 refreshControl={
@@ -756,11 +662,6 @@ const Home = ({route}) => {
       <Text style={styles.noBlogsText}>
         There are no blogs in this category.
       </Text>
-      {/** 
-      <TouchableOpacity onPress={createBlogButtonPressed}>
-        <Text style={[styles.createBlogLink, {fontWeight:'bold'}]}>Create one!</Text>
-      </TouchableOpacity>
-    */}
     </View>
   )}
 
@@ -793,20 +694,6 @@ const Home = ({route}) => {
   renderItem={({ item }) => <NewsArticleCard article={item} />}
 />
 
-{/** 
-
-      <Text style={styles.sectionTitle}>Tips</Text>
-      
-        <View>
-          <FlatList 
-          contentContainerStyle={{paddingLeft:20, marginBottom:100}}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          data={DATA} 
-          renderItem={({item}) => <Card Tips={item}/>}
-          />
-        </View>
-  */}
 
         </ScrollView>
       </LinearGradient>

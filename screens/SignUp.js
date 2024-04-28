@@ -16,26 +16,26 @@ const SignUp = () => {
 
     signUpUser = async (username, email, password) => {
         try {
-            // Step 1: Create the user account
+            //  Create the user account
             await firebase.auth().createUserWithEmailAndPassword(email, password);
     
-            // Step 2: Send a verification email
+            // Send a verification email
             await firebase.auth().currentUser.sendEmailVerification({
                 handleCodeInApp: true,
-                url: 'https://climatesenseapp.firebaseapp.com',
+                url: 'https://climatesenseapp.firebaseapp.com', //firebase app url
             });
     
-            // Step 3: Add user details to Firestore
+            //  Add user details to Firestore
             await firebase.firestore().collection('users').doc(firebase.auth().currentUser.uid).set({
                 username,
                 email,
                 password,
             });
     
-            // Step 4: Navigate to the home screen
+            //  Navigate to the home screen
             navigation.navigate("Home", { email });
     
-            // Step 5: Display a success message
+            // Display a success message
             alert('Verification email sent and user registered successfully');
         } catch (error) {
             // Handle errors

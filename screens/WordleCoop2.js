@@ -201,7 +201,7 @@ const WordleCoop2 = () => {
           }
         }
 
-        if (checkIfWon(rows, curRow)) {
+        if (checkIfWon(rows, curRow)) { //checks if the player has won 
           const winningPlayerState = playerTurn === 1 ? player1State : player2State;
           const setWinningPlayerState = playerTurn === 1 ? setPlayer1State : setPlayer2State;
           setWinningPlayerState({ ...winningPlayerState, gameSate: 'won' });

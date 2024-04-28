@@ -32,8 +32,7 @@ const CarbonFootPrintCalc = ({ navigation }) => {
     ]);
     return; // Exit the function early if validation fails
   }
-    // Perform your carbon footprint calculation based on the input values
-    // For simplicity, let's assume each unit is equivalent to a specific carbon footprint value
+    // Perform  carbon footprint calculation based on the input values
     const electricityFootprint = parseFloat(electricityUsage) * 0.5;
     const gasFootprint = parseFloat(gasUsage) * 2;
     const transportationFootprint = parseFloat(transportationMiles) * 0.1;
@@ -50,101 +49,6 @@ const CarbonFootPrintCalc = ({ navigation }) => {
     
   };
 
-  const CarbonFootprintCard = ({ carbonFootprintData }) => {
-    const navigation = useNavigation();
-  
-    return (
-      <Pressable onPress={() => navigation.navigate("CarbonFootPrintCalc")}>
-        <View
-          style={{
-            backgroundColor: '#FFFFFF',
-            elevation: 4,
-            borderRadius: 25,
-            width: '90%',
-            height: 200,
-            marginLeft: 20,
-            marginTop: 20,
-          }}
-        >
-          <Text style={{ paddingHorizontal: 10, marginTop: 10, fontWeight: 400 }}>
-            Total Carbon Footprint:
-          </Text>
-  
-          {carbonFootprintData ? (
-            <>
-              <Text
-                style={{
-                  textAlign: 'center',
-                  fontSize: 40,
-                  marginTop: 17,
-                  fontWeight: '600',
-                }}
-              >
-                {carbonFootprintData.totalCarbonFootprint} CO2e
-              </Text>
-  
-              <Text
-                style={{
-                  textAlign: 'center',
-                  fontSize: 18,
-                  marginTop: 15,
-                  fontWeight: '200',
-                }}
-              >
-                Recorded on:{' '}
-                {carbonFootprintData.timestamp
-                  .toDate()
-                  .toLocaleDateString()}
-              </Text>
-  
-              {/* Display electricity, transportation, and gas usage */}
-              <Text
-                style={{
-                  textAlign: 'center',
-                  fontSize: 18,
-                  marginTop: 15,
-                  fontWeight: '200',
-                }}
-              >
-                Electricity Usage: {carbonFootprintData.electricityUsage} kWh
-              </Text>
-              <Text
-                style={{
-                  textAlign: 'center',
-                  fontSize: 18,
-                  marginTop: 15,
-                  fontWeight: '200',
-                }}
-              >
-                Transportation Usage: {carbonFootprintData.transportationUsage} miles
-              </Text>
-              <Text
-                style={{
-                  textAlign: 'center',
-                  fontSize: 18,
-                  marginTop: 15,
-                  fontWeight: '200',
-                }}
-              >
-                Gas Usage: {carbonFootprintData.gasUsage} gallons
-              </Text>
-            </>
-          ) : (
-            <Text
-              style={{
-                textAlign: 'center',
-                fontSize: 40,
-                marginTop: 17,
-                fontWeight: '300',
-              }}
-            >
-              Loading...
-            </Text>
-          )}
-        </View>
-      </Pressable>
-    );
-  };
 
 
   useEffect(() => {
@@ -418,8 +322,8 @@ const CarbonFootPrintCalc = ({ navigation }) => {
       }}
       bezier
       style={{
-        paddingHorizontal: 20, // Add horizontal padding
-        alignItems: 'center', // Center the graph horizontally
+        paddingHorizontal: 20, 
+        alignItems: 'center', 
         marginTop: 10, 
         marginBottom: 20, 
         borderRadius:16,
@@ -491,7 +395,7 @@ paddingBottom: 5
 
 textInput: {
   flex: 1,
-  marginTop: Platform.OS === 'android' ? 0 : -6, // Corrected typo here
+  marginTop: Platform.OS === 'android' ? 0 : -6, 
   paddingLeft: 10,
   color: COLORS.darkgrey,
 },

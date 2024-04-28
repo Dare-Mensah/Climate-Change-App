@@ -16,39 +16,6 @@ const EditProfile = ({route}) => {
 
     const navigation = useNavigation();
 
-    const [hasGalleryPermission, setHasGalleryPermission] = useState(null);
-    const [image, setImage] = useState(null);
-
-
-    useEffect(() =>{
-      (async () =>{
-        const galleryStatus = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        setHasGalleryPermission(galleryStatus.status === 'granted');
-      })();
-    }, [])
-
-
-    const pickImage = async () => {
-      let result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [4,3],
-        quality: 1,
-      })
-
-      console.log(result);
-
-      if(!result.canceled){
-        setImage(result.uri)
-      }
-    };
-
-    if(hasGalleryPermission === false){
-      return <Text>No access to Internal Storage</Text>
-    }
-
-
-
 
 
     const { uid } = firebase.auth().currentUser; // Get user UID
@@ -115,7 +82,7 @@ const showAlert = (title, message) => {
       try {
           await user.sendEmailVerification({
               handleCodeInApp: true,
-              url: 'https://climatesenseapp.firebaseapp.com', // Replace with your app's URL
+              url: 'https://climatesenseapp.firebaseapp.com', // app firebase url
           });
           console.log('Verification email sent');
       } catch (error) {
@@ -161,7 +128,7 @@ const showAlert = (title, message) => {
       });
     };
   
-
+    //delete confirmation alert
     const deleteProfile = () => {
       Alert.alert(
         'Delete Account',
@@ -206,7 +173,7 @@ const showAlert = (title, message) => {
         animation={"fadeInUpBig"}
         style={styles.footer}>
 
-<Text style={[styles.text_footer, {marginTop: 35}]}>Username</Text>
+        <Text style={[styles.text_footer, {marginTop: 35}]}>Username</Text>
             <View style={styles.action}>
                 <Image
                     style={{height: 20, width: 20}} 

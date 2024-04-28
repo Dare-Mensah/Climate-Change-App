@@ -12,10 +12,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import Constants from 'expo-constants';
 import io  from 'socket.io-client';
 
-const Privacy = () => {
-
-
-
+const Privacy = () => { //privacy/ security information
   return (
     <LinearGradient style={{flex: 1}} colors={['#B7F1B5','#EAEAEA']}>
     <View style={styles.container}>

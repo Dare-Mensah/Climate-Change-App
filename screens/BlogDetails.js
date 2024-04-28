@@ -21,7 +21,7 @@ const BlogDetails = ({ route, navigation }) => {
 
   const currentUser = firebase.auth().currentUser;
 
-  const fetchComments = async () => {
+  const fetchComments = async () => { // fetching the latest comments from firebase
     try {
       const commentsSnapshot = await firebase.firestore()
         .collection('comments')
@@ -36,7 +36,7 @@ const BlogDetails = ({ route, navigation }) => {
       }));
 
       for (const comment of commentsData) {
-        const userDoc = await firebase.firestore().collection('users').doc(comment.userId).get();
+        const userDoc = await firebase.firestore().collection('users').doc(comment.userId).get(); //getting the comment per user
         comment.user = userDoc.exists ? userDoc.data() : { username: 'Unknown User' };
       }
 
@@ -74,7 +74,7 @@ const BlogDetails = ({ route, navigation }) => {
     fetchBlogAndLikeDetails();
   }, [postId, currentUser]);
 
-  const handleLikePress = async () => {
+  const handleLikePress = async () => { //checks if the user is loggged in order to like the post
     if (!currentUser) {
       Alert.alert('Not Logged In', 'You must be logged in to like a blog.');
       return;
@@ -83,7 +83,7 @@ const BlogDetails = ({ route, navigation }) => {
     const likeRef = firebase.firestore().collection('likes').doc(`${currentUser.uid}_${postId}`);
     const userRef = firebase.firestore().collection('users').doc(currentUser.uid);
   
-    firebase.firestore().runTransaction(async (transaction) => {
+    firebase.firestore().runTransaction(async (transaction) => { //checking if the user has already liked the post
       const likeDoc = await transaction.get(likeRef);
       if (!likeDoc.exists) {
         transaction.set(likeRef, {
@@ -105,11 +105,11 @@ const BlogDetails = ({ route, navigation }) => {
   
 
   const handleAddComment = async () => {
-    if (!currentUser) {
+    if (!currentUser) { //checks if user is logged in to add a comment
       Alert.alert('Not Logged In', 'You must be logged in to comment.');
       return;
     }
-    if (!newComment.trim()) {
+    if (!newComment.trim()) { //checks if the comment does not have any characters 
       Alert.alert('Invalid Comment', 'Please enter a comment.');
       return;
     }
@@ -137,7 +137,7 @@ const BlogDetails = ({ route, navigation }) => {
   };
   
 
-  const handleDeleteComment = async (commentId) => {
+  const handleDeleteComment = async (commentId) => { // deleting comments, if it the comment that user made
     try {
       await firebase.firestore().collection('comments').doc(commentId).delete();
       Alert.alert('Comment Deleted', 'Your comment has been successfully deleted.');
@@ -149,7 +149,7 @@ const BlogDetails = ({ route, navigation }) => {
   };
 
   const handleEditPress = () => {
-    navigation.navigate('EditBlog', { postId });
+    navigation.navigate('EditBlog', { postId }); // edit blog screen
   };
 
 
@@ -158,9 +158,9 @@ const BlogDetails = ({ route, navigation }) => {
     setEditedComment(currentContent);
   };
 
-  const handleUpdateComment = async () => {
+  const handleUpdateComment = async () => { // updating comment 
     try {
-      await firebase.firestore().collection('comments').doc(editCommentId).update({
+      await firebase.firestore().collection('comments').doc(editCommentId).update({ //getting the comment id to update
         content: editedComment,
       });
       setEditCommentId(null);

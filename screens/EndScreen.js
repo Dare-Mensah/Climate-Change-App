@@ -14,100 +14,8 @@ import { useNavigation } from '@react-navigation/native';
 import {firebase} from '../config'
 import Constants from 'expo-constants';
 
-const Number = ({number, label}) => (
-    <View style ={{alignItems: 'center', margin: 10}}>
-        <Text style={{fontSize: 35, fontWeight: 'bold'}}>{number}</Text>
-        <Text style={{fontSize: 20, fontWeight: 200}}>{label}</Text>
-    </View>
-)
-
-
-const GuessDistribution = ({ distribution }) => {
-  if (!distribution) {
-    return null;
-  }
-  const sum = distribution.reduce((total, dist) => dist + total, 0);
-  return (
-    <View style={{ width: '100%', padding: 20, justifyContent: 'flex-start' }}>
-      {distribution.map((dist, index) => (
-        <GuessDistributionLine key={index} position={index + 1} amount={dist} percentage={sum !== 0 ? (100 * dist) / sum : 0} />
-      ))}
-    </View>
-  );
-};
-
-const GuessDistributionLine = ({ position, amount, percentage }) => {
-  return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', width: '100%', justifyContent: 'flex-start' }}>
-      <Text style={{ fontSize: 17 }}>{position}</Text>
-      <View style={{ backgroundColor: COLORS.grey, margin: 5, padding: 5, width: `${percentage}%`, minWidth: 20, maxWidth: 290 }}>
-        <Text style={{ fontSize: 17 }}>{amount}</Text>
-      </View>
-    </View>
-  );
-};
-
-
 const EndScreen = ({ won = false, rows, getCellBGColor, navigation }) => {
 
-    const [secondsTillTmr, setSecondsTillTmr] = useState(0);
-    const [played, setPlayed] = useState(0);
-    const [winRate, setWinRate] = useState(0);
-    const [curStreak, setCurStreak] = useState(0);
-    const [maxStreak, setMaxStreak] = useState(0);
-    const [distribution, setDistribution] = useState(null)
-
-
-  
-    const saveStatsToAsyncStorage = async () => {
-        const statsData = {
-          curStreak,
-          winRate,
-          played,
-          distribution,
-        };
-    
-        // Save to AsyncStorage
-        const statsString = JSON.stringify(statsData);
-        await AsyncStorage.setItem('@game_stats', statsString);
-      
-    };
-
-
-
-
-    useEffect(() => {
-      readState();
-      saveStatsToAsyncStorage(); // Save stats to AsyncStorage
-    }, []);
-
-
-
-    useEffect(() => {
-      const updateUserGameCount = async () => {
-        const currentUser = firebase.auth().currentUser;
-        const userRef = firebase.firestore().collection('users').doc(currentUser.uid);
-        const userDoc = await userRef.get();
-    
-        if (userDoc.exists) {
-          const userData = userDoc.data();
-          const newGameCount = (userData.wordleGamesPlayed || 0) + 1;
-    
-          await userRef.update({
-            wordleGamesPlayed: newGameCount,
-            hasPlayedOver10WordleGames: newGameCount > 10,
-          });
-        }
-      };
-    
-      updateUserGameCount();
-    }, []);
-
-
-
-
-
-  
     const share = () => {
       // Sharing the game result.
       const textMap = rows
@@ -120,91 +28,6 @@ const EndScreen = ({ won = false, rows, getCellBGColor, navigation }) => {
       Alert.alert('Copied Successfully', 'Spread the word on social media');
     };
   
-    useEffect(() => {
-      const updateTime = () => {
-        // Calculating the amount of time before the next game.
-        const now = new Date();
-        const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
-  
-        setSecondsTillTmr(Math.floor((tomorrow - now) / 1000));
-      };
-  
-      const interval = setInterval(updateTime, 1000);
-      return () => clearInterval(interval);
-    }, []);
-  
-    const readState = async () => {
-      const dataString = await AsyncStorage.getItem('@game');
-      let data;
-      try {
-        data = JSON.parse(dataString);
-      } catch (e) {
-        console.log('Could not parse the state');
-      }
-  
-      const keys = Object.keys(data);
-      const values = Object.values(data);
-  
-      setPlayed(keys.length);
-      const numberOfWins = values.filter((game) => game.gameSate === 'won').length;
-  
-      setWinRate(Math.floor((100 * numberOfWins) / keys.length));
-  
-      let _curStreak = 0;
-      let prevDay = 0;
-      let _maxStreak = 0;
-  
-      keys.forEach((key) => {
-        const day = parseInt(key.split('-')[1]);
-  
-        if (data[key].gameSate === 'won' && (_curStreak === 0 || prevDay + 1 === day)) {
-          _curStreak += 1;
-        } else {
-          if (_curStreak > _maxStreak) {
-            _maxStreak = _curStreak;
-          }
-  
-          _curStreak = data[key].gameSate === 'won' ? 1 : 0;
-        }
-  
-        prevDay = day;
-      });
-  
-      if (_curStreak > _maxStreak) {
-        _maxStreak = _curStreak;
-      }
-  
-      setCurStreak(_curStreak);
-      setMaxStreak(_maxStreak);
-
-      const dist =[0,0,0,0,0,0]
-
-      values.map((game) => {
-        if(game.gameSate == 'won') {
-            const tries = game.rows.filter((row) => row[0]).length;
-            dist[tries] = dist[tries] + 1
-        }
-      })
-
-      setDistribution(dist)
-    };
-  
-
-    //const formatSeconds = () => {
-        //const hours = Math.floor(setSecondsTillTmr / 3600);
-       //const minutes = Math.floor((setSecondsTillTmr % 3600) / 60);
-        //const seconds = Math.floor(setSecondsTillTmr % 60);
-      
-        //return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-      //};
-
-
-    const calculateTimeTillNextGame = () => {
-      const hours = Math.floor(secondsTillTmr / 3600);
-      const minutes = Math.floor((secondsTillTmr % 3600) / 60);
-      const seconds = secondsTillTmr % 60;
-      return `${hours}h ${minutes}m ${seconds}s`;
-    };
 
   return (
     <LinearGradient style={{flex: 1}} colors={['#EAEAEA', '#B7F1B5']}>
@@ -212,46 +35,17 @@ const EndScreen = ({ won = false, rows, getCellBGColor, navigation }) => {
         <ScrollView contentContainerStyle={styles.scrollViewContent} showsVerticalScrollIndicator={false}>
           <View style={styles.titleContainer}>
             <Text style={styles.title}>WORDLE</Text>
-            <Text style={styles.winMessage}>{won ? 'You Won!' : 'Try again tomorrow'}</Text>
+            <Text style={styles.winMessage}>{won ? 'You Won!' : 'Failed Game Over'}</Text>
           </View>
-
-
-        {/** 
-        <Text style ={{fontSize: 30, color:"black", fontWeight: 200, marginVertical: 20, textAlign: 'center',}}>Your Statisitics</Text>
         <View>
-            <Number number={played} label ={"Played"}/>
-            <Number number={winRate} label ={"Win %"}/>
-            <Number number={curStreak} label ={"Current Streak"}/>
-            <Number number={maxStreak} label ={"Max Streak"}/> 
-        </View>
-
-        <Text style ={{fontSize: 30, color:"black", fontWeight: 200, marginVertical: 20, textAlign: 'center',}}>Guess Distribution</Text>
-
-        <GuessDistribution distribution={distribution}/>
-        */}
-
-        
-        
-        <View>
-            {/**
-            <View>
-                <Text style ={{fontSize: 30, color:"black", fontWeight: 200, marginTop:20, textAlign: 'center',}}>Next Game</Text>
-                <Text style ={{fontSize: 30, color:"black", fontWeight: 'bold',marginTop:10, textAlign: 'center',}}>{calculateTimeTillNextGame()}</Text>
-            </View>
-          */}
-            
-            
           <View style={styles.buttonContainer}>
             <TouchableOpacity onPress={share} style={[styles.button, {backgroundColor: COLORS.third}]}>
               <Text style={styles.buttonText}>Share</Text>
             </TouchableOpacity>
 
             <TouchableOpacity onPress={() => {
-              navigation.navigate("Home", {
-                currentStreak: curStreak,
-                winPercentage: winRate,
-                playedState: played,
-              });
+              navigation.navigate("Home")
+
             }} 
             style={[styles.button, {backgroundColor: COLORS.third, marginLeft: 10}]}>
               <Text style={styles.buttonText}>Return Home</Text>

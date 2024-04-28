@@ -16,27 +16,6 @@ import Constants from 'expo-constants';
 const Settings = ({route}) => {
 
     const navigation = useNavigation();
-    const [isEnabled, setIsEnabled] = useState(false);
-
-    // Function to load the notification preference
-    const loadNotificationPreference = async () => {
-        const notifEnabled = await AsyncStorage.getItem('notificationsEnabled');
-        setIsEnabled(notifEnabled === 'true');
-    };
-
-    // Function to toggle the notification preference
-    const toggleSwitch = async () => {
-        const newSetting = !isEnabled;
-        setIsEnabled(newSetting);
-        await AsyncStorage.setItem('notificationsEnabled', String(newSetting));
-        // Optional: Implement any additional logic when the notification setting is changed, e.g., registering or deregistering for notifications.
-    };
-
-    // Load the notification preference when the component mounts
-    useEffect(() => {
-        loadNotificationPreference();
-    }, []);
-
 
   return (
     <LinearGradient style={{flex: 1}} colors={['#B7F1B5','#EAEAEA']}>
@@ -58,62 +37,12 @@ const Settings = ({route}) => {
                 </View>
             </TouchableRipple>
 
-            {/** 
-            <TouchableRipple onPress={() => navigation.navigate("Achievements")}>
-                <View style={styles.menuItem}>
-                    <Image source={require('../assets/trophy.png')} style={{height: 30, width: 30}}/>
-                    <Text style={styles.menuItemText}>Achievements</Text>
-                </View>
-            </TouchableRipple>
-            */}
-
-            {/** 
-            <TouchableOpacity onPress={() => navigation.navigate("AppNotify")}>
-                <View style={styles.menuItem}>
-                    <Image source={require('../assets/bell.png')} style={{height: 30, width: 30}}/>
-                    <Text style={styles.menuItemText}>Notifications</Text>
-                </View>
-            </TouchableOpacity>
-            */}
-
             <TouchableRipple onPress={() => navigation.navigate("Privacy")}>
                 <View style={styles.menuItem}>
                     <Image source={require('../assets/lock.png')} style={{height: 28, width: 28}}/>
                     <Text style={styles.menuItemText}>Privacy and Security</Text>
                 </View>
             </TouchableRipple>
-
-            {/** 
-            <TouchableRipple onPress={() => navigation.navigate("Accessibility")}>
-                <View style={styles.menuItem}>
-                    <Image source={require('../assets/lock.png')} style={{height: 28, width: 28}}/>
-                    <Text style={styles.menuItemText}>Accessibility</Text>
-                </View>
-            </TouchableRipple>
-            */}
-
-            <TouchableRipple onPress={() => navigation.navigate("About")}>
-                <View style={styles.menuItem}>
-                    <Image source={require('../assets/help.png')} style={{height: 30, width: 30}}/>
-                    <Text style={styles.menuItemText}>About</Text>
-                </View>
-            </TouchableRipple>
-
-
-            {/** 
-            <View style={styles.menuItem2}>
-                <Image source={require('../assets/notification.png')} style={{height: 30, width: 30}}/>
-                <Text style={styles.menuItemText}>Notifications</Text>
-                    <Switch
-                    style={{paddingLeft:20, marginTop:-10}}
-                        trackColor={{ false: "#767577", true: "#81b0ff" }}
-                        thumbColor={isEnabled ? "#f5dd4b" : "#f4f3f4"}
-                        ios_backgroundColor="#3e3e3e"
-                        onValueChange={toggleSwitch}
-                        value={isEnabled}
-                    />
-            </View>
-            */}
 
             <TouchableRipple onPress={() => {
                 Alert.alert(

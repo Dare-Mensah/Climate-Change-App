@@ -10,7 +10,7 @@ const News = () => {
   const [newsArticles, setNewsArticles] = useState([]);
   const [refreshing, setRefreshing] = useState(false); // State to track whether the data is being refreshed
 
-  const fetchNewsArticles = async () => {
+  const fetchNewsArticles = async () => { // feteching the new article from the new api
     try {
       const url = 'https://newsdata.io/api/1/news';
       const params = {
@@ -42,7 +42,7 @@ const News = () => {
           style={[styles.Title1, style={paddingHorizontal:20, paddingTop:10}]}>News </Animatable.Text>
         </View>
 
-        <FlatList
+        <FlatList //iterating through the list of produced news articles 
         style={{marginBottom:100}}
   data={newsArticles}
   keyExtractor={(item, index) => 'news-' + index}

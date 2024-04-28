@@ -13,24 +13,14 @@ const SignIn = () => {
     const [password, setPassword] = useState('') //password variable
 
 
-    loginUser = async(email, password) => {
+    loginUser = async(email, password) => { //handles the logging in for the4 user
         try{
-            await firebase.auth().signInWithEmailAndPassword(email, password)
+            await firebase.auth().signInWithEmailAndPassword(email, password) // checks if email and passsword is correct 
             navigation.navigate("Home", { email })
         } catch (error){
             alert("Invalid Email or Password")
         }
     }
-
-    const forgotpassword = () => {
-        firebase.auth().sendPasswordResetEmail(email)
-        .then(() => {
-            alert("Password Reset Email Sent")
-        }) .catch((error) => {
-            alert(error)
-        })
-    }
-
 
 
   return (
@@ -103,21 +93,6 @@ const SignIn = () => {
                     <Text style={{fontWeight:'500', textAlign:'center', fontSize: 17}}>SignUp</Text>
                 </TouchableOpacity>
             </View>
-
-            {/** 
-
-            <Text style={{fontWeight:'300', textAlign:'center', fontSize: 17}}>Or</Text>
-
-
-            <View style={{flexDirection:'row', justifyContent:'center', padding:30}}>
-                <Text style={{fontWeight:'300', textAlign:'center', fontSize: 17}}>Login as a Guest?   </Text>
-                <TouchableOpacity 
-                    onPress={() => navigation.navigate("GuestHome")}
-                >
-                    <Text style={{fontWeight:'500', textAlign:'center', fontSize: 17}}>Guest Login</Text>
-                </TouchableOpacity>
-            </View>
-            */}
 
 
         </Animatable.View>
