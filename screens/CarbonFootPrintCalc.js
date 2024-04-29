@@ -325,13 +325,13 @@ const CarbonFootPrintCalc = ({ navigation }) => {
         paddingHorizontal: 20, 
         alignItems: 'center', 
         marginTop: 10, 
-        marginBottom: 20, 
+        marginBottom: 30, 
         borderRadius:16,
       }}
     />
 
 {carbonFootprintData?.totalCarbonFootprint <= leastCarbonFootprintData?.totalCarbonFootprint &&
-    <Text style={[styles.congratulatoryMessage,{marginBottom:100}]}>
+    <Text style={[styles.congratulatoryMessage, {marginBottom:100}]}>
       Congratulations! You have the lowest carbon footprint!
     </Text>
   }

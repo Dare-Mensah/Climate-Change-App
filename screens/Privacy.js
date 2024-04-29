@@ -25,7 +25,7 @@ const Privacy = () => { //privacy/ security information
         <ScrollView showsVerticalScrollIndicator={false}>
 
         <Text style={styles.sectionTitle}>Privacy Notice</Text>
-        <Text style={styles.noticeText}>Climate Sense is comitted tonprotecting user data. This notice outlines the practices with the collection and use of your personal data. Uwsing Climate Sense you will agress to the collection and use of data in accordance with this policy.</Text>
+        <Text style={styles.noticeText}>Climate Sense is comitted to protecting user data. This notice outlines the practices with the collection and use of your personal data. Uwsing Climate Sense you will agress to the collection and use of data in accordance with this policy.</Text>
 
         <Text style={styles.sectionTitle}>Data Collection</Text>
         <Text style={styles.noticeText}>When data is collected provided to us directly such as when you create an account. This information may include but is not limited to:</Text>
@@ -36,7 +36,7 @@ const Privacy = () => { //privacy/ security information
         <Text style={styles.sectionTitle}>Use of Information</Text>
         <Text style={styles.noticeText}>Data we collect is used to:</Text>
         <Text style={styles.noticeTextOne}> - Facilitating social features to allow users to interact and share content</Text>
-        <Text style={styles.noticeTextOne}> - Analysing app usage and user behaviour to further enhance the application.</Text>
+        <Text style={[styles.noticeTextOne, {marginBottom: 100}]}> - Analysing app usage and user behaviour to further enhance the application.</Text>
 
 
         </ScrollView>

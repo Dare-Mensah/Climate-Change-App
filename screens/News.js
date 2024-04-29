@@ -9,8 +9,9 @@ import * as Animatable from 'react-native-animatable';
 const News = () => {
   const [newsArticles, setNewsArticles] = useState([]);
   const [refreshing, setRefreshing] = useState(false); // State to track whether the data is being refreshed
+  const [error, setError] = useState(null);
 
-  const fetchNewsArticles = async () => { // feteching the new article from the new api
+  const fetchNewsArticles = async () => {
     try {
       const url = 'https://newsdata.io/api/1/news';
       const params = {
@@ -20,11 +21,15 @@ const News = () => {
       };
       
       const response = await axios.get(url, { params });
-      if (response.data && response.data.results) {
+      if (response.data && response.data.results.length > 0) {
         setNewsArticles(response.data.results);
+        setError(null); // Clear any existing errors
+      } else {
+        setError('No articles found'); // Set an error message if no articles are returned
       }
     } catch (error) {
       console.error('Error fetching news articles:', error);
+      setError('Failed to fetch news articles'); // Set error message on exception
     }
   };
 

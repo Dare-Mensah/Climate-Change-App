@@ -1,0 +1,38 @@
+Before running the application make sure that you have the expo app installed on a moblie device. The app is avaiable for both andriod and IOS devices.
+
+Steps tp run the application: 
+1) Download the zip file to a chose directory
+2) Open up terminal application on a windows laptop/ desktop
+3) cd to the Climate-Change-App folder
+4) Once the Climate-Change-App ensure that react native is installed in the Climate-Change-App directory the followig links provides guidance on how to install: https://reactnative.dev/docs/environment-setup and https://docs.expo.dev/tutorial/create-your-first-app/
+5) Once all the necessary software is installed run 'npm start' or 'npx expo start' to run the application. A QR code will appear in the terminal, scan this using the expo go app on your mobile device to allow the app to run on your mobile device.
+
+
+RUN THIS BEFORE STARTING THE ANY OF THE WORDLE GAME MODES
+Steps to run Python Flask Server:
+1) Ensure that python is installed on your machine link to install python: https://www.python.org/downloads/windows/
+2) Open another tab/terminal window and cd to the directory of BackendDev and type 'python app.py' to begin running the python flask server 
+3) To see the json file produced click on the link showing the host url for the server and add '/climate-news' to the end of it.
+4) If you run into any issues with imports install any of the following libraires: 
+- Flask: https://pypi.org/project/Flask/
+- requests: https://pypi.org/project/requests/
+- bs4: https://pypi.org/project/beautifulsoup4/
+- spacy: https://pypi.org/project/spacy/
+- TfidVectorizer : https://pypi.org/project/sklearn-features/
+- https://pypi.org/project/numpy/
+
+
+
+RUN THIS BEFORE STARTING THE WORDLE MULTIPLAYER GAME MODE
+Steps to run Python SocketIO Server:
+1) Ensure that python is installed on your machine link to install python: https://www.python.org/downloads/windows/
+2) Open another tab/terminal window and cd to MultiPlayerBackendDev
+3) Then type the command 'venv\Scripts\activate' to activate ther virtual environment.
+4) The type python MultiplayerApp.py to run the environment.
+5) A host link should be shown, which can be clicked showing a message on the browser that the server is currently running
+6) If you run into any issues with imports install any of the following libraires:
+- Flask: https://pypi.org/project/Flask/
+- SocketIO: https://pypi.org/project/python-socketio/
+- uuid: https://pypi.org/project/uuid/
+- threading: https://pypi.org/project/thread/
+- time: https://pypi.org/project/TIME-python/
